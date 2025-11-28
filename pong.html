@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pong senzill</title>
+  <style>
+    body { background: #222; color: #fff; text-align: center; font-family: sans-serif; }
+    canvas { background: #333; display: block; margin: 20px auto; }
+    #score { font-size: 2em; margin: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Pong senzill</h1>
+  <div id="score">Jugador: 0 &nbsp; Oponent: 0</div>
+  <canvas id="pong" width="600" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById('pong');
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+
+    // Raqueta
+    const paddleW = 10, paddleH = 80;
+    let playerY = H/2 - paddleH/2;
+    let oppY = H/2 - paddleH/2;
+    const paddleSpeed = 6;
+
+    // Pilota
+    let ballX = W/2, ballY = H/2, ballR = 8;
+    let ballDX = Math.random() > 0.5 ? 5 : -5;
+    let ballDY = (Math.random()*4 - 2);
+
+    // Marcador
+    let playerScore = 0, oppScore = 0;
+    let gameOver = false;
+
+    function draw() {
+      ctx.clearRect(0,0,W,H);
+      // Raquetes
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(10, playerY, paddleW, paddleH);
+      ctx.fillRect(W-20, oppY, paddleW, paddleH);
+      // Pilota
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, ballR, 0, 2*Math.PI);
+      ctx.fill();
+    }
+
+    function movePlayer(dir) {
+      if (dir === 'up') playerY -= paddleSpeed;
+      if (dir === 'down') playerY += paddleSpeed;
+      playerY = Math.max(0, Math.min(H - paddleH, playerY));
+    }
+
+    // control jugador
+    window.addEventListener('keydown', e=>{
+      if (gameOver) return;
+      if (e.key === 'ArrowUp') movePlayer('up');
+      if (e.key === 'ArrowDown') movePlayer('down');
+    });
+
+    function oppAI() {
+      // segueix la pilota lentament
+      let mid = oppY + paddleH/2;
+      if (mid < ballY-10) oppY += paddleSpeed-2;
+      else if (mid > ballY+10) oppY -= paddleSpeed-2;
+      oppY = Math.max(0, Math.min(H-paddleH, oppY));
+    }
+
+    function ballLogic() {
+      ballX += ballDX;
+      ballY += ballDY;
+
+      // Rebot superior/inferior
+      if (ballY < ballR || ballY > H-ballR) ballDY *= -1;
+
+      // Col·lisió raqueta jugador
+      if (ballX-ballR < 20 && ballY > playerY && ballY < playerY+paddleH) {
+        ballDX *= -1;
+        ballDY += ((ballY-(playerY+paddleH/2))/paddleH)*4;
+        ballX = 20+ballR;
+      }
+
+      // Col·lisió raqueta oponent
+      if (ballX+ballR > W-20 && ballY > oppY && ballY < oppY+paddleH) {
+        ballDX *= -1;
+        ballDY += ((ballY-(oppY+paddleH/2))/paddleH)*4;
+        ballX = W-20-ballR;
+      }
+
+      // Marca punt
+      // Pilota surt per l'esquerra (punt oponent)
+      if (ballX < 0) {
+        oppScore += 1;
+        resetBall();
+      }
+      // Pilota surt per la dreta (punt jugador)
+      if (ballX > W) {
+        playerScore += 1;
+        resetBall();
+      }
+      updateScore();
+      if (playerScore >= 11 || oppScore >= 11) {
+        endGame();
+      }
+    }
+
+    function resetBall() {
+      ballX = W/2;
+      ballY = H/2;
+      ballDX = (Math.random() > 0.5 ? 5 : -5);
+      ballDY = (Math.random()*4 -2);
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = 
+        `Jugador: ${playerScore}   Oponent: ${oppScore}`;
+    }
+
+    function endGame() {
+      gameOver = true;
+      let msg = playerScore > oppScore ? "Has guanyat!" : "L'oponent ha guanyat!";
+      document.getElementById('score').textContent += `   — ${msg}`;
+    }
+
+    function gameLoop() {
+      if (!gameOver) {
+        oppAI();
+        ballLogic();
+        draw();
+        requestAnimationFrame(gameLoop);
+      }
+    }
+
+    draw();
+    gameLoop();
+  </script>
+</body>
+</html>
