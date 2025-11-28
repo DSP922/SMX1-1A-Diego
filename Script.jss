@@ -1,187 +1,131 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
 
-const playerScoreEl = document.getElementById('playerScore');
-const aiScoreEl = document.getElementById('aiScore');
-const gameOverEl = document.getElementById('gameOver');
-const winnerEl = document.getElementById('winner');
+canvas.width = 800;
+canvas.height = 500;
 
-// Configuració del joc
-let gameRunning = true;
+// Marcador
 let playerScore = 0;
 let aiScore = 0;
-const WINNING_SCORE = 11;
 
-// Elements del joc
+// Pales
 const paddleWidth = 15;
-const paddleHeight = 80;
-const ballSize = 12;
+const paddleHeight = 100;
 
-let player = {
-  x: canvas.width - paddleWidth - 10,
-  y: canvas.height / 2 - paddleHeight / 2,
-  width: paddleWidth,
-  height: paddleHeight,
-  dy: 0,
-  speed: 8
+const player = { x: 20, y: canvas.height / 2 - paddleHeight / 2, speed: 8 };
+const ai = { x: canvas.width - 35, y: canvas.height / 2 - paddleHeight / 2, speed: 5 };
+
+// Pilota
+const ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    size: 12,
+    speedX: 5,
+    speedY: 5
 };
 
-let ai = {
-  x: 10,
-  y: canvas.height / 2 - paddleHeight / 2,
-  width: paddleWidth,
-  height: paddleHeight,
-  dy: 0,
-  speed: 6
-};
+// Control jugador
+document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowUp") player.y -= player.speed;
+    if (e.key === "ArrowDown") player.y += player.speed;
+});
 
-let ball = {
-  x: canvas.width / 2,
-  y: canvas.height / 2,
-  width: ballSize,
-  height: ballSize,
-  dx: 7 * (Math.random() > 0.5 ? 1 : -1),
-  dy: 7 * (Math.random() - 0.5),
-  speed: 7
-};
-
-// Controls
-const keys = {};
-window.addEventListener('keydown', (e) => keys[e.key] = true);
-window.addEventListener('keyup', (e) => keys[e.key] = false);
-
-// Bucle principal del joc
-function gameLoop() {
-  if (!gameRunning) return;
-
-  update();
-  draw();
-  requestAnimationFrame(gameLoop);
+// Dibuixar rectangle
+function rect(x, y, w, h, color = "white") {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
 }
 
-// Actualitzar posicions
-function update() {
-  // Moviment jugador
-  if (keys['ArrowUp'] && player.y > 0) {
-    player.y -= player.speed;
-  }
-  if (keys['ArrowDown'] && player.y < canvas.height - player.height) {
-    player.y += player.speed;
-  }
-
-  // IA simple (seguesix la pilota)
-  const targetY = ball.y - ai.height / 2;
-  if (ai.y + ai.dy > 0 && ai.y + ai.dy < canvas.height - ai.height) {
-    ai.dy = (targetY - ai.y) * 0.15;
-    ai.y += ai.dy;
-  }
-
-  // Moviment pilota
-  ball.x += ball.dx;
-  ball.y += ball.dy;
-
-  // Rebot amb pals
-  if (collides(ball, player) || collides(ball, ai)) {
-    ball.dx *= -1;
-    ball.speed += 0.2; // Acelera lleugerament
-  }
-
-  // Rebot amb parets superiors/inferiors
-  if (ball.y <= 0 || ball.y >= canvas.height - ball.height) {
-    ball.dy *= -1;
-  }
-
-  // Punts - pilota surt de la pantalla
-  if (ball.x < 0) {
-    playerScore++;
-    playerScoreEl.textContent = playerScore;
-    resetBall();
-    checkWin();
-  }
-  if (ball.x > canvas.width) {
-    aiScore++;
-    aiScoreEl.textContent = aiScore;
-    resetBall();
-    checkWin();
-  }
+// Dibuixar pilota
+function drawBall() {
+    ctx.fillStyle = "white";
+    ctx.fillRect(ball.x, ball.y, ball.size, ball.size);
 }
 
-// Detecció de col·lisions
-function collides(a, b) {
-  return a.x < b.x + b.width &&
-         a.x + a.width > b.x &&
-         a.y < b.y + b.height &&
-         a.y + a.height > b.y;
+// Dibuixar marcador
+function drawScore() {
+    ctx.fillStyle = "white";
+    ctx.font = "32px Arial";
+    ctx.fillText(playerScore, canvas.width / 4, 40);
+    ctx.fillText(aiScore, (canvas.width / 4) * 3, 40);
 }
 
-// Reiniciar pilota
+// Reset de la pilota després de punt
 function resetBall() {
-  ball.x = canvas.width / 2;
-  ball.y = canvas.height / 2;
-  ball.dx = ball.speed * (Math.random() > 0.5 ? 1 : -1);
-  ball.dy = ball.speed * (Math.random() - 0.5);
-  ball.speed = 7;
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    ball.speedX *= -1;
+
+    // Lleugera variació perquè no sigui repetitiu
+    ball.speedY = (Math.random() > 0.5 ? 1 : -1) * (Math.random() * 4 + 3);
 }
 
-// Comprovar guanyador
-function checkWin() {
-  if (playerScore >= WINNING_SCORE || aiScore >= WINNING_SCORE) {
-    gameRunning = false;
-    const winner = playerScore >= WINNING_SCORE ? '🎉 HAS GUANYAT!' : '🤖 L\'IA HA GUANYAT!';
-    winnerEl.textContent = winner;
-    gameOverEl.style.display = 'block';
-  }
+// Actualitzar física del joc
+function update() {
+    ball.x += ball.speedX;
+    ball.y += ball.speedY;
+
+    // Rebot vertical
+    if (ball.y <= 0 || ball.y + ball.size >= canvas.height) {
+        ball.speedY *= -1;
+    }
+
+    // Rebot amb el jugador
+    if (
+        ball.x <= player.x + paddleWidth &&
+        ball.y + ball.size >= player.y &&
+        ball.y <= player.y + paddleHeight
+    ) {
+        ball.speedX *= -1.1; // mica més ràpida
+    }
+
+    // Rebot amb la IA
+    if (
+        ball.x + ball.size >= ai.x &&
+        ball.y + ball.size >= ai.y &&
+        ball.y <= ai.y + paddleHeight
+    ) {
+        ball.speedX *= -1.1;
+    }
+
+    // Punt per IA
+    if (ball.x < 0) {
+        aiScore++;
+        resetBall();
+    }
+
+    // Punt per jugador
+    if (ball.x > canvas.width) {
+        playerScore++;
+        resetBall();
+    }
+
+    // Moviment IA
+    if (ai.y + paddleHeight / 2 < ball.y) ai.y += ai.speed;
+    else ai.y -= ai.speed;
 }
 
-// Dibuixar tot
+// Dibuixar pantalla
 function draw() {
-  // Fons negre
-  ctx.fillStyle = '#000';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Línia central
-  ctx.strokeStyle = '#00ff88';
-  ctx.lineWidth = 4;
-  ctx.setLineDash([15, 15]);
-  ctx.beginPath();
-  ctx.moveTo(canvas.width / 2, 0);
-  ctx.lineTo(canvas.width / 2, canvas.height);
-  ctx.stroke();
-  ctx.setLineDash([]);
+    // Dibuixar jugador i IA
+    rect(player.x, player.y, paddleWidth, paddleHeight);
+    rect(ai.x, ai.y, paddleWidth, paddleHeight);
 
-  // Pal jugador (verd)
-  ctx.fillStyle = '#00ff88';
-  ctx.fillRect(player.x, player.y, player.width, player.height);
+    // Pilota
+    drawBall();
 
-  // Pal IA (vermell)
-  ctx.fillStyle = '#ff0040';
-  ctx.fillRect(ai.x, ai.y, ai.width, ai.height);
-
-  // Pilota (blanc amb brillantor)
-  ctx.fillStyle = '#fff';
-  ctx.fillRect(ball.x, ball.y, ball.width, ball.height);
-  
-  // Reflecció a la pilota
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  ctx.fillRect(ball.x + 2, ball.y + 2, 4, 4);
+    // Marcador
+    drawScore();
 }
 
-// Reiniciar joc
-function resetGame() {
-  playerScore = 0;
-  aiScore = 0;
-  playerScoreEl.textContent = '0';
-  aiScoreEl.textContent = '0';
-  gameOverEl.style.display = 'none';
-  gameRunning = true;
-  
-  // Reiniciar posicions
-  player.y = canvas.height / 2 - paddleHeight / 2;
-  ai.y = canvas.height / 2 - paddleHeight / 2;
-  resetBall();
-  
-  gameLoop();
+// Bucle del joc
+function gameLoop() {
+    update();
+    draw();
+    requestAnimationFrame(gameLoop);
 }
 
-// Iniciar joc
 gameLoop();
+
