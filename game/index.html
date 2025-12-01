@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ca">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fruites - Joc senzill</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="overlay" class="overlay hidden">
+      <div class="overlay-content">
+        <h1 id="overlay-title">Game Over</h1>
+        <p id="overlay-sub">Has perdut 10 fruites.</p>
+        <button id="restartBtn">Reinicia</button>
+      </div>
+    </div>
+    <div class="instructions">
+      <p>Controla el cistell amb <strong>←</strong> i <strong>→</strong>. Atrapa les fruites. El joc acaba si perds 10 fruites.</p>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
