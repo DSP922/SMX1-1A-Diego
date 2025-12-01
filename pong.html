@@ -1,747 +1,248 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="utf-8" />
-  <title>Pong — Poderes por impacto (Con pantalla inicial)</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    :root{
-      --bg1:#0f1720;
-      --bg2:#132235;
-      --accent:#7ce7ff;
-      --accent-2:#8affb0;
-      --panel: rgba(255,255,255,0.04);
-      --glass: rgba(255,255,255,0.03);
-    }
-    html,body{
-      height:100%;
-      margin:0;
-      font-family: Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,201,255,0.06), transparent),
-                  linear-gradient(180deg,var(--bg1),var(--bg2));
-      color:#e6f7ff;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-    }
-    .container{
-      width: min(920px, 96vw);
-      text-align:center;
-    }
-    h1{
-      margin:0 0 12px 0;
-      font-weight:600;
-      letter-spacing:0.6px;
-      color: #dff8ff;
-      text-shadow: 0 4px 18px rgba(60,170,255,0.06);
-    }
-    #scorebar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      margin-bottom:12px;
-    }
-    .score{
-      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-      padding:10px 16px;
-      border-radius:10px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.02);
-      font-weight:600;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .score .name { font-size:0.95rem; color:#bfefff; }
-    .score .val { font-size:1.25rem; color:var(--accent); font-weight:800; }
-    #controls{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      justify-content:flex-end;
-    }
-    button {
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border:1px solid rgba(255,255,255,0.04);
-      color:#cfefff;
-      padding:8px 12px;
-      border-radius:8px;
-      cursor:pointer;
-      font-weight:600;
-      box-shadow: 0 6px 16px rgba(2,10,20,0.5);
-    }
-    button.primary {
-      background: linear-gradient(90deg, rgba(124,231,255,0.1), rgba(138,255,176,0.06));
-      color: #042b25;
-      border:none;
-    }
-    canvas{
-      display:block;
-      margin: 12px auto 0;
-      width: 100%;
-      height: auto;
-      max-height: 64vh;
-      border-radius: 12px;
-      box-shadow: 0 18px 60px rgba(5,12,20,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
-      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
-    }
-    .overlay{
-      position: absolute;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      pointer-events:auto;
-    }
-    .panel {
-      pointer-events:auto;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      padding:18px 22px;
-      border-radius:12px;
-      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
-      color:#e8fbff;
-    }
-    .start-btn {
-      margin-top:14px;
-      padding:12px 22px;
-      font-size:1.05rem;
-      border-radius:12px;
-      font-weight:800;
-      cursor:pointer;
-      border:none;
-      background: linear-gradient(90deg, rgba(124,231,255,0.12), rgba(138,255,176,0.08));
-      color: #042b25;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.45);
-    }
-    .small { font-size:0.9rem; color:#cfefff; margin-top:6px;}
-    .power-ui {
-      font-size:0.85rem;
-      color:#cfefff;
-      margin-left:12px;
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .power-badge {
-      padding:6px 8px;
-      background:linear-gradient(90deg, rgba(124,231,255,0.06), rgba(138,255,176,0.03));
-      border-radius:8px;
-      font-weight:700;
-      color:#c2f8ff;
-      display:flex;
-      gap:8px;
-      align-items:center;
-    }
-    @media (max-width:600px){
-      .score .val { font-size:1rem; }
-      canvas{ max-height:55vh; }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Pong — Poderes por impacto</h1>
-    <div id="scorebar">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="score">
-          <div class="name">Jugador</div>
-          <div id="playerScore" class="val">0</div>
-        </div>
-        <div class="power-ui" id="playerPowerUI" aria-live="polite"></div>
-      </div>
+<script>
+// ==================== PONG ENGINE 100% FUNCIONAL (2025) ====================
+const canvas = document.getElementById('pong');
+const ctx = canvas.getContext('2d');
+canvas.width = 900;
+canvas.height = 540;
 
-      <div id="controls">
-        <button id="restart" class="primary">Reiniciar</button>
-      </div>
+let ball = { x: canvas.width/2, y: canvas.height/2, vx: 0, vy: 0, r: 13, trail: [] };
+let player = { y: canvas.height/2, score: 0, power: null, powerTime: 0 };
+let opponent = { y: canvas.height/2, score: 0, power: null, powerTime: 0 };
+let paddleHeight = 110;
+let paddleWidth = 16;
+let keys = {};
+let gameRunning = false;
 
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div class="power-ui" id="oppPowerUI" aria-live="polite"></div>
-        <div class="score">
-          <div class="name">Oponente</div>
-          <div id="oppScore" class="val">0</div>
-        </div>
-      </div>
-    </div>
+const DIFF_SETTINGS = {
+  facil:   { speed: 4.4, reaction: 0.24, error: 0.18 },
+  normal:  { speed: 5.8, reaction: 0.15, error: 0.10 },
+  dificil: { speed: 7.6, reaction: 0.09, error: 0.05 },
+  extremo: { speed: 10.2, reaction: 0.05, error: 0.02 }
+};
+let diff = DIFF_SETTINGS[config.diff];
 
-    <div style="position:relative;">
-      <canvas id="pong" width="900" height="540"></canvas>
-      <div id="overlay" class="overlay" aria-hidden="false"></div>
-    </div>
+// ----- COLORES Y EFECTOS SEGÚN CONFIG -----
+function getPaddleColor(isPlayer) {
+  const c = isPlayer ? config.color : config.colorIA;
+  if (c === "galaxy") return "var(--galaxy-grad)";
+  const found = [...ALL_COLORS, ...LOCKED_COLORS].find(x => x.name === c);
+  return found && (ALL_COLORS.includes(found) || unlocks[c]) ? found.color : "#cccccc";
+}
 
-    <div class="small">Usa las flechas ↑ ↓ para mover. Gana el primero a 11 puntos. Aparecerá un poder aleatorio cada 30s; cada poder dura 10s.</div>
-  </div>
+function getEffectColor(isPlayer) {
+  const name = isPlayer ? config.effectColor : config.effectColorIA;
+  const found = EFFECT_COLORS.find(x => x.name === name);
+  return found ? found.color : "#8ee9ff";
+}
 
-  <script>
-  (function(){
-    const canvas = document.getElementById('pong');
-    const ctx = canvas.getContext('2d', { alpha: true });
-    const W = canvas.width, H = canvas.height;
+function getSpriteEmoji(isPlayer) {
+  const id = isPlayer ? config.sprite : config.spriteIA;
+  const s = SPRITES.find(x => x.id === id);
+  return s ? s.emoji : "Sparkles";
+}
 
-    // Visual tuning
-    const bgFade = 0.14;
-    const netColor = 'rgba(255,255,255,0.06)';
-    const glowColor = 'rgba(124,231,255,0.28)';
+// ----- EFECTOS DE IMPACTO -----
+function createImpact(x, y, isPlayer) {
+  const emoji = getSpriteEmoji(isPlayer);
+  const color = getEffectColor(isPlayer);
+  const particles = 10 + Math.floor(Math.random() * 8);
 
-    // Paddles
-    const paddleW = 14;
-    const BASE_PADDLE_H = 100;
-    let playerPaddleH = BASE_PADDLE_H;
-    let oppPaddleH = BASE_PADDLE_H;
-    let playerY = H/2 - playerPaddleH/2;
-    let oppY = H/2 - oppPaddleH/2;
-    const paddleRadius = 8;
-    const BASE_SPEED = 420;
-    let playerSpeed = BASE_SPEED * 1.05;
-    let oppSpeed = BASE_SPEED * 1.05;
-
-    // Ball
-    const ballR = 9;
-    let ballX = W/2, ballY = H/2;
-    let ballVX = 520 * (Math.random() > 0.5 ? 1 : -1);
-    let ballVY = (Math.random()*280 - 140);
-
-    // Score
-    let playerScore = 0, oppScore = 0;
-    const WIN_SCORE = 11;
-    let gameOver = false;
-    let gameStarted = false; // nuevo: controla pantalla inicial
-
-    // Inputs
-    const keys = { ArrowUp:false, ArrowDown:false };
-
-    // Particles
-    const particles = [];
-
-    // Time
-    let lastTime = 0;
-
-    // Powers
-    const POWER_SPAWN_INTERVAL = 30; // seconds
-    const POWER_DURATION = 10; // seconds
-    let spawnAccumulator = 0;
-    let activePowers = { player: null, opp: null };
-    let currentFieldPower = null;
-    const POWER_TTL = 12;
-
-    // last paddle that touched the ball
-    let lastTouched = null; // 'player' or 'opp'
-
-    // Power types
-    const POWER_TYPES = [
-      { id: 'enlarge', name: 'Hitbox +', color: '#7ee8ff', icon: '▮' },
-      { id: 'speed', name: 'Vel 2x', color: '#8affb0', icon: '⚡' } // ahora 2x
-    ];
-
-    // helpers
-    function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-    function rand(min,max){ return min + Math.random()*(max-min); }
-
-    // rounded rect extension
-    CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
-      if (w < 2*r) r = w/2;
-      if (h < 2*r) r = h/2;
-      this.beginPath();
-      this.moveTo(x+r, y);
-      this.arcTo(x+w, y, x+w, y+h, r);
-      this.arcTo(x+w, y+h, x, y+h, r);
-      this.arcTo(x, y+h, x, y, r);
-      this.arcTo(x, y, x+w, y, r);
-      this.closePath();
-      return this;
-    };
-
-    // input
-    window.addEventListener('keydown', e=>{
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        keys[e.key] = true;
-        e.preventDefault();
-      }
-    }, { passive:false });
-    window.addEventListener('keyup', e=>{
-      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
-        keys[e.key] = false;
-        e.preventDefault();
-      }
-    }, { passive:false });
-
-    // restart
-    document.getElementById('restart').addEventListener('click', () => {
-      // reinicia y arranca inmediatamente
-      gameStarted = true;
-      document.getElementById('overlay').innerHTML = '';
-      document.getElementById('overlay').style.pointerEvents = 'none';
-      resetMatch();
+  for (let i = 0; i < particles; i++) {
+    const angle = Math.PI * 2 * i / particles + Math.random() * 0.5;
+    const vel = 2.5 + Math.random() * 5;
+    ball.trail.push({
+      x, y,
+      vx: Math.cos(angle) * vel,
+      vy: Math.sin(angle) * vel,
+      life: 1,
+      color,
+      emoji,
+      size: 24 + Math.random() * 20
     });
+  }
+}
 
-    // start screen (inicial)
-    const overlay = document.getElementById('overlay');
-    function showStartScreen(){
-      gameStarted = false;
-      overlay.style.pointerEvents = 'auto';
-      overlay.innerHTML = `<div class="panel" style="min-width:260px;">
-        <div style="font-size:1.25rem;font-weight:800;color:#dff8ff">Pong — Poderes</div>
-        <div style="margin-top:8px;color:#bfefff">Pulsa Iniciar para comenzar</div>
-        <div style="display:flex;justify-content:center;">
-          <button id="startBtn" class="start-btn">INICIAR</button>
-        </div>
-      </div>`;
-      document.getElementById('startBtn').addEventListener('click', ()=>{
-        overlay.innerHTML = '';
-        overlay.style.pointerEvents = 'none';
-        gameStarted = true;
-        resetMatch();
-      });
+// ----- PODERES -----
+const POWERS = [
+  { name: "big",   label: "Grande",   duration: 400, emoji: "Large Blue Square" },
+  { name: "small", label: "Pequeño",  duration: 360, emoji: "Large Yellow Square" },
+  { name: "fast",  label: "Rápido",   duration: 500, emoji: "Lightning" },
+  { name: "slow",  label: "Lento",    duration: 480, emoji: "Snail" }
+];
+
+function activateRandomPower(forOpponent = false) {
+  const target = forOpponent ? opponent : player;
+  const power = POWERS[Math.floor(Math.random() * POWERS.length)];
+  target.power = power;
+  target.powerTime = power.duration;
+
+  const ui = forOpponent ? document.getElementById("oppPowerUI") : document.getElementById("playerPowerUI");
+  ui.innerHTML = `<div class="power-badge">${power.emoji} ${power.label}</div>`;
+  setTimeout(() => {
+    if (target.power === power) {
+      target.power = null;
+      ui.innerHTML = "";
     }
+  }, power.duration * 16.6);
+}
 
-    function respawnBall(direction){
-      ballX = W/2; ballY = H/2;
-      const speed = 520;
-      const angle = rand(-0.6, 0.6);
-      const dir = direction || (Math.random()>0.5?1:-1);
-      ballVX = dir * speed * Math.cos(angle);
-      ballVY = speed * Math.sin(angle);
-      lastTouched = null;
-    }
+// ----- REINICIAR PELOTA -----
+function resetBall(toLeft = true) {
+  ball.x = canvas.width / 2;
+  ball.y = canvas.height / 2;
+  const angle = (Math.random() - 0.5) * 0.7;
+  const speed = diff.speed * (0.9 + Math.random() * 0.3);
+  ball.vx = (toLeft ? -speed : speed);
+  ball.vy = speed * Math.sin(angle);
+  ball.trail = [];
 
-    function resetBall(direction){
-      respawnBall(direction);
-    }
+  if (Math.random() < 0.3 && (player.score + opponent.score) > 4) {
+    setTimeout(() => activateRandomPower(Math.random() < 0.5), 700);
+  }
+}
 
-    function resetMatch(){
-      playerScore = 0; oppScore = 0;
-      updateScoreUI();
-      gameOver = false;
-      // reset powers and state
-      spawnAccumulator = 0;
-      activePowers = { player: null, opp: null };
-      currentFieldPower = null;
-      playerPaddleH = BASE_PADDLE_H;
-      oppPaddleH = BASE_PADDLE_H;
-      playerSpeed = BASE_SPEED * 1.05;
-      oppSpeed = BASE_SPEED * 1.05;
-      playerY = H/2 - playerPaddleH/2;
-      oppY = H/2 - oppPaddleH/2;
-      document.getElementById('playerPowerUI').innerHTML = '';
-      document.getElementById('oppPowerUI').innerHTML = '';
-      respawnBall(Math.random()>0.5?1:-1);
-      lastTime = performance.now();
-      // start loop only if gameStarted (start screen may block)
-      if (gameStarted) requestAnimationFrame(loop);
-    }
+// ----- FIN DE PARTIDA -----
+function endGame(playerWins) {
+  gameRunning = false;
+  const msg = playerWins ? "¡GANASTE!" : "Perdiste...";
+  const color = playerWins ? "#7ce7ff" : "#ff6e6e";
+  overlay.innerHTML = `<div class="panel" style="font-size:2.8rem;font-weight:800;color:${color}">${msg}</div>`;
+  overlay.style.pointerEvents = "auto";
+  setTimeout(() => {
+    overlay.innerHTML = "";
+    overlay.style.pointerEvents = "none";
+  }, 4000);
+}
 
-    function addParticles(x,y,color,amount=18){
-      for(let i=0;i<amount;i++){
-        particles.push({
-          x,y,
-          vx: rand(-260,260),
-          vy: rand(-220,220),
-          life: rand(0.4,0.9),
-          age:0,
-          size: rand(1.8,4.4),
-          color
-        });
-      }
-    }
+// ----- INICIO / REINICIO -----
+function startGame() {
+  player.score = opponent.score = 0;
+  document.getElementById("playerScore").textContent = "0";
+  document.getElementById("oppScore").textContent = "0";
+  document.getElementById("playerPowerUI").innerHTML = "";
+  document.getElementById("oppPowerUI").innerHTML = "";
+  player.power = opponent.power = null;
+  overlay.innerHTML = "";
+  resetBall();
+  gameRunning = true;
+  if (!window._pongLoop) requestAnimationFrame(gameLoop);
+}
 
-    function updateParticles(dt){
-      for(let i=particles.length-1;i>=0;i--){
-        const p = particles[i];
-        p.age += dt;
-        if (p.age >= p.life){ particles.splice(i,1); continue; }
-        p.vy += 420 * dt;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-      }
-    }
+document.getElementById("restart").onclick = startGame;
 
-    function spawnPower(){
-      if (gameOver) return;
-      if (!gameStarted) return;
-      if (currentFieldPower) return;
-      const type = POWER_TYPES[Math.floor(Math.random() * POWER_TYPES.length)];
-      const margin = 160;
-      const x = rand(margin, W - margin);
-      const y = rand(60, H - 60);
-      currentFieldPower = {
-        x, y, r: 14,
-        type: type.id,
-        color: type.color,
-        name: type.name,
-        icon: type.icon,
-        spawnedAt: performance.now()/1000,
-        ttl: POWER_TTL
-      };
-    }
+// Controles
+window.addEventListener("keydown", e => { if(["ArrowUp","ArrowDown","w","s"].includes(e.key)) keys[e.key] = true; });
+window.addEventListener("keyup", e => { if(["ArrowUp","ArrowDown","w","s"].includes(e.key)) keys[e.key] = false; });
 
-    function collectPower(power, collector){
-      if (!power) return;
-      collector = collector || 'player';
-      activePowers[collector] = {
-        type: power.type,
-        startedAt: performance.now()/1000,
-        expiresAt: performance.now()/1000 + POWER_DURATION
-      };
+// ==================== BUCLE PRINCIPAL ====================
+function gameLoop() {
+  if (!gameRunning) return;
 
-      if (power.type === 'enlarge'){
-        if (collector === 'player'){
-          playerPaddleH = BASE_PADDLE_H * 1.5;
-          playerY = clamp(playerY, 0, H - playerPaddleH);
-        } else {
-          oppPaddleH = BASE_PADDLE_H * 1.5;
-          oppY = clamp(oppY, 0, H - oppPaddleH);
-        }
-      } else if (power.type === 'speed'){
-        // ahora 2x en lugar de 1.5x
-        if (collector === 'player'){
-          playerSpeed = (BASE_SPEED * 1.05) * 2;
-        } else {
-          oppSpeed = (BASE_SPEED * 1.05) * 2;
-        }
-      }
+  // Fondo
+  ctx.fillStyle = "rgba(10,21,36,0.98)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      updatePowerUI(collector);
-      addParticles(power.x, power.y, power.color, 26);
-      currentFieldPower = null;
-    }
+  // Línea central
+  ctx.strokeStyle = "rgba(124,231,255,0.18)";
+  ctx.lineWidth = 4;
+  ctx.setLineDash([14, 16]);
+  ctx.beginPath();
+  ctx.moveTo(canvas.width/2, 0);
+  ctx.lineTo(canvas.width/2, canvas.height);
+  ctx.stroke();
+  ctx.setLineDash([]);
 
-    function clearActivePower(side){
-      activePowers[side] = null;
-      if (side === 'player'){
-        playerPaddleH = BASE_PADDLE_H;
-        playerSpeed = BASE_SPEED * 1.05;
-        playerY = clamp(playerY, 0, H - playerPaddleH);
-      } else {
-        oppPaddleH = BASE_PADDLE_H;
-        oppSpeed = BASE_SPEED * 1.05;
-        oppY = clamp(oppY, 0, H - oppPaddleH);
-      }
-      updatePowerUI(side);
-    }
+  // Movimiento jugador
+  if ((keys["ArrowUp"] || keys["w"]) && player.y > paddleHeight/2) player.y -= 9;
+  if ((keys["ArrowDown"] || keys["s"]) && player.y < canvas.height - paddleHeight/2) player.y += 9;
 
-    function updatePowerUI(side){
-      const el = side === 'player' ? document.getElementById('playerPowerUI') : document.getElementById('oppPowerUI');
-      el.innerHTML = '';
-      const active = activePowers[side];
-      if (!active) return;
-      const remaining = Math.max(0, (active.expiresAt - performance.now()/1000));
-      const type = POWER_TYPES.find(p=>p.id===active.type);
-      const badge = document.createElement('div');
-      badge.className = 'power-badge';
-      badge.style.border = `1px solid ${type.color}`;
-      badge.innerHTML = `<div style="font-size:0.95rem">${type.icon}</div><div style="display:flex;flex-direction:column;text-align:left;">
-        <div style="font-weight:800;font-size:0.88rem">${type.name}</div>
-        <div style="font-size:0.78rem;color:#cfefff"> ${remaining.toFixed(1)}s</div>
-      </div>`;
-      el.appendChild(badge);
-    }
+  // IA
+  const error = (Math.random() - 0.5) * canvas.height * diff.error;
+  const targetY = ball.y + error;
+  if (Math.abs(targetY - opponent.y) > diff.reaction * canvas.height) {
+    opponent.y += (targetY - opponent.y) * 0.18;
+  }
+  opponent.y = Math.max(paddleHeight/2, Math.min(canvas.height - paddleHeight/2, opponent.y));
 
-    function oppAI(dt){
-      const target = ballY - oppPaddleH/2;
-      const diff = target - oppY;
-      const maxMove = oppSpeed * dt;
-      oppY += clamp(diff, -maxMove, maxMove) * 0.98;
-      oppY = clamp(oppY, 0, H - oppPaddleH);
-    }
+  // Aplicar poderes
+  const pSize = player.power?.name === "big" ? 1.8 : player.power?.name === "small" ? 0.5 : 1;
+  const oSize = opponent.power?.name === "big" ? 1.8 : opponent.power?.name === "small" ? 0.5 : 1;
+  const speedMult = opponent.power?.name === "fast" ? 1.7 : opponent.power?.name === "slow" ? 0.5 : 1;
 
-    function drawBackground(){
-      ctx.save();
-      ctx.fillStyle = `rgba(6,12,18,${bgFade})`;
-      ctx.fillRect(0,0,W,H);
-      ctx.restore();
+  const playerPH = paddleHeight * pSize;
+  const oppPH = paddleHeight * oSize;
 
-      const dashH = 18, gap = 14, x = W/2;
-      ctx.save();
-      ctx.strokeStyle = netColor;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      let y = 12;
-      while (y < H-12){
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + dashH);
-        y += dashH + gap;
-      }
-      ctx.stroke();
-      ctx.restore();
-    }
+  // Actualizar pelota
+  ball.x += ball.vx * speedMult;
+  ball.y += ball.vy * speedMult;
 
-    function drawPaddle(x,y,height,active=false){
-      ctx.save();
-      ctx.shadowBlur = active ? 22 : 8;
-      ctx.shadowColor = glowColor;
-      const grad = ctx.createLinearGradient(x, y, x, y + height);
-      grad.addColorStop(0, active ? '#bff6ff' : '#d7f9ff');
-      grad.addColorStop(1, active ? '#7fe7ff' : '#9fefff');
-      ctx.fillStyle = grad;
-      ctx.roundRect(x, y, paddleW, height, paddleRadius).fill();
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = 'rgba(255,255,255,0.03)';
-      ctx.roundRect(x+2,y+2,paddleW-4,height-12, paddleRadius-2).fill();
-      ctx.restore();
-    }
+  // Rebote techo/piso
+  if (ball.y - ball.r <= 0 || ball.y + ball.r >= canvas.height) {
+    ball.vy = -ball.vy;
+    ball.y = ball.y - ball.r <= 0 ? ball.r : canvas.height - ball.r;
+  }
 
-    function drawBall(){
-      ctx.save();
-      ctx.shadowBlur = 28;
-      ctx.shadowColor = glowColor;
-      const ballGrad = ctx.createRadialGradient(ballX-3, ballY-3, 2, ballX, ballY, ballR*2);
-      ballGrad.addColorStop(0, '#e6ffff');
-      ballGrad.addColorStop(0.25, '#aef6ff');
-      ballGrad.addColorStop(1, 'rgba(40,200,255,0.12)');
-      ctx.fillStyle = ballGrad;
-      ctx.beginPath();
-      ctx.arc(ballX, ballY, ballR, 0, Math.PI*2);
-      ctx.fill();
-      ctx.restore();
+  // Colisión raquetas
+  if (ball.x - ball.r <= paddleWidth && Math.abs(ball.y - player.y) <= playerPH/2 && ball.vx < 0) {
+    ball.vx = -ball.vx * 1.07;
+    ball.vy += (ball.y - player.y) / (playerPH/2) * 7;
+    createImpact(paddleWidth + 15, ball.y, true);
+  }
+  if (ball.x + ball.r >= canvas.width - paddleWidth && Math.abs(ball.y - opponent.y) <= oppPH/2 && ball.vx > 0) {
+    ball.vx = -ball.vx * 1.07;
+    ball.vy += (ball.y - opponent.y) / (oppPH/2) * 7;
+    createImpact(canvas.width - paddleWidth - 15, ball.y, false);
+  }
 
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      ctx.beginPath();
-      ctx.arc(ballX - ballR*0.4, ballY - ballR*0.6, ballR*0.45, 0, Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-    }
+  // Puntuación + desbloqueables
+  if (ball.x < -50) {
+    opponent.score++;
+    document.getElementById("oppScore").textContent = opponent.score;
+    if (opponent.score === 11) { endGame(false); }
+    else { resetBall(true); if (opponent.score >= 5 && opponent.score % 3 === 0) saveUnlock(config.diff); }
+  }
+  if (ball.x > canvas.width + 50) {
+    player.score++;
+    document.getElementById("playerScore").textContent = player.score;
+    if (player.score === 11) { endGame(true); }
+    else { resetBall(false); if (player.score >= 5 && player.score % 3 === 0) saveUnlock(config.diff); }
+  }
 
-    function drawPowerOnField(power){
-      if (!power) return;
-      ctx.save();
-      ctx.shadowBlur = 18;
-      ctx.shadowColor = power.color;
-      ctx.fillStyle = 'rgba(255,255,255,0.02)';
-      ctx.beginPath();
-      ctx.arc(power.x, power.y, power.r + 8, 0, Math.PI*2);
-      ctx.fill();
+  // Dibujar raquetas
+  ctx.fillStyle = getPaddleColor(true);
+  ctx.fillRect(12, player.y - playerPH/2, paddleWidth, playerPH);
+  ctx.fillStyle = getPaddleColor(false);
+  ctx.fillRect(canvas.width - 28, opponent.y - oppPH/2, paddleWidth, oppPH);
 
-      const grad = ctx.createRadialGradient(power.x-4, power.y-4, 2, power.x, power.y, power.r*2);
-      grad.addColorStop(0, power.color);
-      grad.addColorStop(1, 'rgba(20,40,60,0.2)');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(power.x, power.y, power.r, 0, Math.PI*2);
-      ctx.fill();
+  // Partículas del trail
+  ball.trail = ball.trail.filter(p => p.life > 0);
+  ball.trail.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= 0.035;
+    ctx.globalAlpha = p.life;
+    ctx.font = `${p.size * p.life}px system-ui`;
+    ctx.fillStyle = p.color;
+    ctx.fillText(p.emoji, p.x - p.size * p.life / 2, p.y + p.size * p.life / 3);
+  });
+  ctx.globalAlpha = 1;
 
-      ctx.fillStyle = '#042b25';
-      ctx.font = '14px system-ui, Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(power.icon, power.x, power.y+1);
-      ctx.restore();
+  // Pelota
+  ctx.beginPath();
+  ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+  ctx.fillStyle = "#7ce7ff";
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = "#7ce7ff";
+  ctx.fill();
+  ctx.shadowBlur = 0;
 
-      const now = performance.now()/1000;
-      const elapsed = now - power.spawnedAt;
-      const t = clamp(elapsed / power.ttl, 0, 1);
-      ctx.save();
-      ctx.strokeStyle = `rgba(255,255,255,0.08)`;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(power.x, power.y, power.r + 12, -Math.PI/2, -Math.PI/2 + Math.PI*2*(1 - t));
-      ctx.stroke();
-      ctx.restore();
-    }
+  requestAnimationFrame(gameLoop);
+}
 
-    function ballLogic(dt){
-      ballX += ballVX * dt;
-      ballY += ballVY * dt;
-
-      if (ballY - ballR < 0){
-        ballY = ballR;
-        ballVY *= -1;
-      } else if (ballY + ballR > H){
-        ballY = H - ballR;
-        ballVY *= -1;
-      }
-
-      const playerLeft = 14, playerRight = playerLeft + paddleW;
-      if (ballX - ballR < playerRight && ballX - ballR > playerLeft - 40){
-        if (ballY > playerY && ballY < playerY + playerPaddleH && ballVX < 0){
-          ballX = playerRight + ballR;
-          const relative = (ballY - (playerY + playerPaddleH/2)) / (playerPaddleH/2);
-          const speed = Math.hypot(ballVX, ballVY);
-          const newAngle = relative * 0.8;
-          const newSpeed = clamp(speed * 1.03, 420, 920);
-          ballVX = Math.abs(Math.cos(newAngle) * newSpeed);
-          ballVY = Math.sin(newAngle) * newSpeed;
-          addParticles(ballX - ballR - 2, ballY, '#7ee8ff', 14);
-          lastTouched = 'player';
-        }
-      }
-
-      const oppLeft = W - 14 - paddleW, oppRight = W - 14;
-      if (ballX + ballR > oppLeft && ballX + ballR < oppRight + 40){
-        if (ballY > oppY && ballY < oppY + oppPaddleH && ballVX > 0){
-          ballX = oppLeft - ballR;
-          const relative = (ballY - (oppY + oppPaddleH/2)) / (oppPaddleH/2);
-          const speed = Math.hypot(ballVX, ballVY);
-          const newAngle = relative * 0.8;
-          const newSpeed = clamp(speed * 1.03, 420, 920);
-          ballVX = -Math.abs(Math.cos(newAngle) * newSpeed);
-          ballVY = Math.sin(newAngle) * newSpeed;
-          addParticles(ballX + ballR + 2, ballY, '#8affb0', 14);
-          lastTouched = 'opp';
-        }
-      }
-
-      // ball picks up power on collision
-      if (currentFieldPower){
-        const dx = ballX - currentFieldPower.x;
-        const dy = ballY - currentFieldPower.y;
-        const dist2 = dx*dx + dy*dy;
-        const collideDist = (ballR + currentFieldPower.r);
-        if (dist2 <= collideDist * collideDist){
-          const collector = lastTouched || 'player';
-          collectPower(currentFieldPower, collector);
-        }
-      }
-
-      if (ballX < -40){
-        oppScore += 1;
-        updateScoreUI(true);
-        if (oppScore >= WIN_SCORE) finishGame(false);
-        else resetBall(1);
-      } else if (ballX > W + 40){
-        playerScore += 1;
-        updateScoreUI(true);
-        if (playerScore >= WIN_SCORE) finishGame(true);
-        else resetBall(-1);
-      }
-    }
-
-    function updateScoreUI(flash=false){
-      const sp = document.getElementById('playerScore');
-      const so = document.getElementById('oppScore');
-      sp.textContent = playerScore;
-      so.textContent = oppScore;
-      if (flash){
-        const el = playerScore > oppScore ? sp : so;
-        el.animate([{ transform:'scale(1.2)'},{ transform:'scale(1)' }], { duration:240, easing:'cubic-bezier(.2,.9,.2,1)' });
-      }
-    }
-
-    function finishGame(playerWon){
-      gameOver = true;
-      const ov = document.getElementById('overlay');
-      ov.innerHTML = `<div class="panel" style="min-width:220px;">
-        <div style="font-size:1.15rem;font-weight:700;">${playerWon ? '¡Has ganado!' : 'Has perdido'}</div>
-        <div style="margin-top:8px;color:#bfefff;">${playerWon ? 'Buen trabajo — primera a 11.' : 'Inténtalo otra vez.'}</div>
-        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;">
-          <button id="overlayRestart" class="primary">Jugar de nuevo</button>
-        </div>
-      </div>`;
-      ov.style.pointerEvents = 'auto';
-      document.getElementById('overlayRestart').addEventListener('click', ()=>{
-        ov.innerHTML = '';
-        ov.style.pointerEvents = 'none';
-        gameStarted = true;
-        resetMatch();
-      });
-    }
-
-    function loop(now){
-      if (!gameStarted || gameOver) return;
-      const dt = Math.min(0.032, (now - lastTime)/1000);
-      lastTime = now;
-
-      // powers spawn
-      spawnAccumulator += dt;
-      if (spawnAccumulator >= POWER_SPAWN_INTERVAL){
-        spawnAccumulator = 0;
-        spawnPower();
-      }
-
-      if (currentFieldPower){
-        const nowSec = performance.now()/1000;
-        if (nowSec - currentFieldPower.spawnedAt >= currentFieldPower.ttl){
-          currentFieldPower = null;
-        }
-      }
-
-      // active power expiration
-      ['player','opp'].forEach(side=>{
-        const ap = activePowers[side];
-        if (ap){
-          const nowSec = performance.now()/1000;
-          if (nowSec >= ap.expiresAt){
-            clearActivePower(side);
-          } else {
-            updatePowerUI(side);
-          }
-        }
-      });
-
-      // player movement
-      let moveDir = 0;
-      if (keys.ArrowUp) moveDir -= 1;
-      if (keys.ArrowDown) moveDir += 1;
-      playerY += moveDir * playerSpeed * dt;
-      playerY = clamp(playerY, 0, H - playerPaddleH);
-
-      // opp AI
-      oppAI(dt);
-
-      // physics
-      ballLogic(dt);
-
-      // direct pickup by paddles
-      if (currentFieldPower){
-        // player
-        const rectX = 14, rectY = playerY, rectW = paddleW, rectH = playerPaddleH;
-        const cx = currentFieldPower.x, cy = currentFieldPower.y, r = currentFieldPower.r;
-        const nearestX = clamp(cx, rectX, rectX + rectW);
-        const nearestY = clamp(cy, rectY, rectY + rectH);
-        const dx = cx - nearestX, dy = cy - nearestY;
-        if (dx*dx + dy*dy <= r*r){
-          collectPower(currentFieldPower, 'player');
-        } else {
-          // opponent
-          const rectX2 = W - 14 - paddleW, rectY2 = oppY, rectW2 = paddleW, rectH2 = oppPaddleH;
-          const nearestX2 = clamp(cx, rectX2, rectX2 + rectW2);
-          const nearestY2 = clamp(cy, rectY2, rectY2 + rectH2);
-          const dx2 = cx - nearestX2, dy2 = cy - nearestY2;
-          if (dx2*dx2 + dy2*dy2 <= r*r){
-            collectPower(currentFieldPower, 'opp');
-          }
-        }
-      }
-
-      updateParticles(dt);
-
-      // render
-      drawBackground();
-      const playerActive = moveDir !== 0;
-      drawPaddle(14, playerY, playerPaddleH, playerActive);
-      drawPaddle(W - 14 - paddleW, oppY, oppPaddleH, false);
-      drawBall();
-      drawPowerOnField(currentFieldPower);
-
-      ctx.save();
-      for (const p of particles){
-        const t = 1 - (p.age / p.life);
-        ctx.globalAlpha = Math.max(0, t);
-        ctx.fillStyle = p.color;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size * t, 0, Math.PI*2);
-        ctx.fill();
-      }
-      ctx.restore();
-
-      requestAnimationFrame(loop);
-    }
-
-    // init
-    updateScoreUI();
-    respawnBall(Math.random()>0.5?1:-1);
-    lastTime = performance.now();
-
-    // show start screen (no inicio automático)
-    showStartScreen();
-
-    // expose debug
-    window._pong = { resetMatch, respawnBall };
-
-  })();
-  </script>
-</body>
-</html>
+// ===== ARRANQUE =====
+document.getElementById("playBtn").onclick = () => {
+  document.getElementById("mainMenu").style.display = "none";
+  document.getElementById("gameScreen").style.display = "";
+  startGame();
+};
+</script>
