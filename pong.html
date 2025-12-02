@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ca">
+<html lang="es">
 <head>
+  <meta charset="UTF-8" />
+  <title>Pong senzill</title>
   <meta charset="utf-8" />
-  <title>Pong — Powers & Customization</title>
+  <title>Pong — Poderes con recogida por bala</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
+    body { background: #222; color: #fff; text-align: center; font-family: sans-serif; }
+    canvas { background: #333; display: block; margin: 20px auto; }
+    #score { font-size: 2em; margin: 10px; }
     :root{
       --bg1:#0f1720;
       --bg2:#132235;
@@ -12,335 +18,827 @@
       --accent-2:#8affb0;
       --panel: rgba(255,255,255,0.04);
       --glass: rgba(255,255,255,0.03);
-      --galaxy-grad: linear-gradient(135deg, #ff6ec4, #7873f5, #67e8f9, #f8b500, #f7971e, #d4145a);
     }
     html,body{
-      height:100%; margin:0; font-family: Inter, Roboto, Arial, sans-serif;
+      height:100%;
+      margin:0;
+      font-family: Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
       background: radial-gradient(1200px 600px at 10% 10%, rgba(124,201,255,0.06), transparent),
                   linear-gradient(180deg,var(--bg1),var(--bg2));
-      color:#e6f7ff; display:flex; align-items:center; justify-content:center;
-      padding:22px; overflow:hidden;
-    }
-    .container{width: min(920px, 96vw); text-align:center;}
-    h1{margin:0 0 12px 0; font-weight:600; letter-spacing:0.6px; color:#dff8ff;}
-    .menu-main{
-      background:linear-gradient(120deg,#142234e0 60%,#0a1826d0 100%);
-      box-shadow:0 24px 78px #0009,inset 0 1px 0 rgba(255,255,255,0.07);
-      border-radius:18px; padding:34px 24px 38px; display:flex; flex-direction:column;
-      align-items:center; position:relative; margin-bottom:35px;
-    }
-    .menu-btn{
-      padding:14px 32px; font-size:1.21rem; border-radius:12px; font-weight:700;
-      background:linear-gradient(120deg, #58aaff, #79ffe7 130%);
-      color:#213956; cursor:pointer; border:none; margin-bottom:9px;
-      box-shadow:0 8px 22px #111a; transition:all .18s;
-    }
-    .menu-btn:hover{filter:brightness(1.12); transform:scale(1.03);}
-    .menu-ball-btn{
-      position: absolute; top:10px; right:14px; background:none; border:none;
-      cursor:pointer; width:40px; height:40px; display:flex; align-items:center;
+      color:#e6f7ff;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      align-items:center;
       justify-content:center;
+      padding:20px;
     }
-    .ball-icon{
-      width:34px;height:34px;background:radial-gradient(circle at 40% 32%,#7ce7ff 65%,#31598a 100%);
-      border-radius:50%; box-shadow:0 1px 10px #7cf8 0.32;
+    .container{
+      width: min(920px, 96vw);
+      text-align:center;
     }
-    .ball-icon:before{
-      content:""; position:absolute; left:10px;top:8px;width:12px;height:12px;
-      border-radius:50%;background:#fff3;
+    h1{
+      margin:0 0 12px 0;
+      font-weight:600;
+      letter-spacing:0.6px;
+      color: #dff8ff;
+      text-shadow: 0 4px 18px rgba(60,170,255,0.06);
     }
-    #customPanel {
-      position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:21;
-      background:rgba(21,32,64,0.92);backdrop-filter:blur(4px);
-      display:none;align-items:center;justify-content:center;
+    #scorebar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
     }
-    .custom-card{
-      background:linear-gradient(122deg,#202f5bd7 80%,#142254cc 120%);
-      border-radius:19px; width:min(720px,96vw); padding:28px 24px;
-      box-shadow:0 30px 60px #1a1c3c88; display:flex; flex-wrap:wrap; gap:32px;
-      justify-content:center; position:relative;
+    .score{
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      padding:10px 16px;
+      border-radius:10px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.02);
+      font-weight:600;
+      display:flex;
+      gap:10px;
+      align-items:center;
     }
-    .close-x{position:absolute;right:17px;top:16px;background:none;border:none;
-      color:#bfefff;font-size:2.2rem;cursor:pointer;}
-    .custom-title{font-size:1.1rem;color:#53afff;margin-bottom:6px;font-weight:600;}
-    .color-list,.sprite-list,.diff-list{display:flex;flex-wrap:wrap;gap:9px;justify-content:center;}
-    .color-btn{width:36px;height:36px;border-radius:10px;cursor:pointer;
-      border:2.5px solid #e2edff36; position:relative; transition:all .2s;
-      box-shadow:0 3px 10px #0007;}
-    .color-btn.selected{border:3.5px solid #48e6fa;}
-    .color-btn.locked{opacity:0.6; cursor:not-allowed;}
-    .lock-icon{position:absolute;bottom:4px;right:4px;font-size:1.3rem;
-      background:#142254cc;padding:2px 5px;border-radius:6px;border:1px solid #e8ae30;}
-    .galaxy-btn{background:var(--galaxy-grad);}
-    .sprite-btn{width:44px;height:44px;border-radius:12px;border:2.5px solid #e2edff1a;
-      cursor:pointer;font-size:1.8em;display:flex;align-items:center;justify-content:center;
-      transition:all .2s;}
-    .sprite-btn.selected{border:4px solid #48e6fa;}
-    .diff-btn{border:none;border-radius:10px;padding:10px 16px;cursor:pointer;
-      font-weight:700;background:#183c6be0;color:#f4f9ff;transition:all .2s;}
-    .diff-btn.selected{background:#48a3fa; color:#fff;}
-    #scorebar{display:flex;align-items:center;justify-content:space-between;
-      gap:16px;margin-bottom:16px;flex-wrap:wrap;}
-    .score{background:rgba(255,255,255,0.04);padding:10px 18px;border-radius:12px;
-      box-shadow:0 6px 20px #00000066,inset 0 1px 0 rgba(255,255,255,0.04);}
-    .score .val{font-size:1.5rem;color:var(--accent);font-weight:800;}
-    .power-ui .power-badge{padding:6px 10px;background:rgba(124,231,255,0.1);
-      border-radius:8px;font-weight:700;color:#c2f8ff;}
-    canvas{display:block;margin:15px auto 0;max-height:64vh;border-radius:14px;
-      box-shadow:0 20px 70px rgba(0,0,0,0.7);background:#0a1524;}
-    .overlay{position:absolute;inset:0;display:flex;align-items:center;
-      justify-content:center;pointer-events:none;}
-    .panel{font-size:3rem;font-weight:900;text-shadow:0 0 30px #000;}
-    .small{font-size:0.95rem;color:#a8e0ff;margin-top:10px;}
+    .score .name { font-size:0.95rem; color:#bfefff; }
+    .score .val { font-size:1.25rem; color:var(--accent); font-weight:800; }
+    #controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-end;
+    }
+    button {
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.04);
+      color:#cfefff;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600;
+      box-shadow: 0 6px 16px rgba(2,10,20,0.5);
+    }
+    button.primary {
+      background: linear-gradient(90deg, rgba(124,231,255,0.1), rgba(138,255,176,0.06));
+      color: #042b25;
+      border:none;
+    }
+    canvas{
+      display:block;
+      margin: 12px auto 0;
+      width: 100%;
+      height: auto;
+      max-height: 64vh;
+      border-radius: 12px;
+      box-shadow: 0 18px 60px rgba(5,12,20,0.6), inset 0 1px 0 rgba(255,255,255,0.02);
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
+    }
+    .overlay{
+      position: absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      pointer-events:none;
+    }
+    .panel {
+      pointer-events:auto;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      padding:18px 22px;
+      border-radius:12px;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+      color:#e8fbff;
+    }
+    .small { font-size:0.9rem; color:#cfefff; margin-top:6px;}
+    .power-ui {
+      font-size:0.85rem;
+      color:#cfefff;
+      margin-left:12px;
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .power-badge {
+      padding:6px 8px;
+      background:linear-gradient(90deg, rgba(124,231,255,0.06), rgba(138,255,176,0.03));
+      border-radius:8px;
+      font-weight:700;
+      color:#c2f8ff;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
     @media (max-width:600px){
-      canvas{max-height:56vh;}
-      .score .val{font-size:1.2rem;}
+      .score .val { font-size:1rem; }
+      canvas{ max-height:55vh; }
     }
   </style>
 </head>
 <body>
+  <h1>Pong senzill</h1>
+  <div id="score">Jugador: 0 &nbsp; Oponent: 0</div>
+  <canvas id="pong" width="600" height="400"></canvas>
   <div class="container">
-    <h1>Pong — Powers & Customization</h1>
-
-    <!-- MAIN MENU -->
-    <div id="mainMenu" class="menu-main">
-      <button id="playBtn" class="menu-btn">Play</button>
-      <button id="exitBtn" class="menu-btn">Exit</button>
-      <button id="customizeBtn" class="menu-ball-btn" title="Customize">
-        <span class="ball-icon"></span>
-      </button>
-    </div>
-
-    <!-- GAME SCREEN -->
-    <div id="gameScreen" style="display:none;">
-      <div id="scorebar">
-        <div style="display:flex;gap:12px;align-items:center;">
-          <div class="score"><div>You</div><div id="playerScore" class="val">0</div></div>
-          <div class="power-ui" id="playerPowerUI"></div>
+    <h1>Pong — Poderes por impacto</h1>
+    <div id="scorebar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="score">
+          <div class="name">Jugador</div>
+          <div id="playerScore" class="val">0</div>
         </div>
-        <button id="restart" style="padding:8px 16px;border-radius:10px;background:#58aaff33;color:#fff;border:none;cursor:pointer;">Restart</button>
-        <div style="display:flex;gap:12px;align-items:center;">
-          <div class="power-ui" id="oppPowerUI"></div>
-          <div class="score"><div>Opponent</div><div id="oppScore" class="val">0</div></div>
-        </div>
+        <div class="power-ui" id="playerPowerUI" aria-live="polite"></div>
       </div>
-      <div style="position:relative;">
-        <canvas id="pong" width="900" height="540"></canvas>
-        <div id="overlay" class="overlay"></div>
-      </div>
-      <div class="small">↑ ↓ or W/S to move • First to 11 wins • Esc = Menu</div>
-    </div>
 
-    <!-- CUSTOMIZATION PANEL -->
-    <div id="customPanel">
-      <div class="custom-card">
-        <button class="close-x" id="closeCustom">×</button>
-        <div>
-          <div class="custom-title">Player Paddle Color</div>
-          <div id="colorPicker" class="color-list"></div>
-          <div class="custom-title">Player Hit Effect</div>
-          <div id="spritePicker" class="sprite-list"></div>
-          <div class="custom-title">Effect Color</div>
-          <div id="effectColorPicker" class="color-list"></div>
-        </div>
-        <div>
-          <div class="custom-title">AI Paddle Color</div>
-          <div id="colorPickerIA" class="color-list"></div>
-          <div class="custom-title">AI Hit Effect</div>
-          <div id="spritePickerIA" class="sprite-list"></div>
-          <div class="custom-title">AI Effect Color</div>
-          <div id="effectColorPickerIA" class="color-list"></div>
-        </div>
-        <div>
-          <div class="custom-title">Difficulty</div>
-          <div id="diffPicker" class="diff-list"></div>
+      <div id="controls">
+        <button id="restart" class="primary">Reiniciar</button>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="power-ui" id="oppPowerUI" aria-live="polite"></div>
+        <div class="score">
+          <div class="name">Oponente</div>
+          <div id="oppScore" class="val">0</div>
         </div>
       </div>
     </div>
+
+    <div style="position:relative;">
+      <canvas id="pong" width="900" height="540"></canvas>
+      <div id="overlay" class="overlay" aria-hidden="true"></div>
+    </div>
+
+    <div class="small">Usa las flechas ↑ ↓ para mover. Gana el primero a 11 puntos. Aparecerá un poder aleatorio cada 30s; cada poder dura 10s.</div>
   </div>
 
   <script>
-    // =============== CONFIG & UNLOCKS ===============
-    const ALL_COLORS = [
-      {name:"white",label:"White",color:"#fff"},
-      {name:"red",label:"Red",color:"#e14c4c"},
-      {name:"blue",label:"Blue",color:"#48a3fa"},
-      {name:"green",label:"Green",color:"#4cf66c"},
-      {name:"yellow",label:"Yellow",color:"#ffe646"},
-      {name:"teal",label:"Teal",color:"#39ead8"},
-      {name:"violet",label:"Violet",color:"#a98cfd"},
-      {name:"gray",label:"Gray",color:"#b5bac8"}
-    ];
-    const LOCKED_COLORS = [
-      {name:"bronze",label:"Bronze",color:"#c97e44",diff:"easy"},
-      {name:"silver",label:"Silver",color:"#b9cbe8",diff:"normal"},
-      {name:"gold",label:"Gold",color:"#ffd84b",diff:"hard"},
-      {name:"galaxy",label:"Galaxy",color:"galaxy",diff:"extreme"}
-    ];
-    const EFFECT_COLORS = [
-      {name:"aqua",label:"Aqua",color:"#8ee9ff"},
-      {name:"fire",label:"Fire",color:"#ff4444"},
-      {name:"tech",label:"Tech",color:"#37d2e8"},
-      {name:"pixel",label:"Pixel",color:"#ecd55f"}
-    ];
-    const SPRITES = [
-      {id:"star",emoji:"Star",desc:"Star"},
-      {id:"sparkle",emoji:"Sparkles",desc:"Sparkles"},
-      {id:"plus",emoji:"+",desc:"Plus"},
-      {id:"zap",emoji:"Zap",desc:"Zap"},
-      {id:"block",emoji:"Green Square",desc:"Block"}
-    ];
-    const DIFFICULTIES = [
-      {name:"easy",label:"Easy"},
-      {name:"normal",label:"Normal"},
-      {name:"hard",label:"Hard"},
-      {name:"extreme",label:"Extreme"}
-    ];
-
-    function getUnlocks(){try{return JSON.parse(localStorage.getItem("pongUnlocks")||"{}");}catch(e){return {};}}
-    function saveUnlock(diff){
-      let u = getUnlocks();
-      if(diff==="easy") u.bronze=true;
-      if(diff==="normal") u.silver=true;
-      if(diff==="hard") u.gold=true;
-      if(diff==="extreme") u.galaxy=true;
-      localStorage.setItem("pongUnlocks",JSON.stringify(u));
-    }
-    function getConfig(){
-      const def = {color:"white",effectColor:"aqua",sprite:"sparkle",colorIA:"gray",effectColorIA:"tech",spriteIA:"zap",diff:"normal"};
-      try{return Object.assign(def, JSON.parse(localStorage.getItem("pongConfig")||"{}"));}catch(e){return def;}
-    }
-    function saveConfig(c){localStorage.setItem("pongConfig",JSON.stringify(c));}
-
-    let config = getConfig();
-    const unlocks = getUnlocks();
-
-    // =============== CUSTOMIZATION PANEL ===============
-    function showCustomizePanel(){
-      document.getElementById("customPanel").style.display="flex";
-      // (same code as before but in English – omitted for brevity, it's exactly the same logic)
-      // You can copy-paste the previous panel code here if you want it 100% identical.
-      // For now, just a quick version:
-      let html = "";
-      [...ALL_COLORS, ...LOCKED_COLORS].forEach(c => {
-        const locked = LOCKED_COLORS.includes(c) && !unlocks[c.name];
-        html += `<div class="color-btn ${config.color===c.name?'selected':''} ${locked?'locked':''}" 
-                 style="--color:${c.color==='galaxy'?'':c.color};${c.name==='galaxy'?'background:var(--galaxy-grad);':''}"
-                 data-color="${c.name}" title="${c.label}">
-                 ${locked?'<span class="lock-icon">Lock</span>':''}</div>`;
-      });
-      document.getElementById("colorPicker").innerHTML = html;
-      // Repeat similar for all other pickers... (full code on request)
-    }
-
-    document.getElementById("customizeBtn").onclick = showCustomizePanel;
-    document.getElementById("closeCustom").onclick = () => document.getElementById("customPanel").style.display="none";
-    document.getElementById("exitBtn").onclick = () => window.close() || window.location.href="about:blank";
-
-    // =============== PONG GAME ENGINE (100% FIXED) ===============
+  (function(){
     const canvas = document.getElementById('pong');
     const ctx = canvas.getContext('2d');
-    canvas.width = 900; canvas.height = 540;
+    const ctx = canvas.getContext('2d', { alpha: true });
+    const W = canvas.width, H = canvas.height;
 
-    let ball = {x:450, y:270, vx:0, vy:0, r:13, trail:[]};
-    let player = {y:270, score:0, power:null};
-    let opponent = {y:270, score:0, power:null};
-    let keys = {};
-    let gameRunning = false;
+    // Raqueta
+    const paddleW = 10, paddleH = 80;
+    let playerY = H/2 - paddleH/2;
+    let oppY = H/2 - paddleH/2;
+    const paddleSpeed = 6;
+    // Visual tuning
+    const bgFade = 0.14; // for motion blur effect overlay
+    const netColor = 'rgba(255,255,255,0.06)';
+    const glowColor = 'rgba(124,231,255,0.28)';
 
-    const DIFF = {easy:5, normal:6.5, hard:8.5, extreme:11}[config.diff];
+    // Paddles
+    const paddleW = 14;
+    const BASE_PADDLE_H = 100; // base height (can be increased by power)
+    let playerPaddleH = BASE_PADDLE_H;
+    let oppPaddleH = BASE_PADDLE_H;
+    let playerY = H/2 - playerPaddleH/2;
+    let oppY = H/2 - oppPaddleH/2;
+    const paddleRadius = 8;
+    const BASE_SPEED = 420; // px per second
+    let playerSpeed = BASE_SPEED * 1.05; // can be modified by power
+    let oppSpeed = BASE_SPEED * 1.05;
 
-    function resetBall(right = true){
-      ball.x = 450; ball.y = 270;
-      const angle = (Math.random()-0.5)*0.8;
-      ball.vx = (right?1:-1)*(DIFF*0.9 + Math.random()*DIFF*0.4);
-      ball.vy = DIFF * Math.sin(angle);
-      ball.trail = [];
+    // Pilota
+    let ballX = W/2, ballY = H/2, ballR = 8;
+    let ballDX = Math.random() > 0.5 ? 5 : -5;
+    let ballDY = (Math.random()*4 - 2);
+    // Ball
+    const ballR = 9;
+    let ballX = W/2, ballY = H/2;
+    let ballVX = 520 * (Math.random() > 0.5 ? 1 : -1);
+    let ballVY = (Math.random()*280 - 140);
+
+    // Marcador
+    // Score
+    let playerScore = 0, oppScore = 0;
+    const WIN_SCORE = 11;
+    let gameOver = false;
+
+    function draw() {
+      ctx.clearRect(0,0,W,H);
+      // Raquetes
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(10, playerY, paddleW, paddleH);
+      ctx.fillRect(W-20, oppY, paddleW, paddleH);
+      // Pilota
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, ballR, 0, 2*Math.PI);
+      ctx.fill();
     }
+    // Inputs
+    const keys = { ArrowUp:false, ArrowDown:false };
 
-    function startGame(){
-      player.score = opponent.score = 0;
-      document.getElementById("playerScore").textContent = "0";
-      document.getElementById("oppScore").textContent = "0";
-      document.getElementById("playerPowerUI").innerHTML = "";
-      document.getElementById("oppPowerUI").innerHTML = "";
-      resetBall();
-      gameRunning = true;
-      requestAnimationFrame(loop);
+    function movePlayer(dir) {
+      if (dir === 'up') playerY -= paddleSpeed;
+      if (dir === 'down') playerY += paddleSpeed;
+      playerY = Math.max(0, Math.min(H - paddleH, playerY));
     }
+    // Particles for hit effects
+    const particles = [];
 
-    function loop(){
-      if(!gameRunning) return;
+    // Time
+    let lastTime = performance.now();
 
-      ctx.fillStyle = "#0a1524"; ctx.fillRect(0,0,900,540);
+    // Powers
+    const POWER_SPAWN_INTERVAL = 30; // seconds between spawns
+    const POWER_DURATION = 10; // seconds power lasts
+    let spawnAccumulator = 0;
+    // active powers per side
+    let activePowers = { player: null, opp: null }; // { type, expiresAt, startedAt }
+    let currentFieldPower = null; // {x,y,r,type,spawnedAt,ttl,...}
+    const POWER_TTL = 12; // if not collected, disappears after this many seconds
 
-      // Player movement
-      if((keys["ArrowUp"]||keys["w"]) && player.y>60) player.y -= 9;
-      if((keys["ArrowDown"]||keys["s"]) && player.y<480) player.y += 9;
+    // Track last paddle that touched the ball
+    let lastTouched = null; // 'player' or 'opp'
 
-      // AI
-      opponent.y += (ball.y - opponent.y) * 0.12;
+    // control jugador
+    // Helper names and icons
+    const POWER_TYPES = [
+      { id: 'enlarge', name: 'Hitbox +', color: '#7ee8ff', icon: '▮' }, // increases paddle height
+      { id: 'speed', name: 'Vel 1.5x', color: '#8affb0', icon: '⚡' } // increases speed
+    ];
 
-      // Ball movement
-      ball.x += ball.vx; ball.y += ball.vy;
-      if(ball.y < 13 || ball.y > 527){ ball.vy = -ball.vy; }
+    // Helpers
+    function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+    function rand(min,max){ return min + Math.random()*(max-min); }
 
-      // Paddle collision
-      if(ball.x < 35 && Math.abs(ball.y - player.y)<65 && ball.vx<0){
-        ball.vx = -ball.vx * 1.07;
-        createImpact(40, ball.y, true);
-      }
-      if(ball.x > 865 && Math.abs(ball.y - opponent.y)<65 && ball.vx>0){
-        ball.vx = -ball.vx * 1.07;
-        createImpact(860, ball.y, false);
-      }
-
-      // Score
-      if(ball.x < 0){ opponent.score++; document.getElementById("oppScore").textContent=opponent.score; resetBall(true);
-        if(opponent.score===11) endGame(false);
-      }
-      if(ball.x > 900){ player.score++; document.getElementById("playerScore").textContent=player.score; resetBall(false);
-        if(player.score===11) endGame(true);
-      }
-
-      // Draw paddles & ball
-      ctx.fillStyle = "#7ce7ff";
-      ctx.fillRect(20, player.y-60, 16, 120);
-      ctx.fillRect(864, opponent.y-60, 16, 120);
-      ctx.beginPath(); ctx.arc(ball.x, ball.y, 13, 0, Math.PI*2); ctx.fill();
-
-      requestAnimationFrame(loop);
-    }
-
-    function createImpact(x,y,isPlayer){
-      for(let i=0;i<15;i++){
-        const a = Math.random()*Math.PI*2;
-        ball.trail.push({x,y,vx:Math.cos(a)*6,vy:Math.sin(a)*6,life:1,emoji:isPlayer?"Sparkles":"Zap"});
-      }
-    }
-
-    function endGame(win){
-      gameRunning = false;
-      document.getElementById("overlay").innerHTML = `<div class="panel" style="color:${win?'#7ce7ff':'#ff6e6e'}">
-        ${win?'YOU WIN!':'YOU LOSE'}</div>`;
-      setTimeout(()=>{document.getElementById("overlay").innerHTML="";}, 3000);
-    }
-
-    // =============== BUTTONS & KEYS ===============
-    document.getElementById("playBtn").onclick = () => {
-      document.getElementById("mainMenu").style.display = "none";
-      document.getElementById("gameScreen").style.display = "";
-      startGame();
+    // Rounded rect drawing extension
+    CanvasRenderingContext2D.prototype.roundRect = function(x,y,w,h,r){
+      if (w < 2*r) r = w/2;
+      if (h < 2*r) r = h/2;
+      this.beginPath();
+      this.moveTo(x+r, y);
+      this.arcTo(x+w, y, x+w, y+h, r);
+      this.arcTo(x+w, y+h, x, y+h, r);
+      this.arcTo(x, y+h, x, y, r);
+      this.arcTo(x, y, x+w, y, r);
+      this.closePath();
+      return this;
     };
-    document.getElementById("restart").onclick = startGame;
 
-    window.addEventListener("keydown", e => keys[e.key]=true);
-    window.addEventListener("keyup", e => keys[e.key]=false);
-    window.addEventListener("keydown", e => {if(e.key==="Escape"){
-      document.getElementById("mainMenu").style.display="";
-      document.getElementById("gameScreen").style.display="none";
-      gameRunning = false;
-    }});
+    // Input handlers
+    window.addEventListener('keydown', e=>{
+      if (gameOver) return;
+      if (e.key === 'ArrowUp') movePlayer('up');
+      if (e.key === 'ArrowDown') movePlayer('down');
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        keys[e.key] = true;
+        e.preventDefault();
+      }
+    }, { passive:false });
+    window.addEventListener('keyup', e=>{
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        keys[e.key] = false;
+        e.preventDefault();
+      }
+    }, { passive:false });
+
+    // Restart button
+    document.getElementById('restart').addEventListener('click', () => {
+      resetMatch();
+    });
+
+    function oppAI() {
+      // segueix la pilota lentament
+      let mid = oppY + paddleH/2;
+      if (mid < ballY-10) oppY += paddleSpeed-2;
+      else if (mid > ballY+10) oppY -= paddleSpeed-2;
+      oppY = Math.max(0, Math.min(H-paddleH, oppY));
+    function respawnBall(direction){
+      ballX = W/2; ballY = H/2;
+      const speed = 520;
+      const angle = rand(-0.6, 0.6); // radians bias
+      const dir = direction || (Math.random()>0.5?1:-1);
+      ballVX = dir * speed * Math.cos(angle);
+      ballVY = speed * Math.sin(angle);
+      lastTouched = null;
+    }
+
+    function ballLogic() {
+      ballX += ballDX;
+      ballY += ballDY;
+    function resetBall(direction){
+      respawnBall(direction);
+    }
+
+      // Rebot superior/inferior
+      if (ballY < ballR || ballY > H-ballR) ballDY *= -1;
+    function resetMatch(){
+      playerScore = 0; oppScore = 0;
+      updateScoreUI();
+      gameOver = false;
+      document.getElementById('overlay').innerHTML = '';
+      // reset powers and state
+      spawnAccumulator = 0;
+      activePowers = { player: null, opp: null };
+      currentFieldPower = null;
+      playerPaddleH = BASE_PADDLE_H;
+      oppPaddleH = BASE_PADDLE_H;
+      playerSpeed = BASE_SPEED * 1.05;
+      oppSpeed = BASE_SPEED * 1.05;
+      playerY = H/2 - playerPaddleH/2;
+      oppY = H/2 - oppPaddleH/2;
+      document.getElementById('playerPowerUI').innerHTML = '';
+      document.getElementById('oppPowerUI').innerHTML = '';
+      respawnBall(Math.random()>0.5?1:-1);
+      lastTime = performance.now();
+      requestAnimationFrame(loop);
+    }
+
+      // Col·lisió raqueta jugador
+      if (ballX-ballR < 20 && ballY > playerY && ballY < playerY+paddleH) {
+        ballDX *= -1;
+        ballDY += ((ballY-(playerY+paddleH/2))/paddleH)*4;
+        ballX = 20+ballR;
+    function addParticles(x,y,color,amount=18){
+      for(let i=0;i<amount;i++){
+        particles.push({
+          x,y,
+          vx: rand(-260,260),
+          vy: rand(-220,220),
+          life: rand(0.4,0.9),
+          age:0,
+          size: rand(1.8,4.4),
+          color
+        });
+      }
+    }
+
+      // Col·lisió raqueta oponent
+      if (ballX+ballR > W-20 && ballY > oppY && ballY < oppY+paddleH) {
+        ballDX *= -1;
+        ballDY += ((ballY-(oppY+paddleH/2))/paddleH)*4;
+        ballX = W-20-ballR;
+    function updateParticles(dt){
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i];
+        p.age += dt;
+        if (p.age >= p.life){ particles.splice(i,1); continue; }
+        p.vy += 420 * dt; // gravity
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+      }
+    }
+
+      // Marca punt
+      // Pilota surt per l'esquerra (punt oponent)
+      if (ballX < 0) {
+        oppScore += 1;
+        resetBall();
+    // Spawn a random power-up on the field
+    function spawnPower(){
+      if (gameOver) return;
+      if (currentFieldPower) return; // already one on field
+      const type = POWER_TYPES[Math.floor(Math.random() * POWER_TYPES.length)];
+      // spawn somewhere in center area, avoid very close to paddles
+      const margin = 160;
+      const x = rand(margin, W - margin);
+      const y = rand(60, H - 60);
+      currentFieldPower = {
+        x, y, r: 14,
+        type: type.id,
+        color: type.color,
+        name: type.name,
+        icon: type.icon,
+        spawnedAt: performance.now()/1000,
+        ttl: POWER_TTL
+      };
+    }
+
+    // Collect power and apply to specified side ('player' or 'opp')
+    function collectPower(power, collector){
+      if (!power) return;
+      collector = collector || 'player';
+      // If another power is active on the collector, replace it
+      activePowers[collector] = {
+        type: power.type,
+        startedAt: performance.now()/1000,
+        expiresAt: performance.now()/1000 + POWER_DURATION
+      };
+
+      // Apply effects
+      if (power.type === 'enlarge'){
+        if (collector === 'player'){
+          playerPaddleH = BASE_PADDLE_H * 1.5;
+          playerY = clamp(playerY, 0, H - playerPaddleH);
+        } else {
+          oppPaddleH = BASE_PADDLE_H * 1.5;
+          oppY = clamp(oppY, 0, H - oppPaddleH);
+        }
+      } else if (power.type === 'speed'){
+        if (collector === 'player'){
+          playerSpeed = (BASE_SPEED * 1.05) * 1.5;
+        } else {
+          oppSpeed = (BASE_SPEED * 1.05) * 1.5;
+        }
+      }
+      // Pilota surt per la dreta (punt jugador)
+      if (ballX > W) {
+        playerScore += 1;
+        resetBall();
+
+      // UI update
+      updatePowerUI(collector);
+
+      // visuals
+      addParticles(power.x, power.y, power.color, 26);
+
+      // remove field power
+      currentFieldPower = null;
+    }
+
+    function clearActivePower(side){
+      activePowers[side] = null;
+      if (side === 'player'){
+        playerPaddleH = BASE_PADDLE_H;
+        playerSpeed = BASE_SPEED * 1.05;
+        playerY = clamp(playerY, 0, H - playerPaddleH);
+      } else {
+        oppPaddleH = BASE_PADDLE_H;
+        oppSpeed = BASE_SPEED * 1.05;
+        oppY = clamp(oppY, 0, H - oppPaddleH);
+      }
+      updateScore();
+      if (playerScore >= 11 || oppScore >= 11) {
+        endGame();
+      updatePowerUI(side);
+    }
+
+    function updatePowerUI(side){
+      const el = side === 'player' ? document.getElementById('playerPowerUI') : document.getElementById('oppPowerUI');
+      el.innerHTML = '';
+      const active = activePowers[side];
+      if (!active) return;
+      const remaining = Math.max(0, (active.expiresAt - performance.now()/1000));
+      const type = POWER_TYPES.find(p=>p.id===active.type);
+      const badge = document.createElement('div');
+      badge.className = 'power-badge';
+      badge.style.border = `1px solid ${type.color}`;
+      badge.innerHTML = `<div style="font-size:0.95rem">${type.icon}</div><div style="display:flex;flex-direction:column;text-align:left;">
+        <div style="font-weight:800;font-size:0.88rem">${type.name}</div>
+        <div style="font-size:0.78rem;color:#cfefff"> ${remaining.toFixed(1)}s</div>
+      </div>`;
+      el.appendChild(badge);
+    }
+
+    // AI - follows ball with smoothing
+    function oppAI(dt){
+      const target = ballY - oppPaddleH/2;
+      const diff = target - oppY;
+      const maxMove = oppSpeed * dt;
+      // smooth interpolation
+      oppY += clamp(diff, -maxMove, maxMove) * 0.98;
+      oppY = clamp(oppY, 0, H - oppPaddleH);
+    }
+
+    // Draw functions
+    function drawBackground(){
+      // subtle vignette and net
+      ctx.save();
+      // Slight motion trail by drawing translucent quad
+      ctx.fillStyle = `rgba(6,12,18,${bgFade})`;
+      ctx.fillRect(0,0,W,H);
+      ctx.restore();
+
+      // center net
+      const dashH = 18, gap = 14, x = W/2;
+      ctx.save();
+      ctx.strokeStyle = netColor;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      let y = 12;
+      while (y < H-12){
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + dashH);
+        y += dashH + gap;
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawPaddle(x,y,height,active=false){
+      ctx.save();
+      ctx.shadowBlur = active ? 22 : 8;
+      ctx.shadowColor = glowColor;
+      const grad = ctx.createLinearGradient(x, y, x, y + height);
+      grad.addColorStop(0, active ? '#bff6ff' : '#d7f9ff');
+      grad.addColorStop(1, active ? '#7fe7ff' : '#9fefff');
+      ctx.fillStyle = grad;
+      ctx.roundRect(x, y, paddleW, height, paddleRadius).fill();
+      // inner shine
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = 'rgba(255,255,255,0.03)';
+      ctx.roundRect(x+2,y+2,paddleW-4,height-12, paddleRadius-2).fill();
+      ctx.restore();
+    }
+
+    function drawBall(){
+      // glow
+      ctx.save();
+      ctx.shadowBlur = 28;
+      ctx.shadowColor = glowColor;
+      const ballGrad = ctx.createRadialGradient(ballX-3, ballY-3, 2, ballX, ballY, ballR*2);
+      ballGrad.addColorStop(0, '#e6ffff');
+      ballGrad.addColorStop(0.25, '#aef6ff');
+      ballGrad.addColorStop(1, 'rgba(40,200,255,0.12)');
+      ctx.fillStyle = ballGrad;
+      ctx.beginPath();
+      ctx.arc(ballX, ballY, ballR, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+
+      // tiny reflective highlight
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.beginPath();
+      ctx.arc(ballX - ballR*0.4, ballY - ballR*0.6, ballR*0.45, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function resetBall() {
+      ballX = W/2;
+      ballY = H/2;
+      ballDX = (Math.random() > 0.5 ? 5 : -5);
+      ballDY = (Math.random()*4 -2);
+    function drawPowerOnField(power){
+      if (!power) return;
+      ctx.save();
+      // glow halo
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = power.color;
+      // circle background
+      ctx.fillStyle = 'rgba(255,255,255,0.02)';
+      ctx.beginPath();
+      ctx.arc(power.x, power.y, power.r + 8, 0, Math.PI*2);
+      ctx.fill();
+      // icon circle
+      const grad = ctx.createRadialGradient(power.x-4, power.y-4, 2, power.x, power.y, power.r*2);
+      grad.addColorStop(0, power.color);
+      grad.addColorStop(1, 'rgba(20,40,60,0.2)');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(power.x, power.y, power.r, 0, Math.PI*2);
+      ctx.fill();
+      // icon/text
+      ctx.fillStyle = '#042b25';
+      ctx.font = '14px system-ui, Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(power.icon, power.x, power.y+1);
+      ctx.restore();
+
+      // small TTL ring
+      const now = performance.now()/1000;
+      const elapsed = now - power.spawnedAt;
+      const t = clamp(elapsed / power.ttl, 0, 1);
+      ctx.save();
+      ctx.strokeStyle = `rgba(255,255,255,0.08)`;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(power.x, power.y, power.r + 12, -Math.PI/2, -Math.PI/2 + Math.PI*2*(1 - t));
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = 
+        `Jugador: ${playerScore}   Oponent: ${oppScore}`;
+    function drawUI(){
+      // nothing more in canvas for now; scores and powers handled in DOM
+    }
+
+    function endGame() {
+    // Collision & logic
+    function ballLogic(dt){
+      ballX += ballVX * dt;
+      ballY += ballVY * dt;
+
+      // top/bottom bounce
+      if (ballY - ballR < 0){
+        ballY = ballR;
+        ballVY *= -1;
+      } else if (ballY + ballR > H){
+        ballY = H - ballR;
+        ballVY *= -1;
+      }
+
+      // player paddle collision (left)
+      const playerLeft = 14, playerRight = playerLeft + paddleW;
+      if (ballX - ballR < playerRight && ballX - ballR > playerLeft - 40){
+        if (ballY > playerY && ballY < playerY + playerPaddleH && ballVX < 0){
+          // reflect
+          ballX = playerRight + ballR;
+          const relative = (ballY - (playerY + playerPaddleH/2)) / (playerPaddleH/2); // -1..1
+          const speed = Math.hypot(ballVX, ballVY);
+          const newAngle = relative * 0.8; // angle bias based on hit position
+          const newSpeed = clamp(speed * 1.03, 420, 920);
+          ballVX = Math.abs(Math.cos(newAngle) * newSpeed);
+          ballVY = Math.sin(newAngle) * newSpeed;
+          addParticles(ballX - ballR - 2, ballY, '#7ee8ff', 14);
+          lastTouched = 'player';
+        }
+      }
+
+      // opponent paddle collision (right)
+      const oppLeft = W - 14 - paddleW, oppRight = W - 14;
+      if (ballX + ballR > oppLeft && ballX + ballR < oppRight + 40){
+        if (ballY > oppY && ballY < oppY + oppPaddleH && ballVX > 0){
+          ballX = oppLeft - ballR;
+          const relative = (ballY - (oppY + oppPaddleH/2)) / (oppPaddleH/2);
+          const speed = Math.hypot(ballVX, ballVY);
+          const newAngle = relative * 0.8;
+          const newSpeed = clamp(speed * 1.03, 420, 920);
+          ballVX = -Math.abs(Math.cos(newAngle) * newSpeed);
+          ballVY = Math.sin(newAngle) * newSpeed;
+          addParticles(ballX + ballR + 2, ballY, '#8affb0', 14);
+          lastTouched = 'opp';
+        }
+      }
+
+      // collision between ball and field power (ball can pick it up)
+      if (currentFieldPower){
+        const dx = ballX - currentFieldPower.x;
+        const dy = ballY - currentFieldPower.y;
+        const dist2 = dx*dx + dy*dy;
+        const collideDist = (ballR + currentFieldPower.r);
+        if (dist2 <= collideDist * collideDist){
+          // apply to lastTouched; if none, default to player
+          const collector = lastTouched || 'player';
+          collectPower(currentFieldPower, collector);
+        }
+      }
+
+      // scoring
+      if (ballX < -40){
+        // opponent scores
+        oppScore += 1;
+        updateScoreUI(true);
+        if (oppScore >= WIN_SCORE) finishGame(false);
+        else resetBall(1);
+      } else if (ballX > W + 40){
+        playerScore += 1;
+        updateScoreUI(true);
+        if (playerScore >= WIN_SCORE) finishGame(true);
+        else resetBall(-1);
+      }
+    }
+
+    function updateScoreUI(flash=false){
+      const sp = document.getElementById('playerScore');
+      const so = document.getElementById('oppScore');
+      sp.textContent = playerScore;
+      so.textContent = oppScore;
+      if (flash){
+        // small pulse effect
+        const el = playerScore > oppScore ? sp : so;
+        el.animate([{ transform:'scale(1.2)'},{ transform:'scale(1)' }], { duration:240, easing:'cubic-bezier(.2,.9,.2,1)' });
+      }
+    }
+
+    function finishGame(playerWon){
+      gameOver = true;
+      let msg = playerScore > oppScore ? "Has guanyat!" : "L'oponent ha guanyat!";
+      document.getElementById('score').textContent += `   — ${msg}`;
+      const ov = document.getElementById('overlay');
+      ov.innerHTML = `<div class="panel" style="min-width:220px;">
+        <div style="font-size:1.15rem;font-weight:700;">${playerWon ? '¡Has ganado!' : 'Has perdido'}</div>
+        <div style="margin-top:8px;color:#bfefff;">${playerWon ? 'Buen trabajo — primera a 11.' : 'Inténtalo otra vez.'}</div>
+        <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;">
+          <button id="overlayRestart" class="primary">Jugar de nuevo</button>
+        </div>
+      </div>`;
+      document.getElementById('overlay').style.pointerEvents = 'auto';
+      document.getElementById('overlayRestart').addEventListener('click', ()=>{
+        document.getElementById('overlay').innerHTML = '';
+        document.getElementById('overlay').style.pointerEvents = 'none';
+        resetMatch();
+      });
+    }
+
+    function gameLoop() {
+      if (!gameOver) {
+        oppAI();
+        ballLogic();
+        draw();
+        requestAnimationFrame(gameLoop);
+    // Main loop
+    function loop(now){
+      if (gameOver) return;
+      const dt = Math.min(0.032, (now - lastTime)/1000); // clamp dt for stability
+      lastTime = now;
+
+      // handle power timers & spawning
+      spawnAccumulator += dt;
+      if (spawnAccumulator >= POWER_SPAWN_INTERVAL){
+        spawnAccumulator = 0;
+        spawnPower();
+      }
+      // If a field power exists and exceeded TTL -> remove
+      if (currentFieldPower){
+        const nowSec = performance.now()/1000;
+        if (nowSec - currentFieldPower.spawnedAt >= currentFieldPower.ttl){
+          currentFieldPower = null;
+        }
+      }
+
+      // handle active power expiration for both sides
+      ['player','opp'].forEach(side=>{
+        const ap = activePowers[side];
+        if (ap){
+          const nowSec = performance.now()/1000;
+          if (nowSec >= ap.expiresAt){
+            clearActivePower(side);
+          } else {
+            updatePowerUI(side);
+          }
+        }
+      });
+
+      // Player movement (smooth & continuous)
+      let moveDir = 0;
+      if (keys.ArrowUp) moveDir -= 1;
+      if (keys.ArrowDown) moveDir += 1;
+      playerY += moveDir * playerSpeed * dt;
+      playerY = clamp(playerY, 0, H - playerPaddleH);
+
+      // Opponent AI
+      oppAI(dt);
+
+      // Physics
+      ballLogic(dt);
+
+      // Check collision between player's paddle and field power (direct pickup)
+      if (currentFieldPower){
+        const rectX = 14, rectY = playerY, rectW = paddleW, rectH = playerPaddleH;
+        const cx = currentFieldPower.x, cy = currentFieldPower.y, r = currentFieldPower.r;
+        const nearestX = clamp(cx, rectX, rectX + rectW);
+        const nearestY = clamp(cy, rectY, rectY + rectH);
+        const dx = cx - nearestX, dy = cy - nearestY;
+        if (dx*dx + dy*dy <= r*r){
+          collectPower(currentFieldPower, 'player');
+        } else {
+          // also allow opponent to directly collect by touching with its paddle
+          const rectX2 = W - 14 - paddleW, rectY2 = oppY, rectW2 = paddleW, rectH2 = oppPaddleH;
+          const nearestX2 = clamp(cx, rectX2, rectX2 + rectW2);
+          const nearestY2 = clamp(cy, rectY2, rectY2 + rectH2);
+          const dx2 = cx - nearestX2, dy2 = cy - nearestY2;
+          if (dx2*dx2 + dy2*dy2 <= r*r){
+            collectPower(currentFieldPower, 'opp');
+          }
+        }
+      }
+
+      // Particles update
+      updateParticles(dt);
+
+      // Rendering
+      drawBackground();
+
+      // draw paddles (left x=14, right x=W-14-paddleW)
+      const playerActive = moveDir !== 0;
+      drawPaddle(14, playerY, playerPaddleH, playerActive);
+      drawPaddle(W - 14 - paddleW, oppY, oppPaddleH, false);
+
+      // draw ball
+      drawBall();
+
+      // draw power on field (if present)
+      drawPowerOnField(currentFieldPower);
+
+      // draw particles
+      ctx.save();
+      for (const p of particles){
+        const t = 1 - (p.age / p.life);
+        ctx.globalAlpha = Math.max(0, t);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size * t, 0, Math.PI*2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      drawUI();
+
+      requestAnimationFrame(loop);
+    }
+
+    draw();
+    gameLoop();
+    // Initialize
+    updateScoreUI();
+    respawnBall(Math.random()>0.5?1:-1);
+    lastTime = performance.now();
+    requestAnimationFrame(loop);
+
+    // expose some for debug (optional)
+    window._pong = { resetMatch, respawnBall };
+
+  })();
   </script>
 </body>
+</html>
 </html>
