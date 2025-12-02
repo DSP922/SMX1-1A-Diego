@@ -1,222 +1,168 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Isla del Tesoro — Corrección robusta</title>
-  <style>
-    html,body{height:100%;margin:0;background:#7ec8ff;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial}
-    #gameWrap{width:800px;margin:18px auto;position:relative}
-    canvas{display:block;width:800px;height:600px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.35);background:#88ccff}
-    .overlay{position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
-    .panel{background:rgba(255,255,255,0.96);padding:18px;border-radius:10px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.14)}
-    button{font-size:15px;padding:8px 14px;margin:6px;cursor:pointer;border-radius:8px;border:0;background:#2b8aef;color:white}
-    #hud{position:absolute;left:12px;top:12px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.6);font-weight:700;pointer-events:none}
-    #controls{position:absolute;right:12px;top:12px;display:flex;gap:8px}
-    #hint{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.6)}
-    #log{position:absolute;left:12px;bottom:12px;color:#08324b;background:rgba(255,255,255,0.85);padding:6px;border-radius:6px;font-size:12px;max-width:420px;max-height:120px;overflow:auto}
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Isla del Tesoro — Funcional</title>
+<style>
+html,body{height:100%;margin:0;background:#7ec8ff;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial}
+#gameWrap{width:800px;margin:18px auto;position:relative}
+canvas{display:block;width:800px;height:600px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.35);background:#88ccff}
+.overlay{position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.panel{background:rgba(255,255,255,0.96);padding:18px;border-radius:10px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.14)}
+button{font-size:15px;padding:8px 14px;margin:6px;cursor:pointer;border-radius:8px;border:0;background:#2b8aef;color:white}
+#hud{position:absolute;left:12px;top:12px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.6);font-weight:700;pointer-events:none}
+#controls{position:absolute;right:12px;top:12px;display:flex;gap:8px}
+#hint{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.6)}
+#log{position:absolute;left:12px;bottom:12px;color:#08324b;background:rgba(255,255,255,0.85);padding:6px;border-radius:6px;font-size:12px;max-width:420px;max-height:120px;overflow:auto}
+</style>
 </head>
 <body>
-  <div id="gameWrap">
-    <div id="hud">Nivel 1 — Tesoro: enterrado</div>
-    <div id="controls">
-      <button id="pauseBtn">Pausa</button>
-      <button id="zoomBtn">Ver isla</button>
-    </div>
-    <canvas id="screen" width="320" height="240"></canvas>
+<div id="gameWrap">
+  <div id="hud">Nivel 1 — Tesoro: enterrado</div>
+  <div id="controls">
+    <button id="pauseBtn">Pausa</button>
+    <button id="zoomBtn">Ver isla</button>
+  </div>
+  <canvas id="screen" width="320" height="240"></canvas>
 
-    <div id="startOverlay" class="overlay">
-      <div class="panel">
-        <h1>Isla del Tesoro — Corrección robusta</h1>
-        <p>Mueve con las flechas. Mantén ESPACIO para desenterrar. Si aparece algo raro, mira el recuadro LOG abajo.</p>
-        <div>
-          <button id="startBtn">Iniciar (Nivel 1)</button>
-          <button id="exitBtn">Salir</button>
-        </div>
+  <div id="startOverlay" class="overlay">
+    <div class="panel">
+      <h1>Isla del Tesoro</h1>
+      <p>Mueve con flechas. Mantén ESPACIO para desenterrar.</p>
+      <div>
+        <button id="startBtn">Iniciar Nivel 1</button>
       </div>
     </div>
-
-    <div id="levelCompleteOverlay" class="overlay" style="display:none">
-      <div class="panel">
-        <h2 id="levelTitle">Nivel completado</h2>
-        <p id="levelMsg"></p>
-        <div>
-          <button id="nextLevelBtn">Siguiente nivel</button>
-          <button id="retryLevelBtn">Repetir nivel</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="deathOverlay" class="overlay" style="display:none">
-      <div class="panel">
-        <h2 id="deathTitle">Has sido alcanzado</h2>
-        <p id="deathMsg">Has sido golpeado por una flecha. Repite el nivel.</p>
-        <div>
-          <button id="deathOkBtn">Reintentar</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="hint" class="hint"></div>
-    <div id="log"></div>
   </div>
 
-  <script>
-  (function(){
-    // --- Debug log ---
-    const logEl = document.getElementById('log');
-    function log(msg){
-      console.log(msg);
-      const p = document.createElement('div');
-      p.textContent = msg;
-      logEl.prepend(p);
-      while(logEl.children.length > 12) logEl.removeChild(logEl.lastChild);
+  <div id="levelCompleteOverlay" class="overlay" style="display:none">
+    <div class="panel">
+      <h2>Nivel completado</h2>
+      <p>¡Bien hecho! Prepárate para el siguiente nivel.</p>
+      <div>
+        <button id="nextLevelBtn">Siguiente nivel</button>
+        <button id="retryLevelBtn">Repetir nivel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deathOverlay" class="overlay" style="display:none">
+    <div class="panel">
+      <h2>Has sido alcanzado</h2>
+      <p>Has sido golpeado por una flecha. Repite el nivel.</p>
+      <div>
+        <button id="deathOkBtn">Reintentar</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="hint" class="hint"></div>
+  <div id="log"></div>
+</div>
+
+<script>
+(function(){
+  const logEl=document.getElementById('log');
+  function log(msg){console.log(msg);const p=document.createElement('div');p.textContent=msg;logEl.prepend(p);while(logEl.children.length>12)logEl.removeChild(logEl.lastChild);}
+  window.addEventListener('error', e=>log('ERROR: '+(e.message||e)));
+  window.addEventListener('unhandledrejection', e=>log('Promise rejection: '+(e.reason||e)));
+
+  const BUF_W=160,BUF_H=120;
+  const screen=document.getElementById('screen');
+  const buf=document.createElement('canvas');buf.width=BUF_W;buf.height=BUF_H;
+  const bctx=buf.getContext('2d'), sctx=screen.getContext('2d');
+  sctx.imageSmoothingEnabled=false; bctx.imageSmoothingEnabled=false;
+
+  const WORLD_W=720,WORLD_H=540,TILE_SIZE=12;
+  const GRID_W=Math.ceil(WORLD_W/TILE_SIZE), GRID_H=Math.ceil(WORLD_H/TILE_SIZE);
+  let landTiles=createEmptyGrid();
+
+  function createEmptyGrid(){const g=[];for(let y=0;y<GRID_H;y++) g[y]=new Array(GRID_W).fill(false);return g;}
+
+  // --- Player ---
+  const player={x:WORLD_W/2, y:WORLD_H/2, w:6,h:8,speed:40};
+  let keys={};
+
+  window.addEventListener('keydown', e=>{keys[e.key]=true; if(e.key.startsWith('Arrow')) e.preventDefault();});
+  window.addEventListener('keyup', e=>keys[e.key]=false);
+
+  // --- Camera ---
+  let cam={x:0,y:0}, zoom=1, showFullIsland=false;
+
+  // --- Land generation simple ---
+  for(let y=10;y<GRID_H-10;y++){
+    for(let x=10;x<GRID_W-10;x++){
+      if(Math.random()<0.65) landTiles[y][x]=true;
     }
+  }
 
-    window.addEventListener('error', e=>{
-      log('ERROR: ' + (e && e.message ? e.message : String(e)));
-      console.error(e);
-    });
-    window.addEventListener('unhandledrejection', e=>{
-      log('Promise rejection: ' + (e && e.reason ? e.reason : String(e)));
-      console.error(e);
-    });
+  function worldToView(wx,wy){return {x:Math.round((wx-cam.x)*zoom),y:Math.round((wy-cam.y)*zoom)};}
 
-    // --- Buffer & Canvas ---
-    const BUF_W = 160, BUF_H = 120;
-    const screen = document.getElementById('screen');
-    const buf = document.createElement('canvas'); buf.width = BUF_W; buf.height = BUF_H;
-    const bctx = buf.getContext('2d'), sctx = screen.getContext('2d');
-    sctx.imageSmoothingEnabled = false; bctx.imageSmoothingEnabled = false;
-
-    // --- World/grid ---
-    const WORLD_W = 720, WORLD_H = 540;
-    const worldCenter = {x: WORLD_W/2, y: WORLD_H/2};
-    const TILE_SIZE = 12;
-    const GRID_W = Math.ceil(WORLD_W / TILE_SIZE);
-    const GRID_H = Math.ceil(WORLD_H / TILE_SIZE);
-
-    // --- Levels ---
-    const LEVELS = [
-      { numBuried: 6, numPalms: 20, numRocks: 14, numBushes: 50, digSeconds: 5.0, noise: 0.38, islets: 0, enemies: 2 },
-      { numBuried: 8, numPalms: 26, numRocks: 20, numBushes: 64, digSeconds: 6.0, noise: 0.46, islets: 0, enemies: 3 },
-      { numBuried: 10, numPalms: 30, numRocks: 28, numBushes: 74, digSeconds: 7.5, noise: 0.52, islets: 1, enemies: 4 },
-      { numBuried: 13, numPalms: 34, numRocks: 36, numBushes: 90, digSeconds: 9.0, noise: 0.6, islets: 2, enemies: 5 },
-      { numBuried: 18, numPalms: 40, numRocks: 44, numBushes: 110, digSeconds: 11.0, noise: 0.72, islets: 3, enemies: 7 }
-    ];
-    const MAX_LEVEL = LEVELS.length;
-    const WATER_SLOW_MULT = 0.455;
-
-    // --- DOM refs ---
-    const hud = document.getElementById('hud');
-    const hintEl = document.getElementById('hint');
-
-    // --- State ---
-    let keys = {};
-    window.addEventListener('keydown', e => { keys[e.key] = true; if(e.key.startsWith('Arrow')) e.preventDefault(); });
-    window.addEventListener('keyup', e => { keys[e.key] = false; });
-
-    let running=false, paused=false, showFullIsland=false, time=0, currentLevel=1;
-    let lastTime = 0;
-
-    // --- Entities ---
-    const player = { x:0, y:0, w:6, h:8, speed:24, _inWater:false };
-    let landTiles = null;
-    let palms=[], bushes=[], rocks=[], buriedItems=[], seaSprites=[], waves=[], particles=[];
-    let enemies=[], arrows=[];
-
-    // --- Helpers ---
-    function randRange(a,b){ return a + Math.random()*(b-a); }
-    function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-    function createEmptyGrid(){ const g=[]; for(let y=0;y<GRID_H;y++) g[y] = new Array(GRID_W).fill(false); return g; }
-
-    // --- Island generation ---
-    // ... (toda la generación de la isla igual que tu código original) ...
-
-    // --- Dibujo ---
-    function worldToView(wx, wy){
-      if(showFullIsland){
-        let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-        for(let ty=0; ty<GRID_H; ty++) for(let tx=0; tx<GRID_W; tx++)
-          if(landTiles[ty][tx]){
-            const wxc = tx*TILE_SIZE + TILE_SIZE/2, wyc = ty*TILE_SIZE + TILE_SIZE/2;
-            if(wxc < minX) minX = wxc; if(wxc > maxX) maxX = wxc;
-            if(wyc < minY) minY = wyc; if(wyc > maxY) maxY = wyc;
+  function drawTileIsland(){
+    bctx.fillStyle='#2ea6ff';
+    bctx.fillRect(0,0,BUF_W,BUF_H);
+    for(let ty=0;ty<GRID_H;ty++){
+      for(let tx=0;tx<GRID_W;tx++){
+        if(landTiles[ty][tx]){
+          let edge=false;
+          for(let oy=-1;oy<=1;oy++) for(let ox=-1;ox<=1;ox++){
+            if(ox===0&&oy===0) continue;
+            let nx=tx+ox,ny=ty+oy;
+            if(nx<0||ny<0||nx>=GRID_W||ny>=GRID_H||!landTiles[ny][nx]) edge=true;
           }
-        if(minX===Infinity){ minX = worldCenter.x - 220; minY = worldCenter.y - 140; maxX = worldCenter.x + 220; maxY = worldCenter.y + 140; }
-        const pad = 20;
-        const islandPixelWidth = (maxX - minX) + pad, islandPixelHeight = (maxY - minY) + pad;
-        const fitX = BUF_W / islandPixelWidth, fitY = BUF_H / islandPixelHeight;
-        const base = Math.min(fitX, fitY);
-        zoom = clamp(base, 0.18, 1.0);
-        const centerX = (minX + maxX)/2, centerY = (minY + maxY)/2;
-        cam.x = centerX - (BUF_W / (2 * zoom));
-        cam.y = centerY - (BUF_H / (2 * zoom));
-      } else {
-        zoom = 1.0;
-        cam.x = player.x + player.w/2 - (BUF_W/2)/zoom;
-        cam.y = player.y + player.h/2 - (BUF_H/2)/zoom;
-      }
-      cam.x = clamp(cam.x, 0, Math.max(0, WORLD_W - BUF_W/zoom));
-      cam.y = clamp(cam.y, 0, Math.max(0, WORLD_H - BUF_H/zoom));
-      if(!isFinite(cam.x)) cam.x = 0;
-      if(!isFinite(cam.y)) cam.y = 0;
-      return { x: Math.round((wx - cam.x) * zoom), y: Math.round((wy - cam.y) * zoom) };
-    }
-    let zoom = 1.0, cam = {x:0,y:0};
-
-    // --- Función corregida de drawTileIsland ---
-    function drawTileIsland(){
-      // fondo agua
-      bctx.fillStyle = '#2ea6ff';
-      bctx.fillRect(0,0,BUF_W,BUF_H);
-
-      if(!landTiles){
-        log('WARN: landTiles undefined — dibujando fallback visual.');
-        const cx = Math.floor(BUF_W/2), cy = Math.floor(BUF_H/2), r = 18;
-        for(let yy=-r; yy<=r; yy++)
-          for(let xx=-r; xx<=r; xx++)
-            if(Math.hypot(xx,yy) <= r) setPixel(cx+xx, cy+yy, '#6ec26b');
-        return;
-      }
-
-      for(let ty=0; ty<GRID_H; ty++){
-        for(let tx=0; tx<GRID_W; tx++){
-          if(landTiles[ty][tx]){
-            let edge=false;
-            for(let oy=-1; oy<=1; oy++) for(let ox=-1; ox<=1; ox++){
-              if(ox===0 && oy===0) continue;
-              const nx=tx+ox, ny=ty+oy;
-              if(nx<0||nx>=GRID_W||ny<0||ny>=GRID_H || !landTiles[ny][nx]) edge=true;
-            }
-            const wx = tx*TILE_SIZE + 1, wy = ty*TILE_SIZE + 1;
-            const v = worldToView(wx, wy);
-            const tw = Math.max(1, Math.round(TILE_SIZE * zoom)), th = Math.max(1, Math.round(TILE_SIZE * zoom));
-            if(edge) fillRectPixel(v.x, v.y, tw, th, '#f3e2b3', true); // borde arena
-            else fillRectPixel(v.x, v.y, tw, th, '#4caf50', zoom > 0.3); // césped verde brillante
-          }
+          const wx=tx*TILE_SIZE+1,wy=ty*TILE_SIZE+1;
+          const v=worldToView(wx,wy);
+          const tw=Math.max(1,Math.round(TILE_SIZE*zoom)), th=Math.max(1,Math.round(TILE_SIZE*zoom));
+          bctx.fillStyle=edge?'#f3e2b3':'#4caf50';
+          bctx.fillRect(v.x,v.y,tw,th);
         }
       }
     }
+  }
 
-    function fillRectPixel(x,y,w,h,color,outline=false){
-      bctx.fillStyle = color; bctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
-      if(outline){
-        bctx.fillStyle='#000';
-        bctx.fillRect(Math.round(x), Math.round(y)-1, Math.round(w), 1);
-        bctx.fillRect(Math.round(x), Math.round(y)+Math.round(h), Math.round(w), 1);
-        bctx.fillRect(Math.round(x)-1, Math.round(y), 1, Math.round(h));
-        bctx.fillRect(Math.round(x)+Math.round(w), Math.round(y), 1, Math.round(h));
-      }
+  function drawPlayer(){
+    const v=worldToView(player.x,player.y);
+    bctx.fillStyle='red';
+    bctx.fillRect(v.x,v.y,Math.round(player.w*zoom),Math.round(player.h*zoom));
+  }
+
+  function drawAll(){
+    drawTileIsland();
+    drawPlayer();
+    sctx.drawImage(buf,0,0,BUF_W,BUF_H,0,0,screen.width,screen.height);
+  }
+
+  let lastTime=0;
+  function loop(ts){
+    const dt=(ts-lastTime)/1000; lastTime=ts;
+    if(!paused){
+      let speed=player.speed;
+      if(keys.ArrowUp) player.y-=speed*dt;
+      if(keys.ArrowDown) player.y+=speed*dt;
+      if(keys.ArrowLeft) player.x-=speed*dt;
+      if(keys.ArrowRight) player.x+=speed*dt;
+      player.x=clamp(player.x,0,WORLD_W-player.w);
+      player.y=clamp(player.y,0,WORLD_H-player.h);
+      cam.x=player.x+player.w/2-BUF_W/2;
+      cam.y=player.y+player.h/2-BUF_H/2;
     }
-    function setPixel(x,y,color){ bctx.fillStyle = color; bctx.fillRect(Math.round(x), Math.round(y), 1, 1); }
+    drawAll();
+    requestAnimationFrame(loop);
+  }
 
-    // --- Resto del código (drawAll, dibujar player, enemigos, partículas, etc.) ---
-    // Aquí iría todo el resto tal como lo tenías en tu código original, sin cambios.
-    // Asegúrate de usar esta nueva drawTileIsland() en drawAll().
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
 
-  })();
-  </script>
+  document.getElementById('startBtn').addEventListener('click',()=>{
+    document.getElementById('startOverlay').style.display='none';
+    paused=false;
+  });
+  document.getElementById('pauseBtn').addEventListener('click',()=>{paused=!paused;});
+  document.getElementById('zoomBtn').addEventListener('click',()=>{showFullIsland=!showFullIsland;});
+
+  requestAnimationFrame(loop);
+
+})();
+</script>
 </body>
 </html>
