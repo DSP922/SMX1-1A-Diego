@@ -268,6 +268,66 @@
       arrows.push({ x:sx, y:sy, vx:Math.cos(angle)*ARROW_SPEED, vy:Math.sin(angle)*ARROW_SPEED, speed:ARROW_SPEED, life:5.0, angle:angle, homing:true });
     }
 
+    // NEW: triggerDeath — centralized death handler with animation
+    function triggerDeath(reason){
+      try{
+        // stop the main loop from continuing updates
+        running = false;
+        paused = false;
+        // clear arrows so they don't continue to home mid-animation
+        arrows.length = 0;
+
+        // create explosion / death particles at player position
+        for(let i=0;i<40;i++){
+          particles.push({
+            x: player.x + randRange(-4,4),
+            y: player.y + randRange(-4,4),
+            vx: randRange(-1.6,1.6),
+            vy: randRange(-3.6,-0.8),
+            size: randRange(0.7,2.2),
+            life: 0.9 + Math.random()*0.6,
+            max: 0.9 + Math.random()*0.6
+          });
+        }
+
+        // small camera shake effect by temporarily toggling showFullIsland and restoring it
+        const prevShow = showFullIsland;
+        showFullIsland = false;
+
+        const animStart = performance.now();
+        const animDur = 750; // ms
+
+        function deathAnimFrame(now){
+          const elapsed = now - animStart;
+          const t = elapsed / animDur;
+          updateParticles(1/60); // step particles (approx)
+          updateSea(1/60); // keep sea lively
+          drawAll();
+
+          // overlay fade-in: draw a translucent rectangle on the buffer to darken the scene progressively
+          const alpha = clamp(t, 0, 1) * 0.7;
+          bctx.fillStyle = 'rgba(0,0,0,' + alpha + ')';
+          bctx.fillRect(0,0,BUF_W,BUF_H);
+          sctx.clearRect(0,0,screen.width,screen.height);
+          sctx.drawImage(buf,0,0,screen.width,screen.height);
+
+          if(elapsed < animDur){
+            requestAnimationFrame(deathAnimFrame);
+          } else {
+            // animation finished — show death overlay
+            showFullIsland = prevShow;
+            document.getElementById('deathMsg').textContent = reason || 'Has sido golpeado. Repite el nivel.';
+            document.getElementById('deathOverlay').style.display = 'flex';
+          }
+        }
+        requestAnimationFrame(deathAnimFrame);
+      }catch(err){
+        log('ERROR triggerDeath: ' + err);
+        // fallback: immediate overlay
+        document.getElementById('deathOverlay').style.display = 'flex';
+      }
+    }
+
     function updateArrows(dt){
       for(let i=arrows.length-1;i>=0;i--){
         const a = arrows[i];
@@ -291,13 +351,9 @@
           const pbox = {x:player.x,y:player.y,w:player.w,h:player.h}, abox = {x:a.x-2,y:a.y-1,w:3,h:2};
           if(rectIntersect(pbox, abox)){
             arrows.splice(i,1);
-            log('Has sido golpeado por una flecha — reiniciando nivel.');
-            // immediate restart of current level
-            generateLevelWrapper(currentLevel);
-            running = true;
-            paused = false;
-            lastTime = performance.now();
-            requestAnimationFrame(loop);
+            log('Has sido golpeado por una flecha — reproducir animación de muerte.');
+            // use triggerDeath instead of immediate regenerate
+            triggerDeath('Has sido golpeado por una flecha. Reintenta el nivel.');
             return;
           }
           if(a.life <= 0) arrows.splice(i,1);
@@ -473,7 +529,7 @@
             const wx = tx*TILE_SIZE + 1, wy = ty*TILE_SIZE + 1;
             const v = worldToView(wx, wy);
             const tw = Math.max(1, Math.round(TILE_SIZE * zoom)), th = Math.max(1, Math.round(TILE_SIZE * zoom));
-            if(edge) fillRectPixel(v.x, v.y, tw, th, '#f3e2b3', true); else fillRectPixel(v.x, v.y, tw, th, '#6ec26b', true);
+            if(edge) fillRectPixel(v.x, v.y, tw, th, '#f3e2b3', true); else fillRectPixel(v.x, v.y, tw, th, '#6ec26g', true);
           }
         }
       }
@@ -565,15 +621,11 @@
 
       enemyUpdate(dt);
 
-      // check physical collision with enemies (if enemy touches player -> restart)
+      // check physical collision with enemies (if enemy touches player -> trigger death animation)
       for(const e of enemies){
         if(rectIntersect({x:player.x,y:player.y,w:player.w,h:player.h}, {x:e.x,y:e.y,w:e.w,h:e.h})){
-          log('Has sido tocado por un enemigo — reiniciando nivel.');
-          generateLevelWrapper(currentLevel);
-          running = true;
-          paused = false;
-          lastTime = performance.now();
-          requestAnimationFrame(loop);
+          log('Has sido tocado por un enemigo — reproducir animación de muerte.');
+          triggerDeath('Has sido alcanzado por un enemigo. Reintenta el nivel.');
           return;
         }
       }
