@@ -83,7 +83,7 @@
             flex-grow: 1;
         }
 
-        #color-selector, #map-selector {
+        #color-selector, #map-selector, #difficulty-selector {
             margin-bottom: 25px;
         }
 
@@ -120,6 +120,24 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
+        /* Estilo para los botones de dificultad */
+        .difficulty-button {
+            background-color: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .difficulty-button.selected {
+            background-color: #4CAF50; /* Verde para seleccionado */
+            box-shadow: 0 3px #388E3C;
+        }
+
         /* --- PANTALLA DE JUEGO --- */
         #game-screen {
             display: none;
@@ -154,13 +172,23 @@
     <div id="main-menu">
         <h1>🏎️ F1 KART CHALLENGE</h1>
         <button class="menu-button" onclick="showSelectionScreen()">JUGAR</button>
-        <button class="menu-button" onclick="alert('Funcionalidad no implementada en este concepto.');">DIFICULTAD: NORMAL</button>
+        <button class="menu-button" id="difficulty-display" onclick="showSelectionScreen()">DIFICULTAD: NORMAL</button>
         <button class="menu-button" onclick="alert('¡Gracias por jugar! Puedes cerrar esta ventana.');">SALIR</button>
     </div>
 
     <div id="selection-screen" class="hidden">
-        <h2>🎨 Elige tu Color y Mapa</h2>
+        <h2>⚙️ Configuración de Carrera</h2>
         
+        <h3>Elige la Dificultad de los Bots:</h3>
+        <div id="difficulty-selector">
+            <button class="difficulty-button" data-difficulty="Facil" onclick="selectDifficulty('Facil')">Fácil</button>
+            <button class="difficulty-button selected" data-difficulty="Normal" onclick="selectDifficulty('Normal')">Normal</button>
+            <button class="difficulty-button" data-difficulty="Dificil" onclick="selectDifficulty('Dificil')">Difícil</button>
+            <button class="difficulty-button" data-difficulty="Experto" onclick="selectDifficulty('Experto')">Experto</button>
+        </div>
+        <p>Dificultad seleccionada: <strong id="selected-difficulty-name">Normal</strong></p>
+        <hr style="width: 80%; border-color: #ccc;">
+
         <h3>Elige el Color de tu Kart:</h3>
         <div id="color-selector">
             </div>
@@ -172,189 +200,4 @@
             </div>
         <p>Mapa seleccionado: <strong id="selected-map-name">Ninguno</strong></p>
         
-        <button class="menu-button" onclick="startGame()" style="margin-top: 20px;">INICIAR CARRERA (1 Jugador + 9 Bots)</button>
-    </div>
-
-    <div id="game-screen" class="hidden">
-        <div id="hud">
-            <span>VUELTA: 1/3</span>
-            <span>POSICIÓN: 10/10</span>
-            <span>POWER-UP: Ninguno</span>
-        </div>
-        <canvas id="game-canvas" width="1000" height="630">
-            Tu navegador no soporta el elemento Canvas.
-        </canvas>
-        <p style="text-align: center; color: black; background-color: white; padding: 10px;">
-            **¡SIMULACIÓN DEL JUEGO!** El juego real de karts y física es demasiado complejo para un solo archivo HTML/JS. 
-            <br>
-            **Jugador:** <strong id="final-player-color"></strong> | **Mapa:** <strong id="final-map-name"></strong> | **Bots:** 9 Bots Generados con colores únicos.
-        </p>
-    </div>
-
-</div>
-
-<script>
-    // --- LÓGICA JAVASCRIPT ---
-
-    // 1. CONFIGURACIÓN
-    const COLORES_DISPONIBLES = {
-        "Rojo Pastel": "#ff9999", "Azul Celeste": "#99ccff", "Verde Menta": "#99ff99", 
-        "Amarillo Suave": "#ffff99", "Morado Lavanda": "#cc99ff", "Naranja Melocotón": "#ffcc99", 
-        "Gris Perla": "#c8c8c8", "Cian Claro": "#99ffff", "Rosa Chicle": "#ff99cc", 
-        "Marrón Arena": "#ffe0b3"
-    };
-
-    const MAPAS = [
-        "El Bucle de la Muerte", "La Serpiente Pastel", "Cruce Peligroso", 
-        "El Laberinto", "Pista de Hielo (Deslizante)"
-    ];
-    
-    const BOT_COUNT = 9;
-    let selectedColor = null;
-    let selectedMap = null;
-
-    // 2. FUNCIONES DE INTERFAZ Y NAVEGACIÓN
-    function showSelectionScreen() {
-        document.getElementById('main-menu').classList.add('hidden');
-        document.getElementById('selection-screen').classList.remove('hidden');
-        renderColorOptions();
-        renderMapOptions();
-    }
-
-    function hideAllScreens() {
-        document.getElementById('main-menu').classList.add('hidden');
-        document.getElementById('selection-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.add('hidden');
-    }
-
-    // 3. GENERACIÓN DE COLORES
-    function renderColorOptions() {
-        const selector = document.getElementById('color-selector');
-        selector.innerHTML = '';
-        for (const [name, hex] of Object.entries(COLORES_DISPONIBLES)) {
-            const div = document.createElement('div');
-            div.className = 'color-option';
-            div.style.backgroundColor = hex;
-            div.setAttribute('data-color-name', name);
-            div.setAttribute('data-color-hex', hex);
-            div.onclick = () => selectColor(name, div);
-            selector.appendChild(div);
-        }
-    }
-
-    function selectColor(name, element) {
-        // Deseleccionar el color anterior
-        document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
-        
-        // Seleccionar el nuevo
-        element.classList.add('selected');
-        selectedColor = { name: name, hex: element.getAttribute('data-color-hex') };
-        document.getElementById('selected-color-name').textContent = name;
-    }
-
-    // 4. GENERACIÓN DE MAPAS
-    function renderMapOptions() {
-        const selector = document.getElementById('map-selector');
-        selector.innerHTML = '';
-        MAPAS.forEach(mapName => {
-            const card = document.createElement('div');
-            card.className = 'map-card';
-            card.textContent = mapName;
-            card.onclick = () => selectMap(mapName, card);
-            selector.appendChild(card);
-        });
-    }
-
-    function selectMap(name, element) {
-        document.querySelectorAll('.map-card').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-        selectedMap = name;
-        document.getElementById('selected-map-name').textContent = name;
-    }
-
-    // 5. LÓGICA DE INICIO DEL JUEGO
-    function startGame() {
-        if (!selectedColor || !selectedMap) {
-            alert("Por favor, selecciona un color y un mapa antes de empezar.");
-            return;
-        }
-
-        // 5.1. Asignar colores a los 9 bots
-        const availableColors = Object.keys(COLORES_DISPONIBLES).filter(name => name !== selectedColor.name);
-        if (availableColors.length < BOT_COUNT) {
-            console.error("No hay suficientes colores únicos para los 9 bots.");
-            return;
-        }
-        
-        // Colores aleatorios para los bots (sin repetir)
-        const botColors = [];
-        const botColorNames = [];
-        let tempColors = [...availableColors];
-        
-        for (let i = 0; i < BOT_COUNT; i++) {
-            const randomIndex = Math.floor(Math.random() * tempColors.length);
-            const colorName = tempColors.splice(randomIndex, 1)[0];
-            botColors.push(COLORES_DISPONIBLES[colorName]);
-            botColorNames.push(colorName);
-        }
-
-        console.log("JUGADOR Color:", selectedColor.name);
-        console.log("BOTS Colores:", botColorNames);
-
-        // 5.2. Mostrar pantalla de juego
-        hideAllScreens();
-        document.getElementById('game-screen').classList.remove('hidden');
-        document.getElementById('final-player-color').textContent = selectedColor.name;
-        document.getElementById('final-map-name').textContent = selectedMap;
-
-        // 5.3. Iniciar el renderizado conceptual
-        renderConceptualGame();
-    }
-    
-    // 6. RENDERIZADO BÁSICO EN EL CANVAS (Simulación)
-    function renderConceptualGame() {
-        const canvas = document.getElementById('game-canvas');
-        const ctx = canvas.getContext('2d');
-        const width = canvas.width;
-        const height = canvas.height;
-
-        // Dibujar carretera simulada (rectángulo grande y centrado)
-        ctx.fillStyle = "#555"; // Color carretera
-        ctx.fillRect(width / 4, height / 4, width / 2, height / 2);
-
-        // Dibujar obstáculos y power-ups (ejemplo)
-        ctx.fillStyle = "black";
-        ctx.fillRect(width / 2 - 10, height / 3, 20, 50); // Obstáculo (Barricada)
-        
-        ctx.fillStyle = "red";
-        ctx.beginPath();
-        ctx.arc(width / 2 + 100, height / 2, 15, 0, Math.PI * 2);
-        ctx.fill(); // PowerUp Nitro
-
-        // Dibujar el kart del jugador (en la posición de salida simulada)
-        ctx.fillStyle = selectedColor.hex;
-        ctx.fillRect(width / 4 + 20, height / 4 + 20, 25, 15); // Kart (jugador)
-        
-        ctx.fillStyle = "white";
-        ctx.font = "20px Arial";
-        ctx.fillText("Tú", width / 4 + 25, height / 4 + 40);
-        
-        // Mensaje de la simulación
-        ctx.fillStyle = "black";
-        ctx.font = "30px Arial";
-        ctx.textAlign = "center";
-        ctx.fillText("Circuito '" + selectedMap + "' en progreso...", width / 2, height / 2 - 100);
-    }
-    
-    // Iniciar la aplicación mostrando el menú
-    document.addEventListener('DOMContentLoaded', () => {
-        // Asegúrate de que solo se muestre el menú al inicio
-        document.getElementById('selection-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.add('hidden');
-        document.getElementById('main-menu').classList.remove('hidden');
-        renderColorOptions(); // Preparar los selectores
-    });
-</script>
-
-</body>
-</html>
+        <button class="menu-button" onclick="startGame
