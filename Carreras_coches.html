@@ -3,25 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Mini-Race: Karts HTML</title>
+<title>Mini-Race: Karts HTML Mejorado</title>
 <style>
-  html, body { margin:0; padding:0; height:100%; overflow:hidden; font-family:sans-serif; }
-  canvas { display:block; background:#bde8c8; }
-  #menu {
-    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
-    width:600px; max-width:90%; background:linear-gradient(#bfdff8,#cfe8ff);
-    border-radius:16px; padding:20px; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.2);
-  }
-  .btn { margin:10px; padding:10px 20px; border:none; border-radius:10px; background:#fff; cursor:pointer; font-weight:bold; }
-  #hud { position:absolute; left:12px; top:12px; color:#06324a; background:rgba(255,255,255,0.8); padding:8px 12px; border-radius:10px; font-weight:600; display:none; }
+html, body { margin:0; padding:0; height:100%; overflow:hidden; font-family:sans-serif; background:#bde8c8; }
+canvas { display:block; background:#bde8c8; }
+#menu {
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:760px; max-width:95%; background:linear-gradient(#bfdff8,#cfe8ff);
+  border-radius:16px; padding:24px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.2);
+}
+#menu h1 { margin:6px 0 12px; font-size:28px; color:#033a6b; }
+.controls { display:flex; gap:12px; justify-content:center; align-items:center; margin:12px 0 18px; flex-wrap:wrap; }
+.btn { margin:10px; padding:10px 20px; border:none; border-radius:10px; background:#fff; cursor:pointer; font-weight:bold; }
+.swatch { width:36px; height:36px; border-radius:6px; border:3px solid rgba(255,255,255,0.6); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+.swatch.selected { outline:3px solid rgba(0,0,0,0.15); transform:scale(1.05); }
+#hud { position:absolute; left:12px; top:12px; color:#06324a; background:rgba(255,255,255,0.8); padding:8px 12px; border-radius:10px; font-weight:600; display:none; }
 </style>
 </head>
 <body>
-
 <canvas id="game"></canvas>
 
 <div id="menu">
   <h1>Mini-Race: Karts</h1>
+  <div style="font-size:14px;color:#04385a;margin-bottom:8px;">Elige color y pulsa Jugar</div>
+  <div class="controls" id="colorChoices"></div>
   <button id="playBtn" class="btn">Jugar</button>
 </div>
 
@@ -33,6 +38,8 @@ const ctx = canvas.getContext('2d');
 let W = canvas.width = window.innerWidth;
 let H = canvas.height = window.innerHeight;
 window.addEventListener('resize', ()=>{ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; });
+
+const COLORS = ['#FF4B4B','#FF9A3C','#FFD166','#6EE7B7','#4CC9F0','#7C83FD','#E56ED1','#A3D39C','#FFB1C1','#C9F1FF'];
 
 const input = { left:false, right:false, up:false, down:false };
 window.addEventListener('keydown', e=>{
@@ -62,11 +69,24 @@ class Car {
   }
   update(){
     if(this.isPlayer){
-      if(input.up) this.speed+=0.1;
+      if(input.up) this.speed+=0.2;
       if(input.down) this.speed-=0.1;
       if(input.left) this.angle-=0.04;
       if(input.right) this.angle+=0.04;
-      this.speed*=0.98;
+      this.speed*=0.95;
+      this.pos.x+=Math.cos(this.angle)*this.speed;
+      this.pos.y+=Math.sin(this.angle)*this.speed;
+    } else {
+      // simple AI: follow track
+      const target = track[Math.floor(Math.random()*track.length)];
+      const dx = target.x - this.pos.x;
+      const dy = target.y - this.pos.y;
+      const targetAngle = Math.atan2(dy,dx);
+      let diff = targetAngle - this.angle;
+      if(diff>Math.PI) diff-=2*Math.PI;
+      if(diff<-Math.PI) diff+=2*Math.PI;
+      this.angle+=diff*0.05;
+      this.speed=1.5;
       this.pos.x+=Math.cos(this.angle)*this.speed;
       this.pos.y+=Math.sin(this.angle)*this.speed;
     }
@@ -77,60 +97,64 @@ class Car {
     ctx.save();
     ctx.translate(x,y);
     ctx.rotate(this.angle);
+    // Kart top-down
     ctx.fillStyle=this.color;
-    ctx.fillRect(-15,-10,30,20);
+    ctx.fillRect(-18,-12,36,24);
+    ctx.fillStyle='#000'; ctx.fillRect(-6,-10,12,12);
     ctx.restore();
   }
 }
 
-// --- JUEGO ---
-let player;
-let npcs=[];
-let running=false;
-let cam={x:0,y:0};
+let player, npcs=[], running=false, cam={x:0,y:0};
+let selectedColor = COLORS[0];
 
+// --- Crear swatches ---
+const colorContainer = document.getElementById('colorChoices');
+COLORS.forEach((c,i)=>{
+  const div=document.createElement('div');
+  div.className='swatch'; div.style.background=c;
+  if(i===0) div.classList.add('selected');
+  div.addEventListener('click', ()=>{
+    selectedColor=c;
+    document.querySelectorAll('.swatch').forEach(s=>s.classList.remove('selected'));
+    div.classList.add('selected');
+  });
+  colorContainer.appendChild(div);
+});
+
+// --- INICIAR JUEGO ---
 function startGame(){
   document.getElementById('menu').style.display='none';
   document.getElementById('hud').style.display='block';
-  player=new Car(track[0].x, track[0].y, 'red', true);
+  player=new Car(track[0].x, track[0].y, selectedColor, true);
   npcs=[];
   for(let i=0;i<5;i++){
-    npcs.push(new Car(track[0].x+Math.random()*50, track[0].y+Math.random()*50, 'blue'));
+    npcs.push(new Car(track[0].x+Math.random()*50, track[0].y+Math.random()*50, COLORS[(i+1)%COLORS.length]));
   }
   running=true;
   requestAnimationFrame(loop);
 }
 
-// --- LOOP ---
 function loop(){
   if(!running) return;
   ctx.clearRect(0,0,W,H);
-  
+
   // CAMARA
-  cam.x=player.pos.x;
-  cam.y=player.pos.y;
+  cam.x=player.pos.x; cam.y=player.pos.y;
 
   // DIBUJAR PISTA
-  ctx.strokeStyle='gray';
-  ctx.lineWidth=60;
+  ctx.strokeStyle='gray'; ctx.lineWidth=60;
   ctx.beginPath();
-  for(let i=0;i<track.length;i++){
-    const p=track[i];
-    const x=p.x-cam.x+W/2, y=p.y-cam.y+H/2;
-    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
-  }
-  ctx.closePath();
-  ctx.stroke();
+  track.forEach((p,i)=>{ const x=p.x-cam.x+W/2, y=p.y-cam.y+H/2; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+  ctx.closePath(); ctx.stroke();
 
-  // ACTUALIZAR Y DIBUJAR CARS
-  player.update();
-  player.draw(ctx,cam);
-  for(let npc of npcs){ npc.update(); npc.draw(ctx,cam); }
+  // DIBUJAR CARS
+  player.update(); player.draw(ctx,cam);
+  npcs.forEach(npc=>{ npc.update(); npc.draw(ctx,cam); });
 
   requestAnimationFrame(loop);
 }
 
-// --- BOTÓN ---
 document.getElementById('playBtn').addEventListener('click', startGame);
 </script>
 </body>
