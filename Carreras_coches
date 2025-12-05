@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mini-Race: Karts HTML (todo en un archivo)</title>
+<style>
+  /* Basic page reset */
+  html,body { height:100%; margin:0; font-family: "Segoe UI", Roboto, Arial; background:#e8f6ff; }
+  canvas { display:block; background:#BDE8C8; } /* pastel green off-road */
+  /* Menu overlay */
+  #menu {
+    position: absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:760px; max-width:95%;
+    background: linear-gradient(180deg,#bfdff8,#cfe8ff); /* pastel blue */
+    border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding:24px; text-align:center;
+  }
+  #menu h1 { margin:6px 0 12px; font-size:28px; color:#033a6b; }
+  .controls { display:flex; gap:12px; justify-content:center; align-items:center; margin:12px 0 18px; flex-wrap:wrap; }
+  .btn { background:#fff; border:2px solid rgba(0,0,0,0.08); padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:600; }
+  .btn:hover { transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,0.08); }
+  .small { padding:8px 12px; font-size:14px; }
+  .color-sel { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; width:100%; }
+  .swatch { width:36px; height:36px; border-radius:6px; border:3px solid rgba(255,255,255,0.6); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+  .swatch.selected { outline:3px solid rgba(0,0,0,0.15); transform:scale(1.05); }
+  .difficulty { padding:8px 12px; border-radius:8px; border:1px solid rgba(0,0,0,0.08); background:#fff; }
+  #hud { position: absolute; left:12px; top:12px; color:#06324a; background:rgba(255,255,255,0.8); padding:8px 12px; border-radius:10px; font-weight:600; }
+  #message { position:absolute; right:12px; top:12px; background:rgba(255,255,255,0.9); padding:8px 12px; border-radius:10px; color:#05314a; display:none; }
+  footer { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); color:#045; font-size:12px; opacity:0.9; }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- Menu overlay -->
+<div id="menu">
+  <h1>Mini-Race: Karts</h1>
+  <div style="font-size:14px;color:#04385a;margin-bottom:8px;">Elige circuito, color, dificultad y pulsa Jugar</div>
+
+  <div class="controls">
+    <div>
+      <label style="display:block;font-weight:700;color:#033a6b;margin-bottom:6px">Circuito</label>
+      <select id="trackSelect" class="difficulty small">
+        <option value="0">Circuito 1 — Óvalo amplio</option>
+        <option value="1">Circuito 2 — Montaña con curvas</option>
+        <option value="2">Circuito 3 — Ciudad larga</option>
+        <option value="3">Circuito 4 — Laberinto grande</option>
+      </select>
+    </div>
+
+    <div>
+      <label style="display:block;font-weight:700;color:#033a6b;margin-bottom:6px">Dificultad</label>
+      <select id="difficulty" class="difficulty small">
+        <option value="0">Fácil</option>
+        <option value="1" selected>Normal</option>
+        <option value="2">Difícil</option>
+      </select>
+    </div>
+
+    <div style="min-width:220px">
+      <label style="display:block;font-weight:700;color:#033a6b;margin-bottom:6px">Color del jugador</label>
+      <div id="colorChoices" class="color-sel"></div>
+    </div>
+  </div>
+
+  <div style="margin-top:8px">
+    <button id="playBtn" class="btn" style="margin-right:10px">Jugar</button>
+    <button id="exitBtn" class="btn" style="background:#f6f6f6">Salir</button>
+  </div>
+
+  <div style="margin-top:14px;font-size:12px;color:#05324a">Controles: A/D o ←/→ para girar, W/↑ acelerar, S/↓ frenar, Espacio para usar power-up</div>
+</div>
+
+<div id="hud">Vuelta: 0 &nbsp;|&nbsp; Pos: 1/&nbsp;10</div>
+<div id="message"></div>
+<footer>Hecho con ♥ — Karts top-down (ventana negra) — Código en un solo archivo</footer>
+
+<script>
+/*
+  Mini-Race: One-file HTML5 canvas racing game
+  - 4 tracks
+  - Player + 9 NPCs (10 karts)
+  - Color selection (>=10 colors), NPCs don't use player's color
+  - Bots follow path waypoints with steering + difficulty influences speed/aggression
+  - Power-ups: Boost and Oil (slip)
+  - Collisions and simple physics
+  - Camera centered above player (top-down)
+  - Pastel green offroad + bushes
+  - Decorative obstacles
+*/
+
+/* ---------- Configuration ---------- */
+const CANVAS = document.getElementById('game');
+const ctx = CANVAS.getContext('2d');
+let W = CANVAS.width = window.innerWidth;
+let H = CANVAS.height = window.innerHeight;
+
+window.addEventListener('resize', ()=>{ W = CANVAS.width = window.innerWidth; H = CANVAS.height = window.innerHeight; });
+
+const ROAD_WIDTH = 220; // default road half-width
+const NUM_NPCS = 9;
+const TOTAL_CARS = 1 + NUM_NPCS;
+const COLORS = [ // >=10 colors palette (pastel-friendly + vivid)
+  '#FF4B4B', '#FF9A3C', '#FFD166', '#6EE7B7', '#4CC9F0',
+  '#7C83FD', '#E56ED1', '#A3D39C', '#FFB1C1', '#C9F1FF',
+  '#F4D35E', '#8AB6FF', '#9BE7E0'
+];
+
+const PLAYER_DEFAULT = { x:0, y:0, angle:0 };
+
+/* Input state */
+const input = { left:false, right:false, up:false, down:false, use:false };
+
+/* Game state */
+let state = {
+  running: false,
+  trackIndex: 0,
+  difficulty: 1,
+  playerColor: COLORS[0],
+  cars: [],
+  powerups: [],
+  obstacles: [],
+  bushes: [],
+  lapCount: {},
+  positions: [],
+  track: null,
+  camera: { x:0, y:0, zoom:1 }
+};
+
+/* ---------- Utility helpers ---------- */
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
+function pointDist(x1,y1,x2,y2){ return Math.hypot(x2-x1, y2-y1); }
+function rand(min,max){ return Math.random()*(max-min)+min; }
+function randInt(min,max){ return Math.floor(rand(min,max+1)); }
+function choose(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* ---------- Track definitions ----------
+   Each track contains:
+   - centerline: array of points {x,y}
+   - startPos: {x,y,angle}
+   - checkpoints: subset of centerline indices to count laps
+   - obstacles: placed rectangles/circles
+   - decorations: bushes
+*/
+const tracks = [];
+
+/* Utility to create circular/oval centerlines */
+function makeOval(cx,cy,rx,ry,rot=0, segments=180) {
+  const pts = [];
+  for(let i=0;i<segments;i++){
+    const a = (i/segments)*Math.PI*2;
+    const x = cx + Math.cos(a)*rx*Math.cos(rot) - Math.sin(a)*ry*Math.sin(rot);
+    const y = cy + Math.cos(a)*rx*Math.sin(rot) + Math.sin(a)*ry*Math.cos(rot);
+    pts.push({x,y});
+  }
+  return pts;
+}
+
+/* Create 4 different tracks (scaled large so camera can pan) */
+(function createTracks(){
+  // Track 0: Wide oval
+  const t0 = {};
+  t0.centerline = makeOval(0,0,1200,700,0,240);
+  t0.startPos = { x:t0.centerline[0].x, y:t0.centerline[0].y - 60, angle: -Math.PI/2 };
+  t0.checkpoints = [0, 60, 120, 180];
+  t0.name = "Óvalo amplio";
+  tracks.push(t0);
+
+  // Track 1: Mountain with S-curves
+  const pts1 = [];
+  for(let i=0;i<420;i++){
+    const t = i/420;
+    const x = -1600 + t*3200;
+    const y = Math.sin(t*Math.PI*4)*600 + Math.cos(t*Math.PI*2)*200;
+    pts1.push({x,y});
+  }
+  // loop back
+  t1 = { centerline: pts1, startPos: {x:pts1[0].x, y:pts1[0].y-100, angle: -Math.PI/2}, checkpoints:[0,105,210,315], name:"Montaña con curvas" };
+  tracks.push(t1);
+
+  // Track 2: City-style long with tight corners
+  const pts2 = [];
+  const center = {x:0,y:0};
+  const R = 1400;
+  for(let i=0;i<360;i++){
+    const a = i*Math.PI*2/360;
+    const r = R + 250*Math.sin(a*4) + 120*Math.cos(a*7);
+    const x = center.x + Math.cos(a)*r;
+    const y = center.y + Math.sin(a)*r;
+    pts2.push({x,y});
+  }
+  tracks.push({ centerline: pts2, startPos:{x:pts2[10].x,y:pts2[10].y-80,angle:0}, checkpoints:[0,90,180,270], name:"Ciudad larga" });
+
+  // Track 3: Laberinto
+  const pts3 = [];
+  const scale = 900;
+  for(let i=0;i<600;i++){
+    const t = i/600;
+    const a = t*Math.PI*6;
+    const x = Math.cos(a)*(scale*(0.8 + 0.2*Math.sin(a*3)));
+    const y = Math.sin(a)*(scale*(0.8 + 0.2*Math.cos(a*2)));
+    pts3.push({x,y});
+  }
+  tracks.push({ centerline: pts3, startPos:{x:pts3[0].x,y:pts3[0].y-100,angle:Math.PI/2}, checkpoints:[0,150,300,450], name:"Laberinto grande" });
+
+})();
+
+/* ---------- Game Entities ---------- */
+
+/* Car class */
+class Car {
+  constructor(id, x,y, angle, color, isPlayer=false) {
+    this.id = id;
+    this.pos = {x,y};
+    this.vel = {x:0,y:0};
+    this.angle = angle;
+    this.steering = 0; // -1..1
+    this.throttle = 0; // -1..1
+    this.speed = 0;
+    this.maxSpeed = 4.0 + Math.random()*0.8; // base, modified by difficulty
+    this.turnSpeed = 0.045;
+    this.size = 18 + (Math.random()*6-3); // visual size
+    this.color = color;
+    this.isPlayer = isPlayer;
+    this.currentWaypoint = 0;
+    this.laps = 0;
+    this.nextCheckpoint = 0;
+    this.boostTimer = 0;
+    this.oiled = 0;
+    this.stunned = 0;
+    this.rank = 1;
+    this.lastPositions = [];
+  }
+
+  update(dt){
+    if(this.stunned>0){ this.stunned -= dt; this.speed *= 0.98; return; }
+
+    // Apply boost/oil effects
+    let maxS = this.maxSpeed * (1 + (this.boostTimer>0?0.8:0));
+    if(this.boostTimer>0) this.boostTimer -= dt;
+    if(this.oiled>0){ this.oiled -= dt; maxS *= 0.6; }
+
+    // Player control
+    if(this.isPlayer){
+      // throttle is controlled externally
+      // simple friction
+      this.speed += (this.throttle>0 ? 0.12*this.throttle : -0.06)*dt*60;
+      // clamp
+      this.speed = clamp(this.speed, -1.2, maxS);
+      // steering reduced at low speed
+      const steerFactor = clamp(this.speed / (maxS*0.6), 0.05, 1);
+      this.angle += this.steering * this.turnSpeed * steerFactor * dt * 60;
+    } else {
+      // AI: follow waypoints
+      this.updateAI(dt, maxS);
+    }
+
+    // Move
+    this.pos.x += Math.cos(this.angle) * this.speed * dt * 60;
+    this.pos.y += Math.sin(this.angle) * this.speed * dt * 60;
+
+    // Add friction and damping
+    this.speed *= 0.995;
+
+    // Keep last positions for simple collision smoothing
+    this.lastPositions.push({x:this.pos.x,y:this.pos.y});
+    if(this.lastPositions.length>5) this.lastPositions.shift();
+  }
+
+  updateAI(dt, maxS){
+    // Basic path-following: aim for current waypoint
+    const line = state.track.centerline;
+    if(!line || line.length===0) return;
+    const wp = line[this.currentWaypoint % line.length];
+    const dx = wp.x - this.pos.x;
+    const dy = wp.y - this.pos.y;
+    const targetAngle = Math.atan2(dy,dx);
+    let angleDiff = normalizeAngle(targetAngle - this.angle);
+    // steering towards waypoint
+    this.steering = clamp(angleDiff*2, -1, 1);
+
+    // speed control based on curvature and distance to waypoint
+    // compute next few waypoints curvature
+    const nextIdx = (this.currentWaypoint+3) % line.length;
+    const nextWp = line[nextIdx];
+    const futureDx = nextWp.x - wp.x;
+    const futureDy = nextWp.y - wp.y;
+    const curvature = Math.hypot(futureDx, futureDy);
+
+    // difficulty influences aggression
+    const diff = state.difficulty;
+    const baseThrottle = 0.9 - diff*0.25 - (curvature<100?0.35:0) + (Math.random()*0.2-0.1);
+    // pick up nearby powerups? simple: if close to boost, try to steer toward it sometimes
+    this.throttle = clamp(baseThrottle, -0.4, 1);
+    // accelerate towards waypoint
+    const distance = Math.hypot(dx,dy);
+    if(distance < 120) { this.currentWaypoint = (this.currentWaypoint+1) % line.length; }
+    // steering jitter for challenge
+    this.angle += (Math.random()*0.002 - 0.001) * (1 + diff*0.5);
+    // adapt speed to difficulty
+    this.speed += (this.throttle*0.1) * dt * (1 + diff*0.06);
+    this.speed = clamp(this.speed, -0.6, maxS);
+  }
+
+  draw(ctx, camX, camY){
+    const x = this.pos.x - camX + W/2;
+    const y = this.pos.y - camY + H/2;
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(this.angle);
+    // Draw kart like top-down F1-like
+    // main body
+    ctx.fillStyle = this.color;
+    roundRect(ctx, -22, -12, 44, 24, 6);
+    ctx.fill();
+
+    // nose & wings
+    ctx.beginPath();
+    ctx.moveTo(22,0);
+    ctx.lineTo(32,-10);
+    ctx.lineTo(28,0);
+    ctx.lineTo(32,10);
+    ctx.closePath();
+    ctx.fill();
+
+    // cockpit / windshield (black)
+    ctx.fillStyle = '#000';
+    roundRect(ctx, -6, -10, 12, 12, 4);
+    ctx.fill();
+
+    // wheels (small) as rectangles
+    ctx.fillStyle = '#222';
+    ctx.fillRect(-16,-18,8,4);
+    ctx.fillRect(-16,14,8,4);
+    ctx.fillRect(8,-18,8,4);
+    ctx.fillRect(8,14,8,4);
+
+    // subtle highlight
+    ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, -22, -12, 44, 24, 6);
+    ctx.stroke();
+
+    // draw ID number for NPCs
+    if(!this.isPlayer){
+      ctx.fillStyle = 'rgba(0,0,0,0.7)';
+      ctx.font = '10px Arial';
+      ctx.textAlign='center';
+      ctx.fillText(this.id, 8, 4);
+    } else {
+      // player HUD indicator
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.lineWidth=2; ctx.stroke();
+    }
+
+    ctx.restore();
+  }
+}
+
+/* ---------- Helpers: Drawing primitives ---------- */
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+/* ---------- Game init/reset ---------- */
+function resetGame(){
+  state.cars = [];
+  state.powerups = [];
+  state.obstacles = [];
+  state.bushes = [];
+  const tIdx = state.trackIndex;
+  state.track = tracks[tIdx];
+
+  // place some bushes and obstacles around the track randomly
+  const line = state.track.centerline;
+  for(let i=0;i<line.length;i+=Math.floor(line.length/80)){
+    if(Math.random() < 0.35){
+      const p = line[i];
+      const off = perpOffset(i, rand(-1,1) * (ROAD_WIDTH + rand(70,220)));
+      state.bushes.push({x: p.x + off.x, y: p.y + off.y, r: 8+Math.random()*12});
+    }
+  }
+  // obstacles (rocks / crates)
+  for(let i=0;i<25;i++){
+    const idx = randInt(0,line.length-1);
+    const p = line[idx];
+    const off = perpOffset(idx, rand(-1,1) * (ROAD_WIDTH + rand(40,260)));
+    state.obstacles.push({x:p.x+off.x, y:p.y+off.y, r:12+rand(6,28)});
+  }
+
+  // generate cars: player + NPCs
+  const palette = COLORS.slice();
+  // ensure player's color is reserved
+  if(!palette.includes(state.playerColor)) palette.unshift(state.playerColor);
+  // Remove player's color from available pool for NPCs
+  const avail = palette.filter(c => c !== state.playerColor);
+  // if not enough colors, duplicate with slight variation (shouldn't happen)
+  while(avail.length < NUM_NPCS) avail.push('#'+Math.floor(Math.random()*16777215).toString(16));
+
+  // shuffle avail
+  for(let i=avail.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [avail[i],avail[j]]=[avail[j],avail[i]]; }
+
+  // place spawn positions near track start
+  const startIdx = 0;
+  const startP = state.track.centerline[startIdx];
+  for(let i=0;i<TOTAL_CARS;i++){
+    const angle = state.track.startPos.angle || 0;
+    const offset = (i - Math.floor(TOTAL_CARS/2)) * 28;
+    const sx = startP.x + Math.cos(angle+Math.PI/2)*offset;
+    const sy = startP.y + Math.sin(angle+Math.PI/2)*offset;
+    if(i===0){
+      const player = new Car('P', sx, sy, angle, state.playerColor, true);
+      // difficulty affects max speed
+      player.maxSpeed *= 1.05;
+      state.cars.push(player);
+    } else {
+      const color = avail[(i-1) % avail.length];
+      const npc = new Car(i, sx, sy, angle, color, false);
+      // difficulty modifies NPC top speed: harder => faster
+      const diff = state.difficulty;
+      npc.maxSpeed *= 1 + diff*0.22 + Math.random()*0.12;
+      // set starting waypoint to a random nearby
+      npc.currentWaypoint = randInt(0, state.track.centerline.length-1);
+      state.cars.push(npc);
+    }
+  }
+
+  // spawn initial powerups on track
+  spawnPowerups(8);
+
+  // camera to player
+  state.camera.x = state.cars[0].pos.x;
+  state.camera.y = state.cars[0].pos.y;
+  state.running = true;
+  // laps map
+  state.lapCount = {};
+  state.cars.forEach(c=> state.lapCount[c.id] = 0 );
+}
+
+/* ---------- Power-ups ---------- */
+function spawnPowerups(n){
+  for(let i=0;i<n;i++){
+    const idx = randInt(0, state.track.centerline.length-1);
+    const p = state.track.centerline[idx];
+    // random along width within road
+    const off = perpOffset(idx, rand(-ROAD_WIDTH*0.6, ROAD_WIDTH*0.6));
+    const type = Math.random() < 0.6 ? 'boost' : 'oil';
+    state.powerups.push({x: p.x + off.x, y: p.y + off.y, type, id:Math.random().toString(36).slice(2)});
+  }
+}
+
+/* ---------- Geometry helpers ---------- */
+function normalizeAngle(a){
+  while(a > Math.PI) a -= Math.PI*2;
+  while(a < -Math.PI) a += Math.PI*2;
+  return a;
+}
+
+/* Perpendicular offset from centerline index */
+function perpOffset(idx, distance){
+  const line = state.track.centerline;
+  const a = idx % line.length;
+  const b = (a+1) % line.length;
+  const p = line[a], q = line[b];
+  const dx = q.x - p.x, dy = q.y - p.y;
+  const len = Math.hypot(dx,dy) || 1;
+  const nx = -dy/len, ny = dx/len; // normal
+  return { x: nx * distance, y: ny * distance };
+}
+
+/* Find nearest point on centerline to a position; returns index and distance */
+function nearestCenterlinePoint(x,y){
+  const line = state.track.centerline;
+  let bestIdx = 0, bestD = Infinity;
+  for(let i=0;i<line.length;i+=4){ // speed: sample every 4th
+    const p = line[i];
+    const d = pointDist(x,y,p.x,p.y);
+    if(d < bestD){ bestD = d; bestIdx = i; }
+  }
+  // refine around bestIdx
+  for(let i=Math.max(0,bestIdx-5); i<=Math.min(line.length-1,bestIdx+5); i++){
+    const p = line[i];
+    const d = pointDist(x,y,p.x,p.y);
+    if(d < bestD){ bestD = d; bestIdx = i; }
+  }
+  return { idx:bestIdx, d:bestD };
+}
+
+/* ---------- Drawing the track ---------- */
+function drawTrack(ctx, camX, camY){
+  const line = state.track.centerline;
+  if(!line) return;
+
+  // draw off-road (canvas background already pastel green)
+  // draw road path by stroking the centerline with wide lineWidth, then filling the middle with texture
+  ctx.save();
+  ctx.translate(W/2 - camX, H/2 - camY);
+
+  // Road fill: draw thick stroke with asphalt color
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.lineWidth = ROAD_WIDTH*2;
+  ctx.strokeStyle = '#4b4b4b';
+  ctx.beginPath();
+  ctx.moveTo(line[0].x, line[0].y);
+  for(let i=1;i<line.length;i++){
+    ctx.lineTo(line[i].x, line[i].y);
+  }
+  ctx.closePath();
+  ctx.stroke();
+
+  // add lane marks (dashed center line)
+  ctx.lineWidth = 4;
+  ctx.setLineDash([24,18]);
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)';
+  ctx.beginPath();
+  ctx.moveTo(line[0].x, line[0].y);
+  for(let i=1;i<line.length;i++){
+    ctx.lineTo(line[i].x, line[i].y);
+  }
+  ctx.closePath();
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // roadside separators: darker edges
+  ctx.lineWidth = 8;
+  ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+  ctx.beginPath();
+  ctx.moveTo(line[0].x, line[0].y);
+  for(let i=1;i<line.length;i++) ctx.lineTo(line[i].x, line[i].y);
+  ctx.closePath();
+  ctx.stroke();
+
+  // decorative: draw some sand/gravel near edges (simple)
+  // We already have bushes and obstacles below; keep it light.
+
+  ctx.restore();
+}
+
+/* ---------- Game loop ---------- */
+let lastTime = performance.now();
+function loop(t){
+  const dt = Math.min(0.033, (t - lastTime)/1000); // clamp dt for stability
+  lastTime = t;
+  if(state.running) update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+/* Update function */
+function update(dt){
+  // Input -> player controls
+  const player = state.cars[0];
+  player.steering = 0;
+  if(input.left) player.steering = -1;
+  if(input.right) player.steering = 1;
+  player.throttle = 0;
+  if(input.up) player.throttle = 1;
+  if(input.down) player.throttle = -0.5;
+
+  // Use powerup
+  if(input.use){ // basic: if player has a powerup on ground, use boost. Here we allow immediate boost for demo:
+    // For simplicity: pressing space triggers a small boost if available (we tie it to being on boost pickup)
+    // But to satisfy "powerups like mario kart", we allow pick-ups by collision below.
+  }
+
+  // Update cars
+  state.cars.forEach(c => c.update(dt));
+
+  // handle collisions car-car
+  handleCollisions(dt);
+
+  // pickups: car-powerup collisions
+  for(let i=state.powerups.length-1;i>=0;i--){
+    const pu = state.powerups[i];
+    for(const car of state.cars){
+      const d = pointDist(car.pos.x,car.pos.y, pu.x,pu.y);
+      if(d < 28){
+        // apply effect
+        if(pu.type === 'boost'){
+          car.boostTimer = 1.6; // seconds
+          if(car.isPlayer) showMessage('Boost!', 700);
+        } else if(pu.type === 'oil'){
+          // drop oil behind the car (if car picks up oil it becomes oil item; but simpler: when picked, it drops a slip trap)
+          // We'll create an oil slick slightly behind the car
+          const ox = car.pos.x - Math.cos(car.angle)*30;
+          const oy = car.pos.y - Math.sin(car.angle)*30;
+          state.obstacles.push({x:ox,y:oy,r:18, oil:true, ttl:8});
+          if(car.isPlayer) showMessage('Has dejado aceite', 900);
+        }
+        state.powerups.splice(i,1);
+        break;
+      }
+    }
+  }
+
+  // obstacles interaction: oil slows / obstacles block
+  for(let i=state.obstacles.length-1;i>=0;i--){
+    const o = state.obstacles[i];
+    if(o.ttl !== undefined){ o.ttl -= dt; if(o.ttl <= 0) state.obstacles.splice(i,1); }
+  }
+
+  // cars hitting obstacles
+  for(const car of state.cars){
+    for(const ob of state.obstacles){
+      const d = pointDist(car.pos.x,car.pos.y, ob.x,ob.y);
+      if(d < (ob.r + 10)){
+        if(ob.oil){
+          car.oiled = 1.6;
+          car.speed *= 0.5;
+        } else {
+          // bounce back a bit
+          car.speed *= -0.3;
+          car.pos.x -= Math.cos(car.angle)*8;
+          car.pos.y -= Math.sin(car.angle)*8;
+          car.stunned = 0.25;
+        }
+      }
+    }
+  }
+
+  // spawn occasional powerups if low
+  if(state.powerups.length < 5 && Math.random() < 0.02) spawnPowerups(1);
+
+  // update camera to follow player (smooth)
+  state.camera.x += (player.pos.x - state.camera.x) * 0.12;
+  state.camera.y += (player.pos.y - state.camera.y) * 0.12;
+
+  // Determine ranks by lap + progress
+  updateRanking();
+}
+
+/* Handle car-car collisions (simple circle overlap resolution) */
+function handleCollisions(dt){
+  for(let i=0;i<state.cars.length;i++){
+    for(let j=i+1;j<state.cars.length;j++){
+      const a = state.cars[i], b = state.cars[j];
+      const dx = b.pos.x - a.pos.x, dy = b.pos.y - a.pos.y;
+      const d = Math.hypot(dx,dy) || 0.001;
+      const minDist = (a.size + b.size) * 0.9;
+      if(d < minDist){
+        // overlap -> separate
+        const overlap = (minDist - d)/2;
+        const nx = dx/d, ny = dy/d;
+        a.pos.x -= nx*overlap;
+        a.pos.y -= ny*overlap;
+        b.pos.x += nx*overlap;
+        b.pos.y += ny*overlap;
+        // simple momentum exchange
+        const va = a.speed, vb = b.speed;
+        const avg = (va+vb)/2;
+        a.speed = avg*0.9;
+        b.speed = avg*0.9;
+        // if hit hard, short stun
+        if(Math.abs(va-vb) > 1.2){
+          a.stunned = b.stunned = 0.25;
+        }
+      }
+    }
+  }
+}
+
+/* Update ranking based on lap + progress along centerline */
+function updateRanking(){
+  const line = state.track.centerline;
+  state.cars.forEach(car=>{
+    // find nearest index
+    const pt = nearestCenterlinePoint(car.pos.x,car.pos.y);
+    car._progress = car.laps*line.length + pt.idx;
+  });
+  state.cars.sort((a,b)=> b._progress - a._progress);
+  // assign ranks
+  state.cars.forEach((c,i)=> c.rank = i+1);
+  // update HUD
+  const posStr = `Vuelta: ${state.cars[0].laps} | Pos: ${state.cars[0].rank}/${state.cars.length}`;
+  document.getElementById('hud').innerText = posStr;
+}
+
+/* ---------- Rendering ---------- */
+function render(){
+  // Clear
+  ctx.clearRect(0,0,W,H);
+
+  // camera
+  const camX = state.camera.x;
+  const camY = state.camera.y;
+
+  // draw background (pastel green already set on canvas background in CSS)
+  // but we can draw some slight texture
+  // draw track
+  drawTrack(ctx, camX, camY);
+
+  // draw bushes
+  state.bushes.forEach(b=>{
+    const x = b.x - camX + W/2, y = b.y - camY + H/2;
+    drawBush(ctx, x, y, b.r);
+  });
+
+  // draw obstacles (rocks/crates)
+  state.obstacles.forEach(o=>{
+    const x = o.x - camX + W/2, y = o.y - camY + H/2;
+    if(o.oil){
+      // oil slick: irregular blob
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.beginPath();
+      ctx.ellipse(0,0,o.r*1.4,o.r*0.8, Math.random()*Math.PI*2, 0, Math.PI*2);
+      ctx.fillStyle = 'rgba(10,10,10,0.85)';
+      ctx.fill();
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.translate(x,y);
+      ctx.fillStyle = '#7b5a3c';
+      ctx.beginPath();
+      ctx.ellipse(0,0,o.r,o.r*0.8,0,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+  });
+
+  // draw powerups
+  state.powerups.forEach(p=>{
+    const x = p.x - camX + W/2, y = p.y - camY + H/2;
+    ctx.save();
+    ctx.translate(x,y);
+    if(p.type==='boost'){
+      // little green arrow
+      ctx.fillStyle = '#6ae36a';
+      ctx.beginPath();
+      ctx.moveTo(-10,8); ctx.lineTo(0,-12); ctx.lineTo(10,8); ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(-6,8,12,3);
+    } else {
+      // banana/oil icon
+      ctx.fillStyle = '#ffd23f';
+      ctx.beginPath();
+      ctx.ellipse(0,0,10,6, -0.3, 0, Math.PI*2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(-7,4,14,3);
+    }
+    ctx.restore();
+  });
+
+  // draw cars sorted by depth (y) so overlapping looks coherent
+  const sorted = state.cars.slice().sort((a,b)=> (a.pos.y - b.pos.y));
+  sorted.forEach(car => car.draw(ctx, camX, camY));
+
+  // UI overlays: minimap-like simple, or current powerup (not implemented)
+  // message handled by DOM
+}
+
+/* Draw bush */
+function drawBush(ctx,x,y,r){
+  ctx.save();
+  ctx.translate(x,y);
+  // multiple circles
+  ctx.fillStyle = '#8dd58d';
+  ctx.beginPath();
+  ctx.ellipse(-r*0.3,0,r*0.9,r*0.6,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(r*0.4,-r*0.2,r*0.8,r*0.5,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#6fb96f';
+  ctx.beginPath();
+  ctx.ellipse(0,r*0.15,r*0.7,r*0.4,0,0,Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/* ---------- Menu & UI logic ---------- */
+const colorContainer = document.getElementById('colorChoices');
+let selectedColor = COLORS[0];
+
+// create color swatches (minimum 10 shown)
+(function createColorSwatches(){
+  const used = new Set();
+  for(let i=0;i<Math.max(10, COLORS.length); i++){
+    const c = COLORS[i % COLORS.length];
+    const div = document.createElement('div');
+    div.className = 'swatch';
+    div.style.background = c;
+    if(i===0){ div.classList.add('selected'); selectedColor = c; }
+    div.addEventListener('click', ()=>{
+      // toggle selection
+      [...colorContainer.children].forEach(ch => ch.classList.remove('selected'));
+      div.classList.add('selected');
+      selectedColor = c;
+      state.playerColor = c;
+    });
+    colorContainer.appendChild(div);
+  }
+})();
+
+document.getElementById('trackSelect').addEventListener('change', (e)=>{
+  state.trackIndex = parseInt(e.target.value);
+});
+document.getElementById('difficulty').addEventListener('change', (e)=>{
+  state.difficulty = parseInt(e.target.value);
+});
+
+document.getElementById('playBtn').addEventListener('click', ()=>{
+  // Assign player color and ensure NPCs don't have it
+  state.playerColor = selectedColor;
+  // hide menu and start
+  document.getElementById('menu').style.display = 'none';
+  resetGame();
+});
+
+document.getElementById('exitBtn').addEventListener('click', ()=>{
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('message').style.display = 'block';
+  document.getElementById('message').innerText = 'Has salido del juego. Actualiza la página para jugar otra vez.';
+});
+
+/* ---------- Input handling ---------- */
+window.addEventListener('keydown', (e)=>{
+  if(e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') input.left = true;
+  if(e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') input.right = true;
+  if(e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') input.up = true;
+  if(e.key === 'ArrowDown' || e.key.toLowerCase() === 's') input.down = true;
+  if(e.code === 'Space') input.use = true;
+});
+window.addEventListener('keyup', (e)=>{
+  if(e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') input.left = false;
+  if(e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') input.right = false;
+  if(e.key === 'ArrowUp' || e.key.toLowerCase() === 'w') input.up = false;
+  if(e.key === 'ArrowDown' || e.key.toLowerCase() === 's') input.down = false;
+  if(e.code === 'Space') input.use = false;
+});
+
+/* ---------- Messages ---------- */
+let msgTimer = null;
+function showMessage(txt, ms=1200){
+  const el = document.getElementById('message');
+  el.style.display = 'block';
+  el.innerText = txt;
+  if(msgTimer) clearTimeout(msgTimer);
+  msgTimer = setTimeout(()=>{ el.style.display='none'; }, ms);
+}
+
+/* ---------- Initialize ---------- */
+requestAnimationFrame(loop);
+
+// Expose some debug tools (optional)
+window.__state = state;
+window.__tracks = tracks;
+</script>
+</body>
+</html>
