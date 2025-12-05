@@ -53,7 +53,6 @@ canvas { display:block; background:#bde8c8; }
     </div>
   </div>
   <button id="playBtn" class="btn">Jugar</button>
-  <button id="exitBtn" class="btn" style="background:#f6f6f6">Salir</button>
 </div>
 
 <div id="hud">Vuelta: 0 | Pos: 1/10</div>
@@ -65,35 +64,29 @@ const ctx = canvas.getContext('2d');
 let W=canvas.width=window.innerWidth, H=canvas.height=window.innerHeight;
 window.addEventListener('resize',()=>{ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; });
 
-// Control de usuario
-let input={left:false,right:false,up:false,down:false,use:false};
+let input={left:false,right:false,up:false,down:false};
 window.addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft'||e.key==='a') input.left=true;
   if(e.key==='ArrowRight'||e.key==='d') input.right=true;
   if(e.key==='ArrowUp'||e.key==='w') input.up=true;
   if(e.key==='ArrowDown'||e.key==='s') input.down=true;
-  if(e.code==='Space') input.use=true;
 });
 window.addEventListener('keyup',e=>{
   if(e.key==='ArrowLeft'||e.key==='a') input.left=false;
   if(e.key==='ArrowRight'||e.key==='d') input.right=false;
   if(e.key==='ArrowUp'||e.key==='w') input.up=false;
   if(e.key==='ArrowDown'||e.key==='s') input.down=false;
-  if(e.code==='Space') input.use=false;
 });
 
 // Variables globales
 const COLORS=['#FF4B4B','#FF9A3C','#FFD166','#6EE7B7','#4CC9F0','#7C83FD','#E56ED1','#A3D39C','#FFB1C1','#C9F1FF'];
-const TOTAL_CARS=10; // 1 jugador + 9 NPC
+const TOTAL_CARS=10;
 let state={
   running:false,
   trackIndex:0,
   difficulty:1,
   playerColor:COLORS[0],
   cars:[],
-  powerups:[],
-  obstacles:[],
-  bushes:[],
   track:null,
   camera:{x:0,y:0}
 };
@@ -106,7 +99,7 @@ const colorChoices = document.getElementById('colorChoices');
 const playBtn = document.getElementById('playBtn');
 const hud = document.getElementById('hud');
 
-// Crear selector de colores
+// Selector de colores
 let selectedColor = COLORS[0];
 COLORS.forEach(c=>{
   const sw = document.createElement('div'); sw.className='swatch'; sw.style.background=c;
@@ -134,19 +127,12 @@ function makeOval(cx,cy,rx,ry,segments=180){
   return pts;
 }
 (function createTracks(){
-  // Track 0: Óvalo
   tracks.push({centerline:makeOval(0,0,1200,700,240),startPos:{x:0,y:-60,angle:-Math.PI/2}});
-  // Track 1: Montaña
-  const pts1=[];
-  for(let i=0;i<420;i++){ const t=i/420; pts1.push({x:-1600+t*3200, y:Math.sin(t*4*Math.PI)*600+Math.cos(t*2*Math.PI)*200}); }
+  const pts1=[]; for(let i=0;i<420;i++){ const t=i/420; pts1.push({x:-1600+t*3200, y:Math.sin(t*4*Math.PI)*600+Math.cos(t*2*Math.PI)*200}); }
   tracks.push({centerline:pts1,startPos:{x:pts1[0].x,y:pts1[0].y-100,angle:-Math.PI/2}});
-  // Track 2: Ciudad
-  const pts2=[]; const R=1400;
-  for(let i=0;i<360;i++){ const a=i*2*Math.PI/360; const r=R+250*Math.sin(a*4)+120*Math.cos(a*7); pts2.push({x:Math.cos(a)*r, y:Math.sin(a)*r}); }
+  const pts2=[]; const R=1400; for(let i=0;i<360;i++){ const a=i*2*Math.PI/360; const r=R+250*Math.sin(a*4)+120*Math.cos(a*7); pts2.push({x:Math.cos(a)*r, y:Math.sin(a)*r}); }
   tracks.push({centerline:pts2,startPos:{x:pts2[10].x,y:pts2[10].y-80,angle:0}});
-  // Track 3: Laberinto
-  const pts3=[]; const scale=900;
-  for(let i=0;i<600;i++){ const t=i/600; const a=t*6*Math.PI; pts3.push({x:Math.cos(a)*(scale*(0.8+0.2*Math.sin(a*3))), y:Math.sin(a)*(scale*(0.8+0.2*Math.cos(a*2)))}); }
+  const pts3=[]; const scale=900; for(let i=0;i<600;i++){ const t=i/600; const a=t*6*Math.PI; pts3.push({x:Math.cos(a)*(scale*(0.8+0.2*Math.sin(a*3))), y:Math.sin(a)*(scale*(0.8+0.2*Math.cos(a*2)))}); }
   tracks.push({centerline:pts3,startPos:{x:pts3[0].x,y:pts3[0].y-100,angle:Math.PI/2}});
 })();
 
@@ -192,9 +178,7 @@ function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo
 // ---------------- GAME ----------------
 function resetGame(){
   state.cars=[]; state.track=tracks[state.trackIndex]; state.camera={x:state.track.startPos.x,y:state.track.startPos.y};
-  // crear jugador
   state.cars.push(new Car('P',state.track.startPos.x,state.track.startPos.y,state.track.startPos.angle,state.playerColor,true));
-  // NPCs
   const avail=COLORS.filter(c=>c!==state.playerColor);
   for(let i=0;i<TOTAL_CARS-1;i++){ state.cars.push(new Car(i+1,state.track.startPos.x+Math.random()*50,state.track.startPos.y+Math.random()*50,state.track.startPos.angle,avail[i%avail.length])); }
   state.running=true; hud.style.display='block';
@@ -233,7 +217,6 @@ function update(dt){
 function render(){
   ctx.clearRect(0,0,W,H);
   const camX=state.camera.x, camY=state.camera.y;
-  // pista
   const line=state.track.centerline;
   ctx.save(); ctx.translate(W/2-camX,H/2-camY);
   ctx.lineWidth=220; ctx.strokeStyle='#4b4b4b'; ctx.beginPath();
