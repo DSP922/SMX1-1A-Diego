@@ -698,12 +698,545 @@
                  car.totalTime = 0;
                  car.speed = 0;
                  car.crossedLine = false; 
+            });<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Grand Prix - Circuito a 5 Vueltas (Mejorado)</title>
+    <style>
+        /* CSS: Estilos Generales y Visuales */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #0d1117; /* Fondo oscuro tipo asfalto */
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5); /* Resplandor neón */
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        /* Lienzo del juego - Aquí se dibujará la pista y los coches */
+        #gameCanvas {
+            border: 5px solid #ffcc00; /* Borde amarillo F1 */
+            background-color: #2c3e50; /* Color base de la pista */
+        }
+
+        /* Estilo del menú inicial */
+        #startMenu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #startMenu h1 {
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ffcc00;
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+
+        #startMenu button {
+            background-color: #e74c3c; /* Rojo intenso */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        #startMenu button:hover {
+            background-color: #c0392b;
+            transform: scale(1.05);
+        }
+
+        /* Estilo de la tabla clasificatoria (Fin del juego) */
+        #resultsTable {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+
+        #resultsTable h2 {
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ffcc00;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+
+        #resultsTable table {
+            width: 80%;
+            max-width: 600px;
+            border-collapse: collapse;
+            background-color: #1a1a1a;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        #resultsTable th, #resultsTable td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        #resultsTable th {
+            background-color: #e74c3c;
+            color: white;
+            font-size: 1.1em;
+        }
+
+        #resultsTable tr:nth-child(even) {
+            background-color: #2c3e50;
+        }
+        
+        #resultsTable tr.player-row {
+            background-color: #27ae60 !important; /* Destacar al jugador */
+            font-weight: bold;
+        }
+        
+        /* HUD - Información de la carrera */
+        #hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 5px;
+            color: white;
+            font-size: 1.2em;
+            z-index: 5;
+            display: none; /* Oculto por defecto */
+        }
+        
+        /* Indicador de cuenta regresiva */
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 8em;
+            color: #ffcc00;
+            text-shadow: 0 0 15px rgba(255, 204, 0, 0.8);
+            font-weight: bold;
+            z-index: 11;
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        
+        <div id="countdown">3</div>
+
+        <div id="hud">
+            Vueltas: <span id="laps">0/5</span> | Tiempo: <span id="time">00:00.00</span>
+        </div>
+
+        <div id="startMenu">
+            <h1>F1 SIMPLE RACER</h1>
+            <h2>Selecciona Dificultad</h2>
+            <button onclick="startGame(50)">FÁCIL (50 km/h)</button>
+            <button onclick="startGame(100)">NORMAL (100 km/h)</button>
+            <button onclick="startGame(150)">DIFÍCIL (150 km/h)</button>
+        </div>
+
+        <div id="resultsTable">
+            <h2>🏆 Resultados Finales 🏁</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Posición</th>
+                        <th>Piloto</th>
+                        <th>Tiempo Total</th>
+                    </tr>
+                </thead>
+                <tbody id="resultsBody">
+                    </tbody>
+            </table>
+            <button onclick="window.location.reload()">Jugar de Nuevo</button>
+        </div>
+    </div>
+
+    <script>
+        // JAVASCRIPT: Lógica del Juego
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const W = canvas.width;
+        const H = canvas.height;
+
+        let gameLoopId;
+        let gameActive = false;
+        let difficultySpeed = 0; 
+        const MAX_LAPS = 5;
+        
+        let raceStartTimestamp = 0; // Marca de tiempo cuando la carrera realmente comienza (después de la cuenta regresiva)
+        let raceStarted = false; 
+
+        // --- Configuración de Colores ---
+        const ALL_COLORS = [
+            '#ff0000', '#0000ff', '#00ff00', '#ffff00', '#ff00ff', 
+            '#00ffff', '#ffa500', '#800080', '#008000', '#ffc0cb'
+        ].slice(0, 9); // Solo 9 para los bots
+        
+        const PLAYER_COLOR = '#ffcc00'; // Color del jugador (Amarillo F1)
+
+        /**
+         * @typedef {Object} Car
+         * @property {number} x - Posición X
+         * @property {number} y - Posición Y
+         * @property {number} dx - Velocidad en X
+         * @property {number} dy - Velocidad en Y
+         * @property {number} angle - Ángulo de dirección (en radianes)
+         * @property {number} speed - Velocidad actual
+         * @property {string} color - Color del coche
+         * @property {string} name - Nombre del piloto
+         * @property {number} laps - Vueltas completadas
+         * @property {number} totalTime - Tiempo final de carrera
+         * @property {boolean} crossedLine - Flag para evitar conteo múltiple de vueltas
+         */
+
+        /** @type {Car} */
+        let player = {
+            x: 0, y: 0, dx: 0, dy: 0, angle: 0, speed: 0, 
+            color: PLAYER_COLOR, name: "JUGADOR", laps: 0, totalTime: 0, crossedLine: false
+        };
+
+        /** @type {Car[]} */
+        let cars = [player];
+
+        // --- Generar Bots ---
+        function createBots(numBots, speedBase) {
+            let availableColors = [...ALL_COLORS]; // Copia de la lista de colores
+            cars = [player]; // Reiniciar con solo el jugador
+
+            for (let i = 0; i < numBots; i++) {
+                const colorIndex = Math.floor(Math.random() * availableColors.length);
+                const botColor = availableColors.splice(colorIndex, 1)[0];
+
+                const botSpeed = speedBase * (0.9 + Math.random() * 0.2); // +/- 10%
+                
+                cars.push({
+                    x: 0, y: 0, dx: 0, dy: 0, angle: 0, speed: botSpeed, 
+                    color: botColor, name: `BOT ${i + 1}`, laps: 0, totalTime: 0, crossedLine: false
+                });
+            }
+        }
+        
+        // --- Constantes de Juego (Ajustadas para coches pequeños F1) ---
+        const CAR_WIDTH = 20; // Más pequeño
+        const CAR_HEIGHT = 10; // Más pequeño
+        const ACCELERATION = 0.25; // Menor para controles más finos
+        const DRAG = 0.98;
+        const MAX_PLAYER_SPEED = 4; // Velocidad máxima más controlable
+        const TURN_SPEED = 0.04;
+        const TRACK_MARGIN = 50; // Margen para los muros
+
+        // --- Controles de Teclado ---
+        let keys = {};
+        window.addEventListener('keydown', (e) => { keys[e.code] = true; });
+        window.addEventListener('keyup', (e) => { keys[e.code] = false; });
+
+        // --- Funciones de Dibujo ---
+
+        // Dibuja la pista y la meta (igual que en el código base, pero con lógica de vueltas)
+        function drawTrack() {
+            // Muros (líneas exteriores)
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = TRACK_MARGIN;
+            ctx.strokeRect(TRACK_MARGIN / 2, TRACK_MARGIN / 2, W - TRACK_MARGIN, H - TRACK_MARGIN);
+
+            // Asfalto
+            ctx.fillStyle = '#2c3e50';
+            ctx.fillRect(TRACK_MARGIN, TRACK_MARGIN, W - 2 * TRACK_MARGIN, H - 2 * TRACK_MARGIN);
+
+            // Meta (Estilo F1)
+            const finishLineX = TRACK_MARGIN;
+            const finishLineY = H / 2 - 20;
+            const finishLineW = 5;
+            const finishLineH = 40;
+
+            // Patrón a cuadros blanco y negro
+            for (let i = 0; i < finishLineH / 10; i++) {
+                ctx.fillStyle = (i % 2 === 0) ? 'black' : 'white';
+                ctx.fillRect(finishLineX, finishLineY + i * 10, finishLineW, 10);
+                
+                ctx.fillStyle = (i % 2 !== 0) ? 'black' : 'white';
+                ctx.fillRect(finishLineX + 5, finishLineY + i * 10, finishLineW, 10);
+            }
+            ctx.fillStyle = 'red';
+            ctx.fillRect(finishLineX - 5, finishLineY - 5, finishLineW + 15, 5); // Borde superior
+        }
+
+        // Dibuja el coche F1 (diseño revisado)
+        function drawCar(car) {
+            ctx.save();
+            // Mover y rotar el contexto al centro del coche
+            ctx.translate(car.x, car.y);
+            ctx.rotate(car.angle);
+            
+            const w = CAR_WIDTH;
+            const h = CAR_HEIGHT;
+            
+            // 1. Cuerpo principal (más alargado)
+            ctx.fillStyle = car.color;
+            ctx.fillRect(-w / 2, -h / 2, w, h);
+
+            // 2. Nariz (Front Wing/Alerón delantero)
+            ctx.fillStyle = 'black';
+            ctx.fillRect(w / 2 - 2, -h / 2 - 2, 4, h + 4);
+            
+            // 3. Cabina/Halo (Detalle blanco/plata)
+            ctx.fillStyle = 'white';
+            ctx.fillRect(-2, -h / 2 + 2, 5, h - 4);
+            
+            // 4. Ruedas (Detalle de sombreado, simplificado)
+            ctx.fillStyle = 'black';
+            ctx.fillRect(-w / 2 - 1, -h / 2 - 2, 2, 2); 
+            ctx.fillRect(-w / 2 - 1, h / 2, 2, 2); 
+            ctx.fillRect(w / 2 - 1, -h / 2 - 2, 2, 2); 
+            ctx.fillRect(w / 2 - 1, h / 2, 2, 2); 
+
+            ctx.restore();
+        }
+        
+        // Dibuja la flecha de identificación del jugador
+        function drawPlayerIndicator(car) {
+            ctx.save();
+            ctx.translate(car.x, car.y - CAR_HEIGHT - 5); // Arriba del coche
+            
+            ctx.fillStyle = 'yellow';
+            
+            // Dibuja un triángulo (flecha)
+            ctx.beginPath();
+            ctx.moveTo(0, -10); // Punta de la flecha
+            ctx.lineTo(-5, 0);  // Esquina izquierda
+            ctx.lineTo(5, 0);   // Esquina derecha
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // --- Lógica del Juego ---
+
+        // Actualiza el estado del jugador
+        function updatePlayer() {
+            if (!raceStarted) return; // No se mueve hasta que empiece la carrera
+
+            // 1. Controles
+            if (keys['ArrowUp'] || keys['KeyW']) {
+                player.speed += ACCELERATION;
+            } else if (keys['ArrowDown'] || keys['KeyS']) {
+                player.speed -= ACCELERATION * 0.7; // Frenar es más lento
+            } else {
+                player.speed *= DRAG; // Resistencia
+            }
+
+            player.speed = Math.min(Math.max(player.speed, -MAX_PLAYER_SPEED / 2), MAX_PLAYER_SPEED);
+
+            if (Math.abs(player.speed) > 0.1) {
+                if (keys['ArrowLeft'] || keys['KeyA']) {
+                    player.angle -= TURN_SPEED * (player.speed > 0 ? 1 : -1);
+                }
+                if (keys['ArrowRight'] || keys['KeyD']) {
+                    player.angle += TURN_SPEED * (player.speed > 0 ? 1 : -1);
+                }
+            }
+
+            // 2. Movimiento
+            player.dx = Math.cos(player.angle) * player.speed;
+            player.dy = Math.sin(player.angle) * player.speed;
+
+            player.x += player.dx;
+            player.y += player.dy;
+
+            // 3. Colisiones (Muros) - Rebote hacia atrás sin cambiar ángulo
+            const hitWall = (player.x < TRACK_MARGIN || player.x > W - TRACK_MARGIN || player.y < TRACK_MARGIN || player.y > H - TRACK_MARGIN);
+
+            if (hitWall) {
+                // Colisión detectada: Rebote
+                player.x -= player.dx * 1.5; // Retrocede más de lo que avanzó
+                player.y -= player.dy * 1.5;
+                player.speed = -player.speed * 0.2; // Pierde casi toda la velocidad y rebota suave
+
+                // Asegurar que esté dentro de los límites
+                player.x = Math.min(Math.max(player.x, TRACK_MARGIN), W - TRACK_MARGIN);
+                player.y = Math.min(Math.max(player.y, TRACK_MARGIN), H - TRACK_MARGIN);
+            }
+            
+            // 4. Chequeo de Meta/Vueltas
+            const finishLineX = TRACK_MARGIN;
+            const finishLineYMin = H / 2 - 20;
+            const finishLineYMax = H / 2 + 20;
+            
+            if (player.x < finishLineX + 10 && player.x > finishLineX - 10 &&
+                player.y > finishLineYMin && player.y < finishLineYMax) {
+                
+                if (player.laps < MAX_LAPS && !player.crossedLine) {
+                     player.laps++;
+                     document.getElementById('laps').textContent = `${player.laps}/${MAX_LAPS}`;
+                     player.crossedLine = true; 
+
+                     if (player.laps === MAX_LAPS) {
+                         endGame();
+                     }
+                }
+            } else {
+                player.crossedLine = false; // Resetear flag de cruce al salir de la zona de meta
+            }
+        }
+        
+        // IA simple del Bot
+        function updateBot(bot) {
+            if (!raceStarted) return; // No se mueve hasta que empiece la carrera
+
+             // El bot simplemente avanza y gira para mantenerse en el centro
+             const botSpeed = bot.speed / 15;
+
+             bot.dx = Math.cos(bot.angle) * botSpeed;
+             bot.dy = Math.sin(bot.angle) * botSpeed;
+
+             bot.x += bot.dx;
+             bot.y += bot.dy;
+             
+             // IA de giro simple
+             if (bot.y < H / 2 - 100) {
+                 bot.angle += 0.005; 
+             } else if (bot.y > H / 2 + 100) {
+                 bot.angle -= 0.005; 
+             }
+             bot.angle += (Math.random() - 0.5) * 0.005; // Pequeña variación
+             
+
+             // 3. Colisiones (Muros) - Simplemente rebota y gira
+             if (bot.x < TRACK_MARGIN || bot.x > W - TRACK_MARGIN || bot.y < TRACK_MARGIN || bot.y > H - TRACK_MARGIN) {
+                 bot.x -= bot.dx * 2; 
+                 bot.y -= bot.dy * 2;
+                 bot.angle += Math.PI / (10 + Math.random() * 5); // Gira ligeramente al azar
+             }
+
+             // 4. Chequeo de Meta/Tiempos (Simulación)
+             if (bot.laps < MAX_LAPS && player.laps > bot.laps) {
+                 // Si el jugador completó una vuelta, el bot también
+                 bot.laps = player.laps; 
+             }
+        }
+
+        // Bucle Principal del Juego
+        function gameLoop(timestamp) {
+            if (!raceStartTimestamp) raceStartTimestamp = timestamp; // Usamos esto para la cuenta regresiva
+
+            // 1. Gestión de la cuenta regresiva
+            const elapsedSinceStart = timestamp - raceStartTimestamp;
+            if (elapsedSinceStart < 3000) {
+                const secondsLeft = Math.ceil(3 - elapsedSinceStart / 1000);
+                document.getElementById('countdown').textContent = secondsLeft > 0 ? secondsLeft : 'GO!';
+                document.getElementById('countdown').style.display = 'block';
+                
+                if (secondsLeft <= 0) {
+                    if (!raceStarted) {
+                        raceStarted = true;
+                        document.getElementById('countdown').style.display = 'none';
+                        raceStartTimestamp = timestamp; // Reiniciar el tiempo para el HUD de carrera
+                    }
+                }
+            } else {
+                document.getElementById('countdown').style.display = 'none';
+            }
+
+            if (gameActive) {
+                // Borrar el canvas
+                ctx.clearRect(0, 0, W, H);
+
+                // Dibujar elementos estáticos
+                drawTrack();
+
+                // Actualizar y dibujar coches
+                updatePlayer();
+                cars.filter(car => car !== player).forEach(updateBot);
+
+                cars.forEach(drawCar);
+                
+                // Dibujar flecha indicadora del jugador (solo por los primeros 5 segundos de carrera real)
+                if (raceStarted && (timestamp - raceStartTimestamp < 5000)) {
+                    drawPlayerIndicator(player);
+                }
+
+                // Actualizar HUD
+                if (raceStarted) {
+                    const raceElapsed = timestamp - raceStartTimestamp;
+                    const totalSeconds = Math.floor(raceElapsed / 1000);
+                    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                    const seconds = String(totalSeconds % 60).padStart(2, '0');
+                    const ms = String(raceElapsed % 1000).padStart(3, '0').substring(0, 2);
+                    document.getElementById('time').textContent = `${minutes}:${seconds}.${ms}`;
+                }
+
+                gameLoopId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // --- Gestión de la Carrera ---
+
+        function startGame(speed) {
+            difficultySpeed = speed;
+            document.getElementById('startMenu').style.display = 'none';
+            document.getElementById('hud').style.display = 'block';
+
+            // Generar 9 bots
+            createBots(9, speed); 
+            
+            // Posicionar los coches en la parrilla de salida (Fila)
+            const startX = TRACK_MARGIN + 10;
+            const startYCenter = H / 2;
+            const spacing = CAR_HEIGHT + 5; // Espacio entre coches
+            const totalHeight = cars.length * spacing;
+            
+            cars.forEach((car, index) => {
+                 car.x = startX;
+                 car.y = startYCenter - (totalHeight / 2) + (index * spacing) + (spacing / 2);
+                 car.angle = 0; // Mirando a la derecha
+                 car.laps = 0;
+                 car.totalTime = 0;
+                 car.speed = 0; // Empiezan quietos
+                 car.crossedLine = false;
             });
             
             gameActive = true;
-            raceStarted = false; 
-            startTime = performance.now(); 
-            raceStartTimestamp = 0;
+            raceStarted = false; // El movimiento comienza después de la cuenta regresiva
+            raceStartTimestamp = performance.now(); // Iniciar el temporizador de cuenta regresiva
             gameLoopId = requestAnimationFrame(gameLoop);
         }
 
@@ -711,19 +1244,22 @@
             gameActive = false;
             cancelAnimationFrame(gameLoopId);
             
+            // Asignar el tiempo final del jugador
             player.totalTime = performance.now() - raceStartTimestamp;
             
-            // Asegurar que todos los bots tengan un tiempo para clasificar
+            // Asignar tiempos a los bots (simulación)
             cars.forEach(car => {
                 if (car.totalTime === 0) {
-                    // Usar la lógica de simulación de tiempo
-                    const timeOffset = (Math.random() * 8000 + 1000) * (difficultySpeed / 100); 
-                    car.totalTime = player.totalTime + timeOffset;
+                     // 1 a 10 segundos después del jugador, ajustado por dificultad
+                     const timeOffset = (Math.random() * 9000 + 1000) * (100 / difficultySpeed); 
+                     car.totalTime = player.totalTime + timeOffset; 
                 }
             });
 
+            // 1. Ordenar la tabla
             const finalResults = cars.sort((a, b) => a.totalTime - b.totalTime);
 
+            // 2. Llenar la tabla de resultados
             const resultsBody = document.getElementById('resultsBody');
             resultsBody.innerHTML = ''; 
             
@@ -743,6 +1279,7 @@
                 resultsBody.appendChild(tr);
             });
 
+            // 3. Mostrar la tabla
             document.getElementById('resultsTable').style.display = 'flex';
         }
 
@@ -754,57 +1291,8 @@
             return `${minutes}:${seconds}.${milliseconds}`;
         }
         
-        // --- Inicialización de Selectores ---
-        
-        function setupColorSelector() {
-            const selectorDiv = document.getElementById('colorSelector');
-            
-            PLAYER_COLOR_OPTIONS.forEach(color => {
-                const div = document.createElement('div');
-                div.className = 'color-option';
-                div.style.backgroundColor = color;
-                div.dataset.color = color;
-                
-                // Marcar el color por defecto (el amarillo brillante)
-                if (color === '#ffcc00') {
-                    div.classList.add('selected');
-                    playerColor = color;
-                }
-
-                div.addEventListener('click', () => {
-                    // Remover selección de todos
-                    document.querySelectorAll('.color-option').forEach(c => c.classList.remove('selected'));
-                    // Añadir al seleccionado
-                    div.classList.add('selected');
-                    playerColor = color;
-                });
-                selectorDiv.appendChild(div);
-            });
-        }
-        
-        function setupMapSelector() {
-            document.getElementById('mapSelector').addEventListener('click', (e) => {
-                if (e.target.classList.contains('map-preview')) {
-                    // Remover selección de todos
-                    document.querySelectorAll('.map-preview').forEach(m => m.classList.remove('selected-map'));
-                    // Añadir al seleccionado
-                    e.target.classList.add('selected-map');
-                    selectedMapIndex = parseInt(e.target.dataset.mapIndex);
-                    
-                    // Mostrar una previsualización estática del mapa seleccionado
-                    ctx.clearRect(0, 0, W, H);
-                    drawMap(selectedMapIndex);
-                }
-            });
-            // Inicializar la previsualización del mapa por defecto
-            ctx.clearRect(0, 0, W, H);
-            drawMap(selectedMapIndex);
-        }
-
-        // Llamar a las funciones de inicialización
-        setupColorSelector();
-        setupMapSelector();
-        document.getElementById('hud').style.display = 'none';
+        // Inicialización: Ocultar HUD y mostrar menú (ya hecho en CSS)
+        // document.getElementById('hud').style.display = 'none';
 
     </script>
 </body>
