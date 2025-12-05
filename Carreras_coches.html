@@ -3,202 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏎️ F1 Kart: El Desafío (Corregido)</title>
-    <style>
-        /* --- ESTILOS CSS --- */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: #333;
-        }
-
-        #game-container {
-            width: 1000px;
-            height: 700px;
-            background-color: #fff;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- MENÚ VISUALMENTE ATRACTIVO --- */
-        #main-menu {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #main-menu h1 {
-            font-size: 4em;
-            margin-bottom: 0.5em;
-            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
-        }
-
-        .menu-button {
-            background-color: #ff5722;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            margin: 10px;
-            font-size: 1.5em;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
-            box-shadow: 0 4px #c43800;
-        }
-
-        .menu-button:hover {
-            background-color: #e64a19;
-            transform: translateY(-2px);
-            box-shadow: 0 6px #c43800;
-        }
-
-        .menu-button:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px #c43800;
-        }
-
-        /* --- PANTALLA DE SELECCIÓN --- */
-        #selection-screen {
-            background-color: #eee;
-            padding: 20px;
-            text-align: center;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            flex-grow: 1;
-        }
-
-        #color-selector, #map-selector, #difficulty-selector {
-            margin-bottom: 25px;
-        }
-
-        .color-option {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: inline-block;
-            margin: 5px;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: border-color 0.2s;
-        }
-
-        .color-option.selected {
-            border-color: #ff5722;
-            transform: scale(1.1);
-        }
-        
-        .map-card {
-            background-color: #fff;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 8px;
-            display: inline-block;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.2s;
-            border: 3px solid transparent;
-        }
-
-        .map-card.selected {
-            border-color: #2a5298;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .difficulty-button {
-            background-color: #666;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 1em;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .difficulty-button.selected {
-            background-color: #4CAF50;
-            box-shadow: 0 3px #388E3C;
-        }
-
-        /* --- PANTALLA DE JUEGO --- */
-        #game-screen {
-            display: none;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        #game-canvas {
-            background-color: #b4e0b4; /* Césped Pastel */
-            flex-grow: 1;
-        }
-        
-        #hud {
-            padding: 10px;
-            background-color: #222;
-            color: white;
-            font-size: 1.1em;
-            display: flex;
-            justify-content: space-around;
-        }
-
-        /* --- UTILS --- */
-        .hidden {
-            display: none !important;
-        }
-    </style>
-</head>
-<body>
-
-<div id="game-container">
-    
-    <div id="main-menu">
-        <h1>🏎️ F1 KART CHALLENGE</h1>
-        <button class="menu-button" onclick="showSelectionScreen()">JUGAR</button>
-        <button class="menu-button" id="difficulty-display" onclick="showSelectionScreen()">DIFICULTAD: NORMAL</button>
-        <button class="menu-button" onclick="window.close(); alert('¡Gracias por jugar!');" style="background-color: #c0392b; box-shadow: 0 4px #a02a1b;">SALIR</button>
-    </div>
-
-    <div id="selection-screen" class="hidden">
-        <h2>⚙️ Configuración de Carrera</h2>
-        
-        <h3>Elige la Dificultad de los Bots:</h3>
-        <div id="difficulty-selector">
-            <button class="difficulty-button" data-difficulty="Facil" onclick="selectDifficulty('Facil')">Fácil</button>
-            <button class="difficulty-button selected" data-difficulty="Normal" onclick="selectDifficulty('Normal')">Normal</button>
-            <button class="difficulty-button" data-difficulty="Dificil" onclick="selectDifficulty('Dificil')">Difícil</button>
-            <button class="difficulty-button" data-difficulty="Experto" onclick="selectDifficulty('Experto')">Experto</button>
-        </div>
-        <p>Dificultad seleccionada: <strong id="selected-difficulty-name">Normal</strong></p>
-        <hr style="width: 80%; border-color: #ccc;">
-
-        <h3>Elige el Color de tu Kart:</h3>
-        <div id="color-selector">
-            </div>
-        <p>Color seleccionado: <strong id="selected-color-name">Ninguno</strong></p>
-        <hr style="width: 80%; border-color: #ccc;">
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏎️ F1 Kart: El Desafío (Corregido y Funcional)</title>
+    <title>🏎️ F1 Kart: El Desafío (Funcional)</title>
     <style>
         /* --- ESTILOS CSS --- */
         body {
@@ -382,13 +187,13 @@
         <h3>Elige el Color de tu Kart:</h3>
         <div id="color-selector">
             </div>
-        <p>Color seleccionado: <strong id="selected-color-name">Ninguno</strong></p>
+        <p>Color seleccionado: <strong id="selected-color-name">Rojo Pastel</strong></p>
         <hr style="width: 80%; border-color: #ccc;">
 
         <h3>Elige el Circuito:</h3>
         <div id="map-selector">
             </div>
-        <p>Mapa seleccionado: <strong id="selected-map-name">Ninguno</strong></p>
+        <p>Mapa seleccionado: <strong id="selected-map-name">El Bucle de la Muerte</strong></p>
         
         <button class="menu-button" onclick="startGame()" style="margin-top: 20px;">INICIAR CARRERA (1 Jugador + 9 Bots)</button>
         <button class="menu-button" style="background-color: #555; box-shadow: 0 4px #333;" onclick="showMainMenu()">VOLVER</button>
@@ -410,7 +215,7 @@
 </div>
 
 <script>
-    // --- LÓGICA JAVASCRIPT CORREGIDA ---
+    // --- LÓGICA JAVASCRIPT FINAL ---
 
     // 1. CONFIGURACIÓN
     const COLORES_DISPONIBLES = {
@@ -433,8 +238,10 @@
     };
 
     const BOT_COUNT = 9;
+    
+    // Asignación de valores por defecto al inicio
     let selectedColor = { name: "Rojo Pastel", hex: COLORES_DISPONIBLES["Rojo Pastel"] }; 
-    let selectedMap = "El Bucle de la Muerte"; 
+    let selectedMap = MAPAS[0]; 
     let selectedDifficulty = "Normal"; 
 
     // Variables de Juego Globales
@@ -446,26 +253,35 @@
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     
-    // Función para dibujar el menú de dificultad al inicio
+    // Función para dibujar el menú de dificultad (solución al problema de dificultad)
     function renderDifficultyOptions() {
         const selector = document.getElementById('difficulty-selector');
-        selector.innerHTML = ''; // Limpiar
-        for (const [name] of Object.entries(DIFICULTAD_MULTIPLIER)) {
-            const button = document.createElement('button');
-            button.className = 'difficulty-button';
-            button.textContent = name;
-            button.setAttribute('data-difficulty', name);
-            button.onclick = () => selectDifficulty(name);
-            if (name === selectedDifficulty) {
-                button.classList.add('selected');
+        // Solo renderizar si está vacío para evitar duplicados
+        if (selector.children.length === 0) {
+            for (const [name] of Object.entries(DIFICULTAD_MULTIPLIER)) {
+                const button = document.createElement('button');
+                button.className = 'difficulty-button';
+                button.textContent = name;
+                button.setAttribute('data-difficulty', name);
+                button.onclick = () => selectDifficulty(name);
+                selector.appendChild(button);
             }
-            selector.appendChild(button);
         }
+        
+        // Aplicar selección actual
+        document.querySelectorAll('.difficulty-button').forEach(btn => {
+            if (btn.getAttribute('data-difficulty') === selectedDifficulty) {
+                btn.classList.add('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        });
     }
 
 
     // 2. NAVEGACIÓN Y MENÚS
     function hideAllScreens() {
+        // Detener el bucle de juego si está corriendo
         if (gameLoopRequest) {
             cancelAnimationFrame(gameLoopRequest);
             gameLoopRequest = null;
@@ -481,7 +297,6 @@
     function showMainMenu() {
         hideAllScreens();
         document.getElementById('main-menu').classList.remove('hidden');
-        // Asegurarse de que el texto del botón de dificultad se actualice
         document.getElementById('difficulty-display').textContent = `DIFICULTAD: ${selectedDifficulty.toUpperCase()}`;
     }
 
@@ -489,7 +304,7 @@
         hideAllScreens();
         document.getElementById('selection-screen').classList.remove('hidden');
         
-        renderDifficultyOptions(); // Renderiza y selecciona la dificultad actual
+        renderDifficultyOptions();
         renderColorOptions();
         renderMapOptions();
         
@@ -499,33 +314,37 @@
         document.getElementById('selected-map-name').textContent = selectedMap;
     }
 
-    // 3. SELECCIÓN DE DIFICULTAD (Corregida)
+    // 3. SELECCIÓN DE DIFICULTAD
     function selectDifficulty(difficulty) {
         selectedDifficulty = difficulty;
         document.getElementById('selected-difficulty-name').textContent = difficulty;
         
+        // Actualizar la clase CSS
         document.querySelectorAll('.difficulty-button').forEach(btn => btn.classList.remove('selected'));
         document.querySelector(`.difficulty-button[data-difficulty="${difficulty}"]`).classList.add('selected');
     }
 
-    // 4. SELECCIÓN DE COLOR (Corregida)
+    // 4. SELECCIÓN DE COLOR
     function renderColorOptions() {
         const selector = document.getElementById('color-selector');
-        if (selector.children.length > 0) return; 
-        
-        for (const [name, hex] of Object.entries(COLORES_DISPONIBLES)) {
-            const div = document.createElement('div');
-            div.className = 'color-option';
-            div.style.backgroundColor = hex;
-            div.setAttribute('data-color-name', name);
-            div.setAttribute('data-color-hex', hex);
-            div.onclick = () => selectColor(name, div);
-            
-            if (selectedColor && selectedColor.name === name) {
-                div.classList.add('selected');
+        if (selector.children.length === 0) { // Solo renderizar una vez
+            for (const [name, hex] of Object.entries(COLORES_DISPONIBLES)) {
+                const div = document.createElement('div');
+                div.className = 'color-option';
+                div.style.backgroundColor = hex;
+                div.setAttribute('data-color-name', name);
+                div.setAttribute('data-color-hex', hex);
+                div.onclick = () => selectColor(name, div);
+                selector.appendChild(div);
             }
-            selector.appendChild(div);
         }
+        // Aplicar la selección actual
+        document.querySelectorAll('.color-option').forEach(el => {
+            el.classList.remove('selected');
+            if (el.getAttribute('data-color-name') === selectedColor.name) {
+                el.classList.add('selected');
+            }
+        });
     }
 
     function selectColor(name, element) {
@@ -535,20 +354,24 @@
         document.getElementById('selected-color-name').textContent = name;
     }
 
-    // 5. SELECCIÓN DE MAPA (Corregida)
+    // 5. SELECCIÓN DE MAPA
     function renderMapOptions() {
         const selector = document.getElementById('map-selector');
-        if (selector.children.length > 0) return;
-
-        MAPAS.forEach(mapName => {
-            const card = document.createElement('div');
-            card.className = 'map-card';
-            card.textContent = mapName;
-            card.onclick = () => selectMap(mapName, card);
-            if (selectedMap === mapName) {
-                card.classList.add('selected');
+        if (selector.children.length === 0) { // Solo renderizar una vez
+            MAPAS.forEach(mapName => {
+                const card = document.createElement('div');
+                card.className = 'map-card';
+                card.textContent = mapName;
+                card.onclick = () => selectMap(mapName, card);
+                selector.appendChild(card);
+            });
+        }
+        // Aplicar la selección actual
+        document.querySelectorAll('.map-card').forEach(el => {
+            el.classList.remove('selected');
+            if (el.textContent === selectedMap) {
+                el.classList.add('selected');
             }
-            selector.appendChild(card);
         });
     }
 
@@ -568,7 +391,7 @@
 
         // 6.1 Configuración del Jugador
         playerKart.color = selectedColor.hex;
-        playerKart.x = 100; // Posición de inicio corregida
+        playerKart.x = 100; 
         playerKart.y = 100;
         playerKart.angle = 90;
         playerKart.speed = 0;
@@ -580,7 +403,7 @@
         document.getElementById('game-screen').classList.remove('hidden');
         document.getElementById('hud-difficulty').textContent = selectedDifficulty.toUpperCase();
 
-        // 6.3 Iniciar el Bucle de Juego con requestAnimationFrame
+        // 6.3 Iniciar el Bucle de Juego 
         document.addEventListener('keydown', handleKeyDown);
         document.addEventListener('keyup', handleKeyUp);
         gameLoopRequest = requestAnimationFrame(gameLoop);
@@ -598,10 +421,9 @@
 
         for (let i = 0; i < BOT_COUNT; i++) {
             botKarts.push({
-                // Posición de inicio escalonada, cerca del jugador
                 x: 100 + (i % 3) * 30, 
                 y: 120 + Math.floor(i / 3) * 30, 
-                angle: 90 + (Math.random() - 0.5) * 10, // Ángulo ligeramente variado
+                angle: 90 + (Math.random() - 0.5) * 10, 
                 speed: 0,
                 maxSpeed: playerKart.maxSpeed * botSpeedFactor * (0.9 + Math.random() * 0.2), 
                 color: shuffledColors[i],
@@ -666,7 +488,6 @@
         botKarts.forEach(bot => {
             bot.speed = bot.maxSpeed * 0.9;
             
-            // Simulación de AI: Giro aleatorio para evitar que se queden quietos
             if (Math.random() < 0.05) {
                 bot.rotationSpeed = (Math.random() - 0.5) * 6; 
             }
@@ -676,7 +497,7 @@
             bot.x += bot.speed * Math.cos(bot.angle * Math.PI / 180);
             bot.y -= bot.speed * Math.sin(bot.angle * Math.PI / 180);
 
-            // Mantener bots dentro de los límites del mapa (simulación de colisión con borde)
+            // Colisión con borde
             const padding = 50;
             if (bot.x < padding || bot.x > canvas.width - padding || bot.y < padding || bot.y > canvas.height - padding) {
                 if (bot.x < padding || bot.x > canvas.width - padding) {
@@ -745,7 +566,6 @@
         ctx.fillText("META", 110, 125);
 
         // 10.3. Dibujar Karts (Jugador y Bots)
-        // Dibujar bots primero, luego jugador para que el jugador esté encima
         [...botKarts].forEach(kart => drawKart(kart)); 
         drawKart(playerKart); 
     }
@@ -785,13 +605,10 @@
         ctx.restore();
     }
 
-    // 11. INICIALIZACIÓN
+    // 11. INICIALIZACIÓN (Solución al fallo de la pantalla en blanco)
     document.addEventListener('DOMContentLoaded', () => {
-        // Inicializar los valores por defecto antes de mostrar el menú
-        selectedColor = { name: "Rojo Pastel", hex: COLORES_DISPONIBLES["Rojo Pastel"] };
-        selectedMap = "El Bucle de la Muerte";
-        selectedDifficulty = "Normal";
-
+        // ESTA ES LA CLAVE: Asegurarse de que los valores por defecto se apliquen 
+        // y se muestre el menú principal de forma inmediata.
         showMainMenu();
     });
 </script>
