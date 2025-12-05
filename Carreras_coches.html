@@ -1,154 +1,137 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Mini-Race: Karts HTML (todo en un archivo)</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mini-Race: Karts HTML</title>
 <style>
-  html,body { height:100%; margin:0; font-family: "Segoe UI", Roboto, Arial; background:#e8f6ff; }
-  canvas { display:block; background:#BDE8C8; } /* pastel green off-road */
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; font-family:sans-serif; }
+  canvas { display:block; background:#bde8c8; }
   #menu {
-    position: absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    width:760px; max-width:95%;
-    background: linear-gradient(180deg,#bfdff8,#cfe8ff);
-    border-radius:16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    padding:24px; text-align:center;
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    width:600px; max-width:90%; background:linear-gradient(#bfdff8,#cfe8ff);
+    border-radius:16px; padding:20px; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,0.2);
   }
-  #menu h1 { margin:6px 0 12px; font-size:28px; color:#033a6b; }
-  .controls { display:flex; gap:12px; justify-content:center; align-items:center; margin:12px 0 18px; flex-wrap:wrap; }
-  .btn { background:#fff; border:2px solid rgba(0,0,0,0.08); padding:10px 18px; border-radius:10px; cursor:pointer; font-weight:600; }
-  .btn:hover { transform:translateY(-3px); box-shadow:0 6px 16px rgba(0,0,0,0.08); }
-  .small { padding:8px 12px; font-size:14px; }
-  .color-sel { display:flex; gap:8px; flex-wrap:wrap; justify-content:center; width:100%; }
-  .swatch { width:36px; height:36px; border-radius:6px; border:3px solid rgba(255,255,255,0.6); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.15); }
-  .swatch.selected { outline:3px solid rgba(0,0,0,0.15); transform:scale(1.05); }
-  .difficulty { padding:8px 12px; border-radius:8px; border:1px solid rgba(0,0,0,0.08); background:#fff; }
-  #hud { position: absolute; left:12px; top:12px; color:#06324a; background:rgba(255,255,255,0.8); padding:8px 12px; border-radius:10px; font-weight:600; display:none; }
-  #message { position:absolute; right:12px; top:12px; background:rgba(255,255,255,0.9); padding:8px 12px; border-radius:10px; color:#05314a; display:none; }
-  footer { position:absolute; bottom:10px; left:50%; transform:translateX(-50%); color:#045; font-size:12px; opacity:0.9; }
+  .btn { margin:10px; padding:10px 20px; border:none; border-radius:10px; background:#fff; cursor:pointer; font-weight:bold; }
+  #hud { position:absolute; left:12px; top:12px; color:#06324a; background:rgba(255,255,255,0.8); padding:8px 12px; border-radius:10px; font-weight:600; display:none; }
 </style>
 </head>
 <body>
+
 <canvas id="game"></canvas>
 
 <div id="menu">
   <h1>Mini-Race: Karts</h1>
-  <div style="font-size:14px;color:#04385a;margin-bottom:8px;">Elige circuito, color, dificultad y pulsa Jugar</div>
-  <div class="controls">
-    <div>
-      <label style="display:block;font-weight:700;color:#033a6b;margin-bottom:6px">Circuito</label>
-      <select id="trackSelect" class="difficulty small">
-        <option value="0">Circuito 1 — Óvalo amplio</option>
-        <option value="1">Circuito 2 — Montaña con curvas</option>
-        <option value="2">Circuito 3 — Ciudad larga</option>
-        <option value="3">Circuito 4 — Laberinto grande</option>
-      </select>
-    </div>
-    <div>
-      <label style="display:block;font-weight:700;color:#033a6b;margin-bottom:6px">Dificultad</label>
-      <select id="difficulty" class="difficulty small">
-        <option value="0">Fácil</option>
-        <option value="1" selected>Normal</option>
-        <option value="2">Difícil</option>
-      </select>
-    </div>
-    <div style="min-width:220px">
-      <label style="display:block;font-weight:700;color:#033a6b;margin-bottom:6px">Color del jugador</label>
-      <div id="colorChoices" class="color-sel"></div>
-    </div>
-  </div>
-  <div style="margin-top:8px">
-    <button id="playBtn" class="btn" style="margin-right:10px">Jugar</button>
-    <button id="exitBtn" class="btn" style="background:#f6f6f6">Salir</button>
-  </div>
-  <div style="margin-top:14px;font-size:12px;color:#05324a">Controles: A/D o ←/→ para girar, W/↑ acelerar, S/↓ frenar, Espacio para usar power-up</div>
+  <button id="playBtn" class="btn">Jugar</button>
 </div>
 
-<div id="hud">Vuelta: 0 &nbsp;|&nbsp; Pos: 1/&nbsp;10</div>
-<div id="message"></div>
-<footer>Hecho con ♥ — Karts top-down (ventana negra) — Código en un solo archivo</footer>
+<div id="hud">Vuelta: 0 | Pos: 1/10</div>
 
 <script>
-// --- CONFIG ---
-const CANVAS = document.getElementById('game');
-const ctx = CANVAS.getContext('2d');
-let W = CANVAS.width = window.innerWidth;
-let H = CANVAS.height = window.innerHeight;
-window.addEventListener('resize', ()=>{ W = CANVAS.width = window.innerWidth; H = CANVAS.height = window.innerHeight; });
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let W = canvas.width = window.innerWidth;
+let H = canvas.height = window.innerHeight;
+window.addEventListener('resize', ()=>{ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; });
 
-const ROAD_WIDTH = 220, NUM_NPCS = 9, TOTAL_CARS = 1 + NUM_NPCS;
-const COLORS = ['#FF4B4B','#FF9A3C','#FFD166','#6EE7B7','#4CC9F0','#7C83FD','#E56ED1','#A3D39C','#FFB1C1','#C9F1FF','#F4D35E','#8AB6FF','#9BE7E0'];
-const input = { left:false, right:false, up:false, down:false, use:false };
-let state = { running:false, trackIndex:0, difficulty:1, playerColor:COLORS[0], cars:[], powerups:[], obstacles:[], bushes:[], lapCount:{}, track:null, camera:{x:0,y:0} };
+const input = { left:false, right:false, up:false, down:false };
+window.addEventListener('keydown', e=>{
+  if(e.key==='ArrowLeft'||e.key==='a') input.left=true;
+  if(e.key==='ArrowRight'||e.key==='d') input.right=true;
+  if(e.key==='ArrowUp'||e.key==='w') input.up=true;
+  if(e.key==='ArrowDown'||e.key==='s') input.down=true;
+});
+window.addEventListener('keyup', e=>{
+  if(e.key==='ArrowLeft'||e.key==='a') input.left=false;
+  if(e.key==='ArrowRight'||e.key==='d') input.right=false;
+  if(e.key==='ArrowUp'||e.key==='w') input.up=false;
+  if(e.key==='ArrowDown'||e.key==='s') input.down=false;
+});
 
-// --- HELPERS ---
-function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
-function dist(a,b){ return Math.hypot(a.x-b.x, a.y-b.y); }
-function rand(min,max){ return Math.random()*(max-min)+min; }
-function randInt(min,max){ return Math.floor(rand(min,max+1)); }
-function choose(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
-function normalizeAngle(a){ while(a>Math.PI) a-=2*Math.PI; while(a<-Math.PI) a+=2*Math.PI; return a; }
-function pointDist(x1,y1,x2,y2){ return Math.hypot(x2-x1, y2-y1); }
-
-// --- TRACKS ---
-const tracks = [];
-function makeOval(cx,cy,rx,ry,rot=0, segments=180){
-  const pts=[]; for(let i=0;i<segments;i++){ const a=(i/segments)*Math.PI*2; const x=cx+Math.cos(a)*rx*Math.cos(rot)-Math.sin(a)*ry*Math.sin(rot); const y=cy+Math.cos(a)*rx*Math.sin(rot)+Math.sin(a)*ry*Math.cos(rot); pts.push({x,y}); } return pts;
+// --- TRACK SIMPLE (ÓVALO) ---
+const track = [];
+for(let i=0;i<360;i+=2){
+  const angle = i * Math.PI/180;
+  track.push({x: Math.cos(angle)*400, y: Math.sin(angle)*200});
 }
-(function createTracks(){
-  const t0={centerline:makeOval(0,0,1200,700,0,240),startPos:{x:0,y:-60,angle:-Math.PI/2},checkpoints:[0,60,120,180],name:"Óvalo amplio"}; tracks.push(t0);
-  const pts1=[]; for(let i=0;i<420;i++){ const t=i/420; const x=-1600+t*3200; const y=Math.sin(t*Math.PI*4)*600+Math.cos(t*Math.PI*2)*200; pts1.push({x,y}); } tracks.push({centerline:pts1,startPos:{x:pts1[0].x,y:pts1[0].y-100,angle:-Math.PI/2},checkpoints:[0,105,210,315],name:"Montaña con curvas"});
-  const pts2=[]; const R=1400; for(let i=0;i<360;i++){ const a=i*Math.PI*2/360; const r=R+250*Math.sin(a*4)+120*Math.cos(a*7); pts2.push({x:Math.cos(a)*r,y:Math.sin(a)*r}); } tracks.push({centerline:pts2,startPos:{x:pts2[10].x,y:pts2[10].y-80,angle:0},checkpoints:[0,90,180,270],name:"Ciudad larga"});
-  const pts3=[]; const scale=900; for(let i=0;i<600;i++){ const t=i/600; const a=t*Math.PI*6; pts3.push({x:Math.cos(a)*(scale*(0.8+0.2*Math.sin(a*3))),y:Math.sin(a)*(scale*(0.8+0.2*Math.cos(a*2)))}); } tracks.push({centerline:pts3,startPos:{x:pts3[0].x,y:pts3[0].y-100,angle:Math.PI/2},checkpoints:[0,150,300,450],name:"Laberinto grande"});
-})();
 
-// --- CAR CLASS ---
-class Car{
-  constructor(id,x,y,angle,color,isPlayer=false){ this.id=id; this.pos={x,y}; this.angle=angle; this.speed=0; this.steering=0; this.throttle=0; this.maxSpeed=4+Math.random()*0.8; this.size=18+(Math.random()*6-3); this.color=color; this.isPlayer=isPlayer; this.currentWaypoint=0; this.laps=0; this.boostTimer=0; this.oiled=0; this.stunned=0; this.rank=1; this.lastPositions=[]; }
-  update(dt){
-    if(this.stunned>0){ this.stunned-=dt; this.speed*=0.98; return; }
-    let maxS=this.maxSpeed*(1+(this.boostTimer>0?0.8:0));
-    if(this.boostTimer>0) this.boostTimer-=dt;
-    if(this.oiled>0){ this.oiled-=dt; maxS*=0.6; }
+// --- CAR ---
+class Car {
+  constructor(x,y,color,isPlayer=false){
+    this.pos={x,y}; this.angle=0; this.speed=0; this.color=color; this.isPlayer=isPlayer;
+  }
+  update(){
     if(this.isPlayer){
-      this.speed+=(this.throttle>0?0.12*this.throttle:-0.06)*dt*60;
-      this.speed=clamp(this.speed,-1.2,maxS);
-      const steerFactor=clamp(this.speed/(maxS*0.6),0.05,1); this.angle+=this.steering*0.045*steerFactor*dt*60;
-    }else{ this.updateAI(dt,maxS); }
-    this.pos.x+=Math.cos(this.angle)*this.speed*dt*60; this.pos.y+=Math.sin(this.angle)*this.speed*dt*60;
-    this.speed*=0.995;
-    this.lastPositions.push({x:this.pos.x,y:this.pos.y}); if(this.lastPositions.length>5) this.lastPositions.shift();
+      if(input.up) this.speed+=0.1;
+      if(input.down) this.speed-=0.1;
+      if(input.left) this.angle-=0.04;
+      if(input.right) this.angle+=0.04;
+      this.speed*=0.98;
+      this.pos.x+=Math.cos(this.angle)*this.speed;
+      this.pos.y+=Math.sin(this.angle)*this.speed;
+    }
   }
-  updateAI(dt,maxS){ const line=state.track.centerline; if(!line||line.length===0) return; const wp=line[this.currentWaypoint%line.length]; const dx=wp.x-this.pos.x; const dy=wp.y-this.pos.y; const targetAngle=Math.atan2(dy,dx); let angleDiff=normalizeAngle(targetAngle-this.angle); this.steering=clamp(angleDiff*2,-1,1); const nextWp=line[(this.currentWaypoint+3)%line.length]; const curvature=Math.hypot(nextWp.x-wp.x,nextWp.y-wp.y); const diff=state.difficulty; const baseThrottle=0.9-diff*0.25-(curvature<100?0.35:0)+(Math.random()*0.2-0.1); this.throttle=clamp(baseThrottle,-0.4,1); const distance=Math.hypot(dx,dy); if(distance<120) this.currentWaypoint=(this.currentWaypoint+1)%line.length; this.angle+=(Math.random()*0.002-0.001)*(1+diff*0.5); this.speed+=this.throttle*0.1*dt*(1+diff*0.06); this.speed=clamp(this.speed,-0.6,maxS); }
-  draw(ctx,camX,camY){
-    const x=this.pos.x-camX+W/2, y=this.pos.y-camY+H/2; ctx.save(); ctx.translate(x,y); ctx.rotate(this.angle); ctx.fillStyle=this.color; roundRect(ctx,-22,-12,44,24,6); ctx.fill();
-    ctx.beginPath(); ctx.moveTo(22,0); ctx.lineTo(32,-10); ctx.lineTo(28,0); ctx.lineTo(32,10); ctx.closePath(); ctx.fill();
-    ctx.fillStyle='#000'; roundRect(ctx,-6,-10,12,12,4); ctx.fill();
-    ctx.fillStyle='#222'; ctx.fillRect(-16,-18,8,4); ctx.fillRect(-16,14,8,4); ctx.fillRect(8,-18,8,4); ctx.fillRect(8,14,8,4);
-    ctx.strokeStyle='rgba(255,255,255,0.12)'; ctx.lineWidth=1; roundRect(ctx,-22,-12,44,24,6); ctx.stroke();
-    if(!this.isPlayer){ ctx.fillStyle='rgba(0,0,0,0.7)'; ctx.font='10px Arial'; ctx.textAlign='center'; ctx.fillText(this.id,8,4); } ctx.restore();
+  draw(ctx,cam){
+    const x=this.pos.x-cam.x+W/2;
+    const y=this.pos.y-cam.y+H/2;
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(this.angle);
+    ctx.fillStyle=this.color;
+    ctx.fillRect(-15,-10,30,20);
+    ctx.restore();
   }
 }
 
-// --- GAME LOGIC ---
-function resetGame(){
-  state.cars=[]; state.powerups=[]; state.obstacles=[]; state.bushes=[]; const t=tracks[state.trackIndex]; state.track=t;
-  const line=t.centerline;
-  for(let i=0;i<line.length;i+=Math.floor(line.length/80)){ if(Math.random()<0.35){ const p=line[i]; const off=perpOffset(i,rand(-1,1)*(ROAD_WIDTH+rand(70,220))); state.bushes.push({x:p.x+off.x,y:p.y+off.y,r:8+Math.random()*12}); } }
-  for(let i=0;i<25;i++){ const idx=randInt(0,line.length-1); const p=line[idx]; const off=perpOffset(idx,rand(-1,1)*(ROAD_WIDTH+rand(40,260))); state.obstacles.push({x:p.x+off.x,y:p.y+off.y,r:12+rand(6,28)}); }
-  const palette=COLORS.slice(); const avail=palette.filter(c=>c!==state.playerColor);
-  while(avail.length<NUM_NPCS) avail.push('#'+Math.floor(Math.random()*16777215).toString(16));
-  const startP=line[0]; for(let i=0;i<TOTAL_CARS;i++){ const angle=t.startPos.angle; const offset=(i-Math.floor(TOTAL_CARS/2))*28; const sx=startP.x+Math.cos(angle+Math.PI/2)*offset; const sy=startP.y+Math.sin(angle+Math.PI/2)*offset;
-    if(i===0){ state.cars.push(new Car('P',sx,sy,angle,state.playerColor,true)); } else { const npc=new Car(i,sx,sy,angle,avail[(i-1)%avail.length],false); npc.maxSpeed*=(1+state.difficulty*0.22+Math.random()*0.12); npc.currentWaypoint=randInt(0,line.length-1); state.cars.push(npc); }
+// --- JUEGO ---
+let player;
+let npcs=[];
+let running=false;
+let cam={x:0,y:0};
+
+function startGame(){
+  document.getElementById('menu').style.display='none';
+  document.getElementById('hud').style.display='block';
+  player=new Car(track[0].x, track[0].y, 'red', true);
+  npcs=[];
+  for(let i=0;i<5;i++){
+    npcs.push(new Car(track[0].x+Math.random()*50, track[0].y+Math.random()*50, 'blue'));
   }
-  spawnPowerups(8); state.camera.x=state.cars[0].pos.x; state.camera.y=state.cars[0].pos.y; state.running=true;
+  running=true;
+  requestAnimationFrame(loop);
 }
 
-function spawnPowerups(n){ for(let i=0;i<n;i++){ const idx=randInt(0,state.track.centerline.length-1); const p=state.track.centerline[idx]; const off=perpOffset(idx,rand(-ROAD_WIDTH*0.6,ROAD_WIDTH*0.6)); const type=Math.random()<0.6?'boost':'oil'; state.powerups.push({x:p.x+off.x,y:p.y+off.y,type,id:Math.random().toString(36).slice(2)}); } }
+// --- LOOP ---
+function loop(){
+  if(!running) return;
+  ctx.clearRect(0,0,W,H);
+  
+  // CAMARA
+  cam.x=player.pos.x;
+  cam.y=player.pos.y;
 
-function perpOffset(idx,distance){ const line=state.track.centerline; const a=idx%line.length,b=(a+1)%line.length; const p=line[a],q=line[b]; const dx=q.x-p.x,dy=q.y-p.y,len=Math.hypot(dx,dy)||1; return {x:-dy/len*distance, y:dx/len*distance}; }
+  // DIBUJAR PISTA
+  ctx.strokeStyle='gray';
+  ctx.lineWidth=60;
+  ctx.beginPath();
+  for(let i=0;i<track.length;i++){
+    const p=track[i];
+    const x=p.x-cam.x+W/2, y=p.y-cam.y+H/2;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.stroke();
 
-function nearestCenterlinePoint(x,y){ const line=state.track.centerline; let bestIdx=0,bestD=Infinity; for(let i=0;i<line.length;i+=4){ const d=pointDist(x,y,line[i].x,line[i].y); if(d<bestD){ bestD=d; bestIdx=i; } } for(let i=Math.max(0,bestIdx-5);i<=Math.min(line.length-1,bestIdx+5);i++){ const d=pointDist(x,y,line[i].x,line[i].y); if(d<bestD){ bestD=d; bestIdx=i; } } return {idx:bestIdx,d:bestD}; }
+  // ACTUALIZAR Y DIBUJAR CARS
+  player.update();
+  player.draw(ctx,cam);
+  for(let npc of npcs){ npc.update(); npc.draw(ctx,cam); }
 
-function drawTrack(ctx,
+  requestAnimationFrame(loop);
+}
+
+// --- BOTÓN ---
+document.getElementById('playBtn').addEventListener('click', startGame);
+</script>
+</body>
+</html>
