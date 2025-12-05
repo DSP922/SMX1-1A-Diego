@@ -1,617 +1,309 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏎️ F1 Kart: El Desafío (Funcional)</title>
-    <style>
-        /* --- ESTILOS CSS --- */
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: #333;
-        }
-
-        #game-container {
-            width: 1000px;
-            height: 700px;
-            background-color: #fff;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            border-radius: 15px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* --- MENÚ VISUALMENTE ATRACTIVO --- */
-        #main-menu {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            padding: 40px;
-            text-align: center;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #main-menu h1 {
-            font-size: 4em;
-            margin-bottom: 0.5em;
-            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
-        }
-
-        .menu-button {
-            background-color: #ff5722;
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            margin: 10px;
-            font-size: 1.5em;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s, transform 0.1s;
-            box-shadow: 0 4px #c43800;
-        }
-
-        .menu-button:hover {
-            background-color: #e64a19;
-            transform: translateY(-2px);
-            box-shadow: 0 6px #c43800;
-        }
-
-        .menu-button:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px #c43800;
-        }
-
-        /* --- PANTALLA DE SELECCIÓN --- */
-        #selection-screen {
-            background-color: #eee;
-            padding: 20px;
-            text-align: center;
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            flex-grow: 1;
-        }
-
-        #color-selector, #map-selector, #difficulty-selector {
-            margin-bottom: 25px;
-        }
-
-        .color-option {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: inline-block;
-            margin: 5px;
-            cursor: pointer;
-            border: 3px solid transparent;
-            transition: border-color 0.2s;
-        }
-
-        .color-option.selected {
-            border-color: #ff5722;
-            transform: scale(1.1);
-        }
-        
-        .map-card {
-            background-color: #fff;
-            padding: 15px;
-            margin: 10px;
-            border-radius: 8px;
-            display: inline-block;
-            cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            transition: box-shadow 0.2s;
-            border: 3px solid transparent;
-        }
-
-        .map-card.selected {
-            border-color: #2a5298;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .difficulty-button {
-            background-color: #666;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            margin: 5px;
-            font-size: 1em;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .difficulty-button.selected {
-            background-color: #4CAF50;
-            box-shadow: 0 3px #388E3C;
-        }
-
-        /* --- PANTALLA DE JUEGO --- */
-        #game-screen {
-            display: none;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        #game-canvas {
-            background-color: #b4e0b4; /* Césped Pastel */
-            flex-grow: 1;
-        }
-        
-        #hud {
-            padding: 10px;
-            background-color: #222;
-            color: white;
-            font-size: 1.1em;
-            display: flex;
-            justify-content: space-around;
-        }
-
-        /* --- UTILS --- */
-        .hidden {
-            display: none !important;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TurboTrack — Juego de Carreras (HTML) — Mejorado</title>
+<style>
+:root{--bg1:#0f172a;--bg2:#081226;--accent:#00e5a8;--card:#061427}
+*{box-sizing:border-box;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#e6eef8}
+.app{display:grid;grid-template-rows:auto 1fr;padding:28px;gap:18px;min-height:100vh}
+.header{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;gap:14px;align-items:center}
+.logo .badge{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700;box-shadow:0 8px 26px rgba(0,0,0,.5)}
+.title{font-size:20px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.01));backdrop-filter: blur(6px);border-radius:14px;padding:18px;box-shadow:0 10px 30px rgba(2,6,23,0.6)}
+.menu{display:flex;gap:18px;align-items:flex-start}
+.left{width:360px}
+.right{flex:1;display:flex;flex-direction:column;gap:18px}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;border:0;background:linear-gradient(90deg,#0f1724,#071022);color:#e6eef8;cursor:pointer}
+.btn.primary{background:linear-gradient(90deg,#06b6d4,#7c3aed);box-shadow:0 8px 22px rgba(124,58,237,0.18);}
+.control-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.selector{padding:10px;border-radius:10px;background:rgba(255,255,255,0.02);min-width:0}
+.color-swatch{width:32px;height:32px;border-radius:6px;cursor:pointer;border:2px solid rgba(255,255,255,0.04)}
+.preview{display:flex;gap:10px;align-items:center}
+.canvas-wrap{position:relative;overflow:hidden;border-radius:12px}
+#gameCanvas{width:100%;height:600px;background:linear-gradient(180deg,#0b1220,#061228);display:block}
+.hud{position:absolute;left:12px;top:12px;background:linear-gradient(180deg,rgba(3,7,18,0.65),rgba(3,7,18,0.25));padding:8px 10px;border-radius:10px;font-weight:700}
+.info{display:flex;gap:12px;align-items:center}
+.small{font-size:12px;color:#a9c0d8}
+.map-preview{width:78px;height:56px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.03)}
+.legend{display:flex;flex-direction:column;gap:8px}
+.footer{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#9fb0c8}
+.controls{font-size:13px;color:#cfeef0}
+.overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,6,23,0.6),rgba(2,6,23,0.65));display:flex;align-items:center;justify-content:center}
+.leaderboard{background:linear-gradient(180deg,#061427,#082034);padding:18px;border-radius:12px;box-shadow:0 12px 40px rgba(2,8,20,0.7);min-width:520px}
+.lb-row{display:flex;justify-content:space-between;padding:8px 12px;border-radius:8px;margin-top:8px;background:linear-gradient(90deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01))}
+.lb-row.head{font-weight:800}
+.car-f1{filter: drop-shadow(0 10px 16px rgba(0,0,0,0.7));}
+@media(max-width:900px){.menu{flex-direction:column}.left{width:100%}.right{order:2}}
+</style>
 </head>
 <body>
+<div class="app">
+  <div class="header">
+    <div class="logo"><div class="badge">TT</div><div><div class="title">TurboTrack</div><div class="small">Edición Mejorada — Física y UI</div></div></div>
+    <div class="controls small">Controles: Flechas / WASD — Pausa: P — Reiniciar: R</div>
+  </div>
 
-<div id="game-container">
-    
-    <div id="main-menu">
-        <h1>🏎️ F1 KART CHALLENGE</h1>
-        <button class="menu-button" onclick="showSelectionScreen()">JUGAR</button>
-        <button class="menu-button" id="difficulty-display" onclick="showSelectionScreen()">DIFICULTAD: NORMAL</button>
-        <button class="menu-button" onclick="window.close(); alert('¡Gracias por jugar!');" style="background-color: #c0392b; box-shadow: 0 4px #a02a1b;">SALIR</button>
-    </div>
+  <div class="menu">
+    <div class="left card">
+      <h3>Menú Principal</h3>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button class="btn primary" id="startBtn">▶ Empezar carrera</button>
+        <button class="btn" id="resetBtn">⟲ Reiniciar</button>
+      </div>
 
-    <div id="selection-screen" class="hidden">
-        <h2>⚙️ Configuración de Carrera</h2>
-        
-        <h3>Elige la Dificultad de los Bots:</h3>
-        <div id="difficulty-selector">
-            </div>
-        <p>Dificultad seleccionada: <strong id="selected-difficulty-name">Normal</strong></p>
-        <hr style="width: 80%; border-color: #ccc;">
+      <div style="margin-top:14px">
+        <label class="small">Selecciona color del jugador</label>
+        <div class="control-row" id="playerColors"></div>
+      </div>
 
-        <h3>Elige el Color de tu Kart:</h3>
-        <div id="color-selector">
-            </div>
-        <p>Color seleccionado: <strong id="selected-color-name">Rojo Pastel</strong></p>
-        <hr style="width: 80%; border-color: #ccc;">
-
-        <h3>Elige el Circuito:</h3>
-        <div id="map-selector">
-            </div>
-        <p>Mapa seleccionado: <strong id="selected-map-name">El Bucle de la Muerte</strong></p>
-        
-        <button class="menu-button" onclick="startGame()" style="margin-top: 20px;">INICIAR CARRERA (1 Jugador + 9 Bots)</button>
-        <button class="menu-button" style="background-color: #555; box-shadow: 0 4px #333;" onclick="showMainMenu()">VOLVER</button>
-    </div>
-
-    <div id="game-screen" class="hidden">
-        <div id="hud">
-            <span>VUELTA: <strong id="hud-lap">1/3</strong></span>
-            <span>POSICIÓN: <strong id="hud-position">10/10</strong></span>
-            <span>DIFICULTAD: <strong id="hud-difficulty">NORMAL</strong></span>
-            <span>POWER-UP: <strong id="hud-powerup">Ninguno</strong></span>
+      <div style="margin-top:12px">
+        <label class="small">Dificultad</label>
+        <div class="control-row">
+          <button class="btn selector" data-diff="0" id="diffEasy">Fácil — 50 km/h</button>
+          <button class="btn selector" data-diff="1" id="diffNorm">Normal — 100 km/h</button>
+          <button class="btn selector" data-diff="2" id="diffHard">Difícil — 150 km/h</button>
         </div>
-        <canvas id="game-canvas" width="1000" height="630"></canvas>
-        <p style="text-align: center; color: black; background-color: white; padding: 10px;">
-            **JUGABLE.** Usa las flechas ($\leftarrow\uparrow\rightarrow\downarrow$) o WASD para moverte. El objetivo es conducir por el circuito.
-        </p>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="small">Mapa</label>
+        <div class="control-row" id="mapList"></div>
+      </div>
+
+      <div style="margin-top:12px">
+        <label class="small">Información</label>
+        <div class="small" style="margin-top:8px">Muros de pista integrados, meta con bandera a cuadros, 5 vueltas por carrera, tabla final con tiempos.</div>
+      </div>
+
     </div>
 
+    <div class="right">
+      <div class="card canvas-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div class="info"><div class="hud" id="hud">Listo</div></div>
+          <div class="legend small" id="lapInfo">Mapa: —</div>
+        </div>
+        <canvas id="gameCanvas" width="1200" height="600"></canvas>
+        <div id="overlayHolder" style="position:absolute;inset:0;pointer-events:none"></div>
+      </div>
+
+      <div class="card" style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-weight:700">Detalles de la carrera</div>
+          <div class="small">9 bots — IA mejorada — Muros de pista y colisiones suaves</div>
+        </div>
+        <div class="footer">
+          <div class="small">Hecho con ❤️ y un poco de física</div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-    // --- LÓGICA JAVASCRIPT FINAL ---
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+let W = canvas.width, H = canvas.height;
+const startBtn = document.getElementById('startBtn');
+const resetBtn = document.getElementById('resetBtn');
+const playerColorsDiv = document.getElementById('playerColors');
+const mapListDiv = document.getElementById('mapList');
+const hud = document.getElementById('hud');
+const lapInfo = document.getElementById('lapInfo');
+const overlayHolder = document.getElementById('overlayHolder');
 
-    // 1. CONFIGURACIÓN
-    const COLORES_DISPONIBLES = {
-        "Rojo Pastel": "#ff9999", "Azul Celeste": "#99ccff", "Verde Menta": "#99ff99", 
-        "Amarillo Suave": "#ffff99", "Morado Lavanda": "#cc99ff", "Naranja Melocotón": "#ffcc99", 
-        "Gris Perla": "#c8c8c8", "Cian Claro": "#99ffff", "Rosa Chicle": "#ff99cc", 
-        "Marrón Arena": "#ffe0b3"
-    };
+const COLORS = ["#ef4444","#f97316","#f59e0b","#eab308","#10b981","#06b6d4","#3b82f6","#8b5cf6","#ec4899","#64748b"];
+let playerColor = COLORS[0];
+let difficulty = 1; // 0,1,2
+let maps = []; let selectedMapIndex=0; let gameRunning=false; let lastTime=0; let entities=[]; let lapsToFinish=5;
+const kmhToPxs = (kmh)=> kmh * 0.12; const DIFF_SPEEDS = [50,100,150].map(kmh=>kmhToPxs(kmh));
+const keys = {left:false,right:false,up:false,down:false};
+window.addEventListener('keydown',e=>{ if(e.key==='ArrowLeft'||e.key==='a')keys.left=true; if(e.key==='ArrowRight'||e.key==='d')keys.right=true; if(e.key==='ArrowUp'||e.key==='w')keys.up=true; if(e.key==='ArrowDown'||e.key==='s')keys.down=true; if(e.key==='p') togglePause(); if(e.key==='r') resetRace(); });
+window.addEventListener('keyup',e=>{ if(e.key==='ArrowLeft'||e.key==='a')keys.left=false; if(e.key==='ArrowRight'||e.key==='d')keys.right=false; if(e.key==='ArrowUp'||e.key==='w')keys.up=false; if(e.key==='ArrowDown'||e.key==='s')keys.down=false; });
 
-    const MAPAS = [
-        "El Bucle de la Muerte", "La Serpiente Pastel", "Cruce Peligroso", 
-        "El Laberinto", "Pista de Hielo (Deslizante)"
-    ];
-    
-    const DIFICULTAD_MULTIPLIER = {
-        "Facil": 0.7,
-        "Normal": 0.9,
-        "Dificil": 1.1,
-        "Experto": 1.3
-    };
+// START LOCK: all cars stay in a single row for 3s, arrow above player for 5s
+let startLock = false; let startLockTime = 0; const START_LOCK_MS = 3000; const ARROW_MS = 5000;
 
-    const BOT_COUNT = 9;
-    
-    // Asignación de valores por defecto al inicio
-    let selectedColor = { name: "Rojo Pastel", hex: COLORES_DISPONIBLES["Rojo Pastel"] }; 
-    let selectedMap = MAPAS[0]; 
-    let selectedDifficulty = "Normal"; 
+class Car{
+  constructor(x,y,color,isPlayer=false){
+    this.x=x; this.y=y; this.angle=-Math.PI/2; this.speed=0; this.color=color; this.w=14; this.h=28; this.isPlayer=isPlayer; this.maxSpeed=DIFF_SPEEDS[difficulty]; this.currentWaypoint=0; this.laps=0; this.rank=0; this.times=[]; this.startTime=null; this.bestLap=Infinity; this.finished=false; this.finishTime=null; this.showArrow=false; this.id=null;
+  }
+  update(dt,map,now){
+    if(this.finished) return;
+    // if startLock active, do not move (except slight idle)
+    if(startLock) return;
 
-    // Variables de Juego Globales
-    let playerKart = { x: 0, y: 0, angle: 90, speed: 0, maxSpeed: 4, color: null };
-    let botKarts = [];
-    let gameLoopRequest = null; 
-    let keys = {}; 
+    if(this.isPlayer){
+      const accelInput = keys.up?1: (keys.down?-0.9:0);
+      const target = accelInput * this.maxSpeed;
+      this.speed += (target - this.speed) * 0.08;
+      const steerInput = (keys.left? -1:0) + (keys.right?1:0);
+      const steerFactor = 0.055 * (1 - Math.min(Math.abs(this.speed)/this.maxSpeed,0.9));
+      this.angle += steerInput * steerFactor;
+    } else {
+      const wp = map.waypoints[this.currentWaypoint];
+      if(!wp) return;
+      const dx = wp.x - this.x, dy = wp.y - this.y;
+      const targetAngle = Math.atan2(dy,dx);
+      let diff = normalizeAngle(targetAngle - this.angle);
+      const nextWp = map.waypoints[(this.currentWaypoint+1)%map.waypoints.length];
+      const angAhead = Math.atan2(nextWp.y - wp.y, nextWp.x - wp.x);
+      const corner = Math.abs(normalizeAngle(angAhead - targetAngle));
+      const brake = Math.min(0.6, corner*0.8);
+      this.angle += Math.max(Math.min(diff,0.06),-0.06) * (0.95 + Math.random()*0.2);
+      const dist = Math.hypot(dx,dy);
+      const base = this.maxSpeed * (1 - brake*0.6) * (0.9 + Math.random()*0.18);
+      this.speed += (Math.min(base, dist*0.04) - this.speed) * 0.08;
+      if(dist < 28) this.currentWaypoint = (this.currentWaypoint+1) % map.waypoints.length;
+    }
+    // movement
+    const vx = Math.cos(this.angle) * this.speed;
+    const vy = Math.sin(this.angle) * this.speed;
+    this.x += vx * dt * 60;
+    this.y += vy * dt * 60;
+    // friction
+    this.speed *= 0.998;
 
-    const canvas = document.getElementById('game-canvas');
-    const ctx = canvas.getContext('2d');
-    
-    // Función para dibujar el menú de dificultad (solución al problema de dificultad)
-    function renderDifficultyOptions() {
-        const selector = document.getElementById('difficulty-selector');
-        // Solo renderizar si está vacío para evitar duplicados
-        if (selector.children.length === 0) {
-            for (const [name] of Object.entries(DIFICULTAD_MULTIPLIER)) {
-                const button = document.createElement('button');
-                button.className = 'difficulty-button';
-                button.textContent = name;
-                button.setAttribute('data-difficulty', name);
-                button.onclick = () => selectDifficulty(name);
-                selector.appendChild(button);
-            }
-        }
-        
-        // Aplicar selección actual
-        document.querySelectorAll('.difficulty-button').forEach(btn => {
-            if (btn.getAttribute('data-difficulty') === selectedDifficulty) {
-                btn.classList.add('selected');
-            } else {
-                btn.classList.remove('selected');
-            }
-        });
+    // keep inside track
+    const centerPt = map.getClosestPointOnCenter({x:this.x,y:this.y});
+    const offset = Math.hypot(this.x - centerPt.x, this.y - centerPt.y);
+    const roadHalf = map.roadWidth/2 - 6;
+    if(offset > roadHalf){
+      const nx = (centerPt.x - this.x)/offset; const ny = (centerPt.y - this.y)/offset;
+      // push back slightly without flipping angle
+      this.x += nx * (offset - roadHalf);
+      this.y += ny * (offset - roadHalf);
+      this.speed *= 0.65; // slow down
+      // small backward step along heading
+      this.x -= vx * 0.06;
+      this.y -= vy * 0.06;
     }
 
+    // finish line
+    if(map.finish && pointSegmentDistance({x:this.x,y:this.y}, map.finish.a, map.finish.b) < 14){
+      if(!this._crossed){
+        this._crossed = true;
+        const t = now - map.raceStart;
+        if(this.startTime===null) this.startTime = now; else { const lapTime = (now - this.startTime)/1000; this.times.push(lapTime); this.bestLap = Math.min(this.bestLap, lapTime); this.startTime = now; }
+        this.laps++;
+        if(this.laps >= lapsToFinish){ this.finished=true; this.finishTime = t/1000; }
+      }
+    } else { this._crossed=false; }
+  }
+  draw(ctx){
+    ctx.save(); ctx.translate(this.x,this.y); ctx.rotate(this.angle);
+    // shadow
+    ctx.fillStyle = 'rgba(0,0,0,0.45)'; ctx.beginPath(); ctx.ellipse(0,this.h*0.28,this.w*1.1,this.h*0.45,0,0,Math.PI*2); ctx.fill();
+    // body inspired by F1 photo: narrow nose, wider mid, big rear wing
+    // nose
+    ctx.fillStyle=this.color; ctx.beginPath(); ctx.moveTo(0,-this.h*0.6); ctx.lineTo(this.w*0.22,-this.h*0.25); ctx.lineTo(-this.w*0.22,-this.h*0.25); ctx.closePath(); ctx.fill();
+    // cockpit and body
+    ctx.fillStyle=this.color; ctx.beginPath(); ctx.ellipse(0,-this.h*0.08,this.w*0.45,this.h*0.35,0,0,Math.PI*2); ctx.fill();
+    // canopy (dark)
+    ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(0,-this.h*0.12,this.w*0.25,this.h*0.18,0,0,Math.PI*2); ctx.fill();
+    // rear wing
+    ctx.fillStyle='rgba(18,18,18,0.95)'; ctx.fillRect(-this.w*0.5,this.h*0.18,this.w,4);
+    // wheels (stylized narrow F1)
+    ctx.fillStyle='#111'; ctx.beginPath(); ctx.ellipse(-this.w*0.55,-this.h*0.06,3,6,0,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(this.w*0.55,-this.h*0.06,3,6,0,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(-this.w*0.55,this.h*0.25,3,6,0,0,Math.PI*2); ctx.fill(); ctx.beginPath(); ctx.ellipse(this.w*0.55,this.h*0.25,3,6,0,0,Math.PI*2); ctx.fill();
+    ctx.restore();
 
-    // 2. NAVEGACIÓN Y MENÚS
-    function hideAllScreens() {
-        // Detener el bucle de juego si está corriendo
-        if (gameLoopRequest) {
-            cancelAnimationFrame(gameLoopRequest);
-            gameLoopRequest = null;
-        }
-        document.removeEventListener('keydown', handleKeyDown);
-        document.removeEventListener('keyup', handleKeyUp);
+    // arrow
+    if(this.showArrow){ ctx.save(); ctx.fillStyle='yellow'; ctx.beginPath(); ctx.moveTo(this.x,this.y - this.h - 12); ctx.lineTo(this.x - 8,this.y - this.h + 6); ctx.lineTo(this.x + 8,this.y - this.h + 6); ctx.closePath(); ctx.fill(); ctx.restore(); }
+  }
+}
 
-        document.getElementById('main-menu').classList.add('hidden');
-        document.getElementById('selection-screen').classList.add('hidden');
-        document.getElementById('game-screen').classList.add('hidden');
-    }
+function normalizeAngle(a){while(a>Math.PI)a-=Math.PI*2;while(a<-Math.PI)a+=Math.PI*2;return a;}
+function pointSegmentDistance(p,a,b){ const A=p.x-a.x,B=p.y-a.y,C=b.x-a.x,D=b.y-a.y; const dot=A*C+B*D; const len_sq=C*C+D*D; let param = len_sq!==0?dot/len_sq:-1; let xx,yy; if(param<0){xx=a.x;yy=a.y;} else if(param>1){xx=b.x;yy=b.y;} else {xx=a.x+param*C; yy=a.y+param*D;} const dx=p.x-xx, dy=p.y-yy; return Math.hypot(dx,dy); }
 
-    function showMainMenu() {
-        hideAllScreens();
-        document.getElementById('main-menu').classList.remove('hidden');
-        document.getElementById('difficulty-display').textContent = `DIFICULTAD: ${selectedDifficulty.toUpperCase()}`;
-    }
+function createMaps(){ maps = [];
+  const mk = (name,wpArr,roadWidth)=>({name,waypoints:wpArr,roadWidth,finish:{a:wpArr[0],b:{x:wpArr[0].x+120,y:wpArr[0].y}}, getClosestPointOnCenter(p){ let best=null,minD=1e9; for(let i=0;i<this.waypoints.length;i++){ const a=this.waypoints[i], b=this.waypoints[(i+1)%this.waypoints.length]; const A=p.x-a.x,B=p.y-a.y,C=b.x-a.x,D=b.y-a.y; const dot=A*C+B*D; const len_sq=C*C+D*D; const t = len_sq?Math.max(0,Math.min(1,dot/len_sq)):0; const xx=a.x+t*C, yy=a.y+t*D; const d=Math.hypot(p.x-xx,p.y-yy); if(d<minD){minD=d;best={x:xx,y:yy};} } return best || {x:this.waypoints[0].x,y:this.waypoints[0].y}; }});
+  const oval = []; for(let i=0;i<28;i++){ const a=i/28*Math.PI*2; oval.push({x:W/2+Math.cos(a)*360,y:H/2+Math.sin(a)*200}); }
+  maps.push(mk('Óvalo Clásico',oval,120));
+  const c1=[{x:180,y:120},{x:420,y:90},{x:740,y:150},{x:980,y:110},{x:920,y:360},{x:720,y:420},{x:460,y:360},{x:260,y:420},{x:140,y:300}]; maps.push(mk('Ciudad Rápida',c1,100));
+  const m=[]; for(let i=0;i<18;i++){ const t=i/18; m.push({x:120 + t*(W-240) + Math.sin(t*6.28)*120, y:80 + Math.cos(t*3.14)*120 + t*260}); } maps.push(mk('Puerto de la Sierra',m,110));
+  const d=[]; for(let i=0;i<24;i++){ const a=i/24*Math.PI*2; d.push({x:W/2 + Math.cos(a)*300 + Math.sin(a*3)*40, y:H/2 + Math.sin(a)*220}); } maps.push(mk('Desierto Dorado',d,140));
+  const h=[{x:160,y:140},{x:360,y:120},{x:520,y:210},{x:680,y:120},{x:980,y:200},{x:920,y:400},{x:700,y:480},{x:440,y:420},{x:240,y:500}]; maps.push(mk('Puerto',h,90));
+}
 
-    function showSelectionScreen() {
-        hideAllScreens();
-        document.getElementById('selection-screen').classList.remove('hidden');
-        
-        renderDifficultyOptions();
-        renderColorOptions();
-        renderMapOptions();
-        
-        // Actualizar nombres de selección
-        document.getElementById('selected-difficulty-name').textContent = selectedDifficulty;
-        document.getElementById('selected-color-name').textContent = selectedColor.name;
-        document.getElementById('selected-map-name').textContent = selectedMap;
-    }
+function buildColorChoices(){ playerColorsDiv.innerHTML=''; COLORS.forEach((c,i)=>{ const d=document.createElement('div'); d.className='color-swatch'; d.style.background=c; d.title=c; d.onclick=()=>{ playerColor=c; highlightColor(); assignColorsToBots(); renderPreview(); }; playerColorsDiv.appendChild(d); }); }
+function highlightColor(){ const nodes=playerColorsDiv.children; for(let i=0;i<nodes.length;i++){ nodes[i].style.outline = (COLORS[i]===playerColor)?'3px solid rgba(255,255,255,0.12)':''; }}
+function buildMapList(){ mapListDiv.innerHTML=''; maps.forEach((m,i)=>{ const b=document.createElement('button'); b.className='btn selector'; b.textContent=m.name; b.onclick=()=>{ selectedMapIndex=i; lapInfo.innerHTML=`Mapa: ${m.name}`; renderPreview(); resetRace(); }; mapListDiv.appendChild(b); }); }
 
-    // 3. SELECCIÓN DE DIFICULTAD
-    function selectDifficulty(difficulty) {
-        selectedDifficulty = difficulty;
-        document.getElementById('selected-difficulty-name').textContent = difficulty;
-        
-        // Actualizar la clase CSS
-        document.querySelectorAll('.difficulty-button').forEach(btn => btn.classList.remove('selected'));
-        document.querySelector(`.difficulty-button[data-difficulty="${difficulty}"]`).classList.add('selected');
-    }
+function assignColorsToBots(){ const pool = COLORS.filter(c=>c!==playerColor); for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; } const botColors = pool.slice(0,9);
+  entities = []; const map = maps[selectedMapIndex]; const start = map.waypoints[0] || {x:W/2,y:H/2};
+  // place cars in a neat row, reduced size so they fit
+  const rowX = start.x - 180; const rowY = start.y + 60; const spacing = 36;
+  // player first (left-most)
+  const p = new Car(rowX + spacing*0, rowY, playerColor, true); p.maxSpeed = DIFF_SPEEDS[difficulty]; p.id = 'Jugador'; entities.push(p);
+  for(let i=0;i<9;i++){ const c = botColors[i%botColors.length]; const b = new Car(rowX + spacing*(i+1), rowY + (i%2?6:-6), c, false); b.maxSpeed = DIFF_SPEEDS[difficulty] * (0.92 + Math.random()*0.16); b.currentWaypoint = Math.floor(Math.random()*maps[selectedMapIndex].waypoints.length); b.id = 'Bot ' + (i+1); entities.push(b); }
+}
 
-    // 4. SELECCIÓN DE COLOR
-    function renderColorOptions() {
-        const selector = document.getElementById('color-selector');
-        if (selector.children.length === 0) { // Solo renderizar una vez
-            for (const [name, hex] of Object.entries(COLORES_DISPONIBLES)) {
-                const div = document.createElement('div');
-                div.className = 'color-option';
-                div.style.backgroundColor = hex;
-                div.setAttribute('data-color-name', name);
-                div.setAttribute('data-color-hex', hex);
-                div.onclick = () => selectColor(name, div);
-                selector.appendChild(div);
-            }
-        }
-        // Aplicar la selección actual
-        document.querySelectorAll('.color-option').forEach(el => {
-            el.classList.remove('selected');
-            if (el.getAttribute('data-color-name') === selectedColor.name) {
-                el.classList.add('selected');
-            }
-        });
-    }
+function startRace(){ if(gameRunning) return; // lock start: place cars and freeze for START_LOCK_MS
+  startLock = true; startLockTime = performance.now(); maps[selectedMapIndex].raceStart = performance.now(); // mark race start for timers
+  entities.forEach(e=>{ e.laps=0; e.times=[]; e.startTime=null; e.finished=false; e.finishTime=null; e.showArrow = e.isPlayer; });
+  // hide arrow after ARROW_MS
+  setTimeout(()=>{ entities.forEach(e=> e.showArrow=false); }, 5000);
+  // release after 3s
+  setTimeout(()=>{ startLock = false; gameRunning = true; lastTime = performance.now(); requestAnimationFrame(loop); }, 3000);
+  hud.textContent='Listo — salida en 3s'; draw(); }
 
-    function selectColor(name, element) {
-        document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-        selectedColor = { name: name, hex: element.getAttribute('data-color-hex') };
-        document.getElementById('selected-color-name').textContent = name;
-    }
+function resetRace(){ gameRunning=false; hud.textContent='Listo'; assignColorsToBots(); drawStatic(); clearOverlay(); }
+function togglePause(){ gameRunning = !gameRunning; hud.textContent = gameRunning? 'Reanudado' : 'Pausado'; if(gameRunning) lastTime=performance.now(); if(gameRunning) requestAnimationFrame(loop); }
 
-    // 5. SELECCIÓN DE MAPA
-    function renderMapOptions() {
-        const selector = document.getElementById('map-selector');
-        if (selector.children.length === 0) { // Solo renderizar una vez
-            MAPAS.forEach(mapName => {
-                const card = document.createElement('div');
-                card.className = 'map-card';
-                card.textContent = mapName;
-                card.onclick = () => selectMap(mapName, card);
-                selector.appendChild(card);
-            });
-        }
-        // Aplicar la selección actual
-        document.querySelectorAll('.map-card').forEach(el => {
-            el.classList.remove('selected');
-            if (el.textContent === selectedMap) {
-                el.classList.add('selected');
-            }
-        });
-    }
+function loop(ts){ const dt = Math.min((ts-lastTime)/1000,0.033); lastTime = ts; update(dt,ts); draw(); if(gameRunning) requestAnimationFrame(loop); }
 
-    function selectMap(name, element) {
-        document.querySelectorAll('.map-card').forEach(el => el.classList.remove('selected'));
-        element.classList.add('selected');
-        selectedMap = name;
-        document.getElementById('selected-map-name').textContent = name;
-    }
+function update(dt,now){ const map = maps[selectedMapIndex]; entities.forEach(e=> e.update(dt,map,now)); // collisions between cars -> gentle backward impulse
+  for(let i=0;i<entities.length;i++){ for(let j=i+1;j<entities.length;j++){ const a=entities[i], b=entities[j]; const overlapX = (a.w/2 + b.w/2) - Math.abs(a.x - b.x); const overlapY = (a.h/2 + b.h/2) - Math.abs(a.y - b.y); if(overlapX>0 && overlapY>0){ // compute relative direction
+        const ax = Math.cos(a.angle)*a.speed; const ay = Math.sin(a.angle)*a.speed; const bx = Math.cos(b.angle)*b.speed; const by = Math.sin(b.angle)*b.speed; // apply small backward nudge along velocity direction
+        a.x -= ax * 0.06; a.y -= ay * 0.06; b.x -= bx * 0.06; b.y -= by * 0.06; a.speed *= 0.6; b.speed *= 0.6; } } }
+  // ranking
+  entities.sort((a,b)=> b.laps - a.laps || distanceToNextWP(a,map)-distanceToNextWP(b,map)); entities.forEach((e,i)=> e.rank=i+1);
+  const anyRunning = entities.some(e=> !e.finished);
+  if(!anyRunning) endRace(); }
 
-    // 6. INICIO Y LÓGICA DEL JUEGO
-    function startGame() {
-        if (!selectedColor || !selectedMap) {
-            alert("Por favor, selecciona un color y un mapa antes de empezar.");
-            return;
-        }
+function distanceToNextWP(car,map){ const wp = map.waypoints[car.currentWaypoint] || map.waypoints[0]; return Math.hypot(wp.x-car.x, wp.y-car.y); }
 
-        // 6.1 Configuración del Jugador
-        playerKart.color = selectedColor.hex;
-        playerKart.x = 100; 
-        playerKart.y = 100;
-        playerKart.angle = 90;
-        playerKart.speed = 0;
+function draw(){ ctx.clearRect(0,0,W,H); drawBackground(); drawTrack(maps[selectedMapIndex]); drawFinishBanner(maps[selectedMapIndex]); entities.forEach(e=> e.draw(ctx)); drawHUD(); }
 
-        setupBotKarts();
+function drawBackground(){ const g = ctx.createLinearGradient(0,0,0,H); g.addColorStop(0,'#071227'); g.addColorStop(1,'#02131f'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); }
 
-        // 6.2 Mostrar pantalla de juego
-        hideAllScreens();
-        document.getElementById('game-screen').classList.remove('hidden');
-        document.getElementById('hud-difficulty').textContent = selectedDifficulty.toUpperCase();
+function drawTrack(map){ ctx.save(); const wp = map.waypoints; ctx.lineWidth = map.roadWidth + 30; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='rgba(180,180,200,0.03)'; ctx.beginPath(); if(wp.length){ ctx.moveTo(wp[0].x,wp[0].y); for(let i=1;i<wp.length;i++) ctx.lineTo(wp[i].x,wp[i].y); ctx.closePath(); ctx.stroke(); } ctx.lineWidth = map.roadWidth; ctx.strokeStyle='rgba(30,30,40,0.95)'; ctx.beginPath(); if(wp.length){ ctx.moveTo(wp[0].x,wp[0].y); for(let i=1;i<wp.length;i++) ctx.lineTo(wp[i].x,wp[i].y); ctx.closePath(); ctx.stroke(); } ctx.lineWidth=2; ctx.setLineDash([16,14]); ctx.strokeStyle='rgba(255,255,255,0.06)'; ctx.beginPath(); if(wp.length){ ctx.moveTo(wp[0].x,wp[0].y); for(let i=1;i<wp.length;i++) ctx.lineTo(wp[i].x,wp[i].y); ctx.closePath(); ctx.stroke(); } ctx.setLineDash([]); ctx.restore(); }
 
-        // 6.3 Iniciar el Bucle de Juego 
-        document.addEventListener('keydown', handleKeyDown);
-        document.addEventListener('keyup', handleKeyUp);
-        gameLoopRequest = requestAnimationFrame(gameLoop);
-    }
-    
-    function setupBotKarts() {
-        const availableColors = Object.keys(COLORES_DISPONIBLES)
-            .filter(name => name !== selectedColor.name)
-            .map(name => COLORES_DISPONIBLES[name]); 
-        
-        botKarts = [];
-        let shuffledColors = [...availableColors].sort(() => 0.5 - Math.random());
-        
-        const botSpeedFactor = DIFICULTAD_MULTIPLIER[selectedDifficulty];
+function drawFinishBanner(map){ const a=map.finish.a, b=map.finish.b; ctx.save(); ctx.strokeStyle='rgba(0,0,0,0.6)'; ctx.lineWidth=4; ctx.beginPath(); ctx.moveTo(a.x,a.y-40); ctx.lineTo(a.x,a.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(b.x,b.y-40); ctx.lineTo(b.x,b.y); ctx.stroke(); const pw = 160, ph = 36; const sx = a.x, sy = a.y-40; const ex = b.x, ey = b.y-40; const angle = Math.atan2(ey-sy,ex-sx); ctx.translate(sx,sy); ctx.rotate(angle); ctx.fillStyle='white'; ctx.fillRect(0,-ph/2,pw,ph); const cell = 16; for(let i=0;i<pw;i+=cell){ for(let j=0;j<ph;j+=cell){ if(((i/cell)+(j/cell))%2===0) ctx.fillStyle='black'; else ctx.fillStyle='white'; ctx.fillRect(i,-ph/2+j,cell,cell); } } // flag poles decoration
+  ctx.restore(); }
 
-        for (let i = 0; i < BOT_COUNT; i++) {
-            botKarts.push({
-                x: 100 + (i % 3) * 30, 
-                y: 120 + Math.floor(i / 3) * 30, 
-                angle: 90 + (Math.random() - 0.5) * 10, 
-                speed: 0,
-                maxSpeed: playerKart.maxSpeed * botSpeedFactor * (0.9 + Math.random() * 0.2), 
-                color: shuffledColors[i],
-                rotationSpeed: (Math.random() * 4) - 2 
-            });
-        }
-    }
+function drawHUD(){ const p = entities.find(e=>e.isPlayer); if(p){ hud.innerHTML = `Vel: ${Math.round(p.speed/0.12)} km/h — Pos: ${p.rank}/${entities.length} — Vueltas: ${p.laps}/${lapsToFinish}`; } }
 
-    // 7. MANEJO DE TECLADO
-    function handleKeyDown(e) {
-        keys[e.key] = true;
-    }
+function renderPreview(){ drawStatic(); }
+function drawStatic(){ ctx.clearRect(0,0,W,H); drawBackground(); drawTrack(maps[selectedMapIndex]); drawFinishBanner(maps[selectedMapIndex]); }
 
-    function handleKeyUp(e) {
-        keys[e.key] = false;
-    }
+function endRace(){ gameRunning=false; hud.textContent='Carrera finalizada'; showLeaderboard(); }
 
-    // 8. FÍSICA Y MOVIMIENTO
-    function updatePlayerMovement() {
-        const acceleration = 0.15;
-        const friction = 0.05;
-        const turnSpeed = 3;
+function showLeaderboard(){ clearOverlay(); const div = document.createElement('div'); div.className='overlay'; div.style.pointerEvents='auto'; const box = document.createElement('div'); box.className='leaderboard'; const title = document.createElement('div'); title.style.fontSize='20px'; title.style.fontWeight='900'; title.textContent='Clasificación Final — TurboTrack'; box.appendChild(title);
+  const list = [...entities].sort((a,b)=> (a.finishTime||99999) - (b.finishTime||99999));
+  const header = document.createElement('div'); header.className='lb-row head'; header.innerHTML = `<div style="flex:1">Puesto</div><div style="flex:2">Piloto</div><div style="flex:2">Tiempo (s)</div><div style="flex:2">Mejor Vuelta</div>`; box.appendChild(header);
+  list.forEach((e,i)=>{ const row = document.createElement('div'); row.className='lb-row'; row.innerHTML = `<div style="flex:1">${i+1}</div><div style="flex:2"><span style="display:inline-block;width:14px;height:14px;background:${e.color};margin-right:8px;border-radius:3px;vertical-align:middle"></span>${e.isPlayer? 'Jugador' : e.id}</div><div style="flex:2">${e.finishTime? e.finishTime.toFixed(2) : 'DNF'}</div><div style="flex:2">${e.bestLap===Infinity? '-' : e.bestLap.toFixed(2)}</div>`; box.appendChild(row); });
+  const btns = document.createElement('div'); btns.style.display='flex'; btns.style.justifyContent='flex-end'; btns.style.marginTop='12px'; const again = document.createElement('button'); again.className='btn primary'; again.textContent='Volver a jugar'; again.onclick=()=>{ overlayHolder.innerHTML=''; resetRace(); }; btns.appendChild(again); box.appendChild(btns); div.appendChild(box); overlayHolder.appendChild(div);
+}
+function clearOverlay(){ overlayHolder.innerHTML=''; }
 
-        // Acelerar y Frenar
-        if (keys['ArrowUp'] || keys['w']) {
-            playerKart.speed = Math.min(playerKart.speed + acceleration, playerKart.maxSpeed);
-        } else if (keys['ArrowDown'] || keys['s']) {
-            playerKart.speed = Math.max(playerKart.speed - acceleration * 1.5, -playerKart.maxSpeed / 2);
-        } else {
-            playerKart.speed *= (1 - friction);
-            if (Math.abs(playerKart.speed) < 0.1) playerKart.speed = 0;
-        }
+createMaps(); buildColorChoices(); buildMapList(); highlightColor(); assignColorsToBots(); drawStatic(); lapInfo.textContent = `Mapa: ${maps[selectedMapIndex].name}`;
+startBtn.onclick=()=>{ assignColorsToBots(); startRace(); };
+resetBtn.onclick=()=>{ resetRace(); };
+document.getElementById('diffEasy').onclick=()=>{ difficulty=0; applyDifficulty(); highlightDiff(); };
+document.getElementById('diffNorm').onclick=()=>{ difficulty=1; applyDifficulty(); highlightDiff(); };
+document.getElementById('diffHard').onclick=()=>{ difficulty=2; applyDifficulty(); highlightDiff(); };
+function highlightDiff(){ document.querySelectorAll('[data-diff]').forEach(b=> b.style.outline = (Number(b.dataset.diff)===difficulty)?'3px solid rgba(255,255,255,0.08)':'' ); }
+function applyDifficulty(){ entities.forEach(e=> e.maxSpeed = DIFF_SPEEDS[difficulty] * (e.isPlayer?1: (0.92 + Math.random()*0.16)) ); hud.textContent = 'Dificultad aplicada'; }
 
-        // Girar
-        if (Math.abs(playerKart.speed) > 0.1) {
-            if (keys['ArrowLeft'] || keys['a']) {
-                playerKart.angle += turnSpeed * (playerKart.speed > 0 ? 1 : -1);
-            }
-            if (keys['ArrowRight'] || keys['d']) {
-                playerKart.angle -= turnSpeed * (playerKart.speed > 0 ? 1 : -1);
-            }
-        }
-        
-        // Movimiento
-        playerKart.x += playerKart.speed * Math.cos(playerKart.angle * Math.PI / 180);
-        playerKart.y -= playerKart.speed * Math.sin(playerKart.angle * Math.PI / 180);
+window.addEventListener('resize',()=>{ const rect = canvas.getBoundingClientRect(); W = canvas.width = rect.width; H = canvas.height = rect.height; createMaps(); assignColorsToBots(); drawStatic(); });
 
-        // Límite de la pantalla (Colisión con el césped/borde)
-        const kartSize = 15;
-        if (playerKart.x < kartSize || playerKart.x > canvas.width - kartSize || 
-            playerKart.y < kartSize || playerKart.y > canvas.height - kartSize) {
-            
-            playerKart.speed = -playerKart.speed * 0.5;
-            
-            playerKart.x = Math.max(kartSize, Math.min(canvas.width - kartSize, playerKart.x));
-            playerKart.y = Math.max(kartSize, Math.min(canvas.height - kartSize, playerKart.y));
-        }
-    }
-
-    function updateBotMovement() {
-        // AI muy básica: Avanzar y girar de forma semi-aleatoria
-        botKarts.forEach(bot => {
-            bot.speed = bot.maxSpeed * 0.9;
-            
-            if (Math.random() < 0.05) {
-                bot.rotationSpeed = (Math.random() - 0.5) * 6; 
-            }
-            bot.angle += bot.rotationSpeed;
-
-            // Mover
-            bot.x += bot.speed * Math.cos(bot.angle * Math.PI / 180);
-            bot.y -= bot.speed * Math.sin(bot.angle * Math.PI / 180);
-
-            // Colisión con borde
-            const padding = 50;
-            if (bot.x < padding || bot.x > canvas.width - padding || bot.y < padding || bot.y > canvas.height - padding) {
-                if (bot.x < padding || bot.x > canvas.width - padding) {
-                    bot.angle = 180 - bot.angle;
-                }
-                if (bot.y < padding || bot.y > canvas.height - padding) {
-                    bot.angle = 360 - bot.angle;
-                }
-            }
-        });
-    }
-
-
-    // 9. BUCLE PRINCIPAL DE JUEGO (GAME LOOP)
-    function gameLoop() {
-        updatePlayerMovement();
-        updateBotMovement();
-        renderGame();
-        
-        gameLoopRequest = requestAnimationFrame(gameLoop);
-    }
-    
-    // 10. RENDERIZADO DEL JUEGO
-    function renderGame() {
-        // Limpiar (Césped Pastel)
-        ctx.fillStyle = "#b4e0b4"; 
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // 10.1. Dibujar Carretera (El Bucle de la Muerte)
-        const pathPoints = [
-            [100, 100], [canvas.width - 100, 100], 
-            [canvas.width - 100, canvas.height - 100], [100, canvas.height - 100], [100, 100]
-        ];
-
-        const roadPath = new Path2D();
-        roadPath.moveTo(pathPoints[0][0], pathPoints[0][1]);
-        for (let i = 1; i < pathPoints.length; i++) {
-            roadPath.lineTo(pathPoints[i][0], pathPoints[i][1]);
-        }
-
-        // Carretera (Gris oscuro)
-        ctx.strokeStyle = "#555";
-        ctx.lineWidth = 100;
-        ctx.lineCap = 'round';
-        ctx.stroke(roadPath);
-        
-        // Línea central (Blanco)
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 5;
-        ctx.stroke(roadPath); 
-        
-        // 10.2. Decoraciones y Obstáculos (Arbusto central)
-        ctx.fillStyle = "#006400";
-        ctx.beginPath();
-        ctx.arc(canvas.width / 2, canvas.height / 2, 40, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Bandera de meta (inicio/fin)
-        ctx.fillStyle = "white";
-        ctx.fillRect(100, 40, 50, 60);
-        ctx.fillStyle = "black";
-        ctx.fillRect(100, 40, 25, 30);
-        ctx.fillRect(125, 70, 25, 30);
-        ctx.fillStyle = "red";
-        ctx.font = "20px Arial";
-        ctx.fillText("META", 110, 125);
-
-        // 10.3. Dibujar Karts (Jugador y Bots)
-        [...botKarts].forEach(kart => drawKart(kart)); 
-        drawKart(playerKart); 
-    }
-
-    function drawKart(kart) {
-        ctx.save();
-        ctx.translate(kart.x, kart.y);
-        ctx.rotate((-kart.angle * Math.PI / 180)); 
-
-        const width = 30;
-        const height = 16;
-
-        ctx.fillStyle = kart.color;
-        ctx.fillRect(-width / 2, -height / 2, width, height);
-
-        // Morro del Kart (Más puntiagudo)
-        ctx.beginPath();
-        ctx.moveTo(width / 2, -height / 2);
-        ctx.lineTo(width / 2 + 10, 0);
-        ctx.lineTo(width / 2, height / 2);
-        ctx.closePath();
-        ctx.fill();
-
-        // Ruedas (negro)
-        ctx.fillStyle = "black";
-        ctx.fillRect(-12, -10, 5, 20); 
-        ctx.fillRect(2, -10, 5, 20); 
-        ctx.fillRect(width / 2 - 5, -10, 5, 20); 
-        
-        // Para distinguir al jugador
-        if (kart === playerKart) {
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(-width / 2 - 2, -height / 2 - 2, width + 4, height + 4);
-        }
-
-        ctx.restore();
-    }
-
-    // 11. INICIALIZACIÓN (Solución al fallo de la pantalla en blanco)
-    document.addEventListener('DOMContentLoaded', () => {
-        // ESTA ES LA CLAVE: Asegurarse de que los valores por defecto se apliquen 
-        // y se muestre el menú principal de forma inmediata.
-        showMainMenu();
-    });
+console.log('TurboTrack mejorado listo.');
 </script>
-
 </body>
 </html>
+
