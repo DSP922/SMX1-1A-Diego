@@ -1,599 +1,772 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Isla del Tesoro — Corrección robusta</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Frutas - Niveles y Power-ups</title>
   <style>
-    html,body{height:100%;margin:0;background:#7ec8ff;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial}
-    #gameWrap{width:800px;margin:18px auto;position:relative}
-    canvas{display:block;width:800px;height:600px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,0.35);background:#88ccff}
-    .overlay{position:absolute;left:0;top:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center}
-    .panel{background:rgba(255,255,255,0.96);padding:18px;border-radius:10px;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,0.14)}
-    button{font-size:15px;padding:8px 14px;margin:6px;cursor:pointer;border-radius:8px;border:0;background:#2b8aef;color:white}
-    #hud{position:absolute;left:12px;top:12px;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,0.6);font-weight:700;pointer-events:none}
-    #controls{position:absolute;right:12px;top:12px;display:flex;gap:8px}
-    #hint{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.6)}
-    #log{position:absolute;left:12px;bottom:12px;color:#08324b;background:rgba(255,255,255,0.85);padding:6px;border-radius:6px;font-size:12px;max-width:420px;max-height:120px;overflow:auto}
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+    body { background: linear-gradient(#87CEEB, #eaf6ff); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .container { position: relative; width: 860px; max-width: 100%; }
+    canvas { display: block; width: 100%; height: auto; background: linear-gradient(#dff3ff, #fff); border-radius: 10px; box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+    .instructions { margin-top: 10px; text-align: center; color: #123; }
+    .instructions p { margin: 4px 0; }
+    #hud { font-weight: 700; color: #1b2430; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .overlay { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.45); transition: opacity 0.2s ease; z-index: 40; }
+    .overlay.hidden { display: none; }
+    .overlay-content { background: white; padding: 24px 28px; border-radius: 10px; text-align: center; min-width: 280px; box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+    .overlay-content h1 { margin-bottom: 8px; color: #d33; }
+    .overlay-content p { margin-bottom: 16px; color: #333; }
+    #restartBtn { padding: 8px 14px; border-radius: 6px; border: none; background: linear-gradient(180deg,#3cb371,#2ea86f); color: white; cursor: pointer; font-weight: 600; }
+    #restartBtn:hover { filter: brightness(0.95); }
+
+    /* Level transition UI (black translucent panel + cards) */
+    .level-panel {
+      position: absolute;
+      left: 0; top: 0; width: 100%; height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.7);
+      z-index: 50;
+      color: white;
+      gap: 18px;
+    }
+    .level-panel.hidden { display: none; }
+    .level-panel h2 { font-size: 28px; margin: 6px 0; }
+    .cards { display:flex; gap:18px; align-items:stretch; }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+      border-radius: 12px;
+      padding: 18px;
+      width: 220px;
+      text-align:center;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .card h3 { margin-bottom:8px; font-size:18px; color:#fff; }
+    .card p { font-size:13px; color:#eee; margin-bottom:12px; }
+    .card button { padding:8px 12px; border-radius:8px; border: none; cursor:pointer; font-weight:700; }
+    .card button.primary { background: #2bb673; color:white; }
+    .card button.ghost { background: rgba(255,255,255,0.08); color: white; }
+    .small-muted { font-size:12px; color: rgba(255,255,255,0.8); margin-top:8px; }
+
+    /* Selection grid for removing fruit/metal */
+    .selection-ui {
+      position: absolute;
+      left: 0; top: 0; width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center; z-index:60;
+      background: rgba(0,0,0,0.75);
+      color: white;
+    }
+    .selection-ui.hidden { display: none; }
+    .selection-panel {
+      background: white; color:#222; padding:18px; border-radius:10px; max-width:720px; width:92%;
+    }
+    .preview-grid { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+    .preview-item { width:120px; background:#f6f8fa; border-radius:8px; padding:10px; text-align:center; cursor:pointer; border:2px solid transparent; }
+    .preview-item.disabled { opacity:0.5; cursor:not-allowed; }
+    .preview-item.selected { border-color:#2bb673; box-shadow:0 6px 18px rgba(0,0,0,0.08); }
+    .preview-item canvas { display:block; margin:0 auto 8px auto; }
+
+    /* HUD extras */
+    .hud-left { display:flex; align-items:center; gap:12px; }
+    .lives { display:flex; gap:6px; align-items:center; }
+    .heart { width:22px; height:22px; display:inline-block; }
+    .score-badge { background: rgba(0,0,0,0.06); padding:6px 10px; border-radius:8px; }
+
+    @media (max-width:720px) {
+      .cards { flex-direction: column; }
+      .card { width: 88%; }
+      .preview-item { width: 30%; }
+    }
   </style>
 </head>
 <body>
-  <div id="gameWrap">
-    <div id="hud">Nivel 1 — Tesoro: enterrado</div>
-    <div id="controls">
-      <button id="pauseBtn">Pausa</button>
-      <button id="zoomBtn">Ver isla</button>
-    </div>
-    <canvas id="screen" width="320" height="240"></canvas>
+  <div class="container">
+    <canvas id="gameCanvas" width="800" height="600" aria-label="Canvas del juego - atrapa las frutas"></canvas>
 
-    <div id="startOverlay" class="overlay">
-      <div class="panel">
-        <h1>Isla del Tesoro — Corrección robusta</h1>
-        <p>Mueve con las flechas. Mantén ESPACIO para desenterrar. Si aparece algo raro, mira el recuadro LOG abajo.</p>
-        <div>
-          <button id="startBtn">Iniciar (Nivel 1)</button>
-          <button id="exitBtn">Salir</button>
+    <!-- Game over / victory overlay (re-using previous overlay) -->
+    <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" style="z-index:45">
+      <div class="overlay-content">
+        <h1 id="overlay-title">Juego terminado</h1>
+        <p id="overlay-sub">Te has quedado sin vidas.</p>
+        <p id="final-score" style="font-weight:700; margin-bottom:12px;"></p>
+        <button id="restartBtn">Reiniciar</button>
+      </div>
+    </div>
+
+    <!-- Level transition panel (pauses the game) -->
+    <div id="levelPanel" class="level-panel hidden" aria-hidden="true">
+      <h2 id="levelPanelTitle">Nivel completado</h2>
+      <div class="cards">
+        <div class="card" id="cardRegenerate">
+          <h3>Regenerar vida</h3>
+          <p>Restaura todas tus vidas al máximo (3 vidas).</p>
+          <button class="primary" data-action="regenerate">Elegir</button>
+          <div class="small-muted">Recomendado si estás bajo de vidas</div>
+        </div>
+        <div class="card" id="cardHitbox">
+          <h3>Aumentar hitbox</h3>
+          <p>Aumenta el ancho de la cesta un 5% (mejor captura).</p>
+          <button class="primary" data-action="hitbox">Elegir</button>
+          <div class="small-muted">Se aplica permanentemente</div>
+        </div>
+        <div class="card" id="cardRemove">
+          <h3>Eliminar objeto</h3>
+          <p>Elige una fruta u objeto metálico para que no aparezca en el siguiente nivel.</p>
+          <button class="primary" data-action="remove">Elegir</button>
+          <div class="small-muted">Se aplica sólo al siguiente nivel</div>
+        </div>
+      </div>
+      <button id="skipPowerBtn" class="card" style="margin-top:12px; width:260px; background:transparent; border:1px solid rgba(255,255,255,0.1);">Continuar sin elegir</button>
+    </div>
+
+    <!-- Selection UI for choosing which fruit/metal to remove -->
+    <div id="selectionUI" class="selection-ui hidden" aria-hidden="true">
+      <div class="selection-panel">
+        <h3>Elige el objeto a eliminar para el siguiente nivel</h3>
+        <p style="margin-bottom:12px; color:#666">Haz clic en el objeto que quieres eliminar temporalmente (sólo para el nivel entrante).</p>
+        <div class="preview-grid" id="previewGrid"></div>
+        <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
+          <button id="confirmRemoveBtn" class="primary" style="background:#2bb673; color:white;">Confirmar eliminación</button>
+          <button id="cancelRemoveBtn" class="ghost" style="background:#eee;">Cancelar</button>
         </div>
       </div>
     </div>
 
-    <div id="levelCompleteOverlay" class="overlay" style="display:none">
-      <div class="panel">
-        <h2 id="levelTitle">Nivel completado</h2>
-        <p id="levelMsg"></p>
-        <div>
-          <button id="nextLevelBtn">Siguiente nivel</button>
-          <button id="retryLevelBtn">Repetir nivel</button>
+    <div class="instructions">
+      <div id="hud">
+        <div class="hud-left">
+          <div class="lives" id="livesContainer" aria-hidden="true"></div>
+          <div class="score-badge" id="hudText">Puntuación: 0</div>
+        </div>
+        <div class="level-info" id="levelInfo">
+          <div>Nivel: <span id="levelNum">1</span></div>
+          <div>Tiempo: <span id="timeLeft">60</span>s</div>
+          <div>Frutas restante: <span id="fruitsLeft">20</span></div>
         </div>
       </div>
+      <p style="font-size:13px; color:#334">Atrapa frutas. Evita metálicos (restan vidas). Al pasar de nivel, elige un power-up.</p>
     </div>
-
-    <div id="deathOverlay" class="overlay" style="display:none">
-      <div class="panel">
-        <h2 id="deathTitle">Has sido alcanzado</h2>
-        <p id="deathMsg">Has sido golpeado por una flecha. Repite el nivel.</p>
-        <div>
-          <button id="deathOkBtn">Reintentar</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="hint" class="hint"></div>
-    <div id="log"></div>
   </div>
 
   <script>
-  (function(){
-    // Short debug log helper (writes both console and on-screen #log)
-    const logEl = document.getElementById('log');
-    function log(msg){
-      console.log(msg);
-      const p = document.createElement('div');
-      p.textContent = msg;
-      logEl.prepend(p);
-      while(logEl.children.length > 12) logEl.removeChild(logEl.lastChild);
+  (function () {
+    /* ---------------------------
+       --- Setup & Constants ---
+       --------------------------- */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const LOGICAL_WIDTH = 800, LOGICAL_HEIGHT = 600;
+    function resizeCanvas(){
+      const ratio = window.devicePixelRatio || 1;
+      const cssWidth = canvas.clientWidth;
+      const cssHeight = Math.round(cssWidth * (LOGICAL_HEIGHT / LOGICAL_WIDTH));
+      canvas.style.height = cssHeight + 'px';
+      canvas.width = LOGICAL_WIDTH * ratio;
+      canvas.height = LOGICAL_HEIGHT * ratio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
 
-    window.addEventListener('error', function(e){
-      log('ERROR: ' + (e && e.message ? e.message : String(e)));
-      console.error(e);
-    });
-    window.addEventListener('unhandledrejection', function(e){
-      log('Promise rejection: ' + (e && e.reason ? e.reason : String(e)));
-      console.error(e);
-    });
+    // DOM elements
+    const overlay = document.getElementById('overlay');
+    const restartBtn = document.getElementById('restartBtn');
+    const hudText = document.getElementById('hudText');
+    const finalScore = document.getElementById('final-score');
+    const livesContainer = document.getElementById('livesContainer');
+    const levelNumEl = document.getElementById('levelNum');
+    const timeLeftEl = document.getElementById('timeLeft');
+    const fruitsLeftEl = document.getElementById('fruitsLeft');
 
-    // ---- Buffer & Canvas ----
-    const BUF_W = 160, BUF_H = 120;
-    const screen = document.getElementById('screen');
-    const buf = document.createElement('canvas'); buf.width = BUF_W; buf.height = BUF_H;
-    const bctx = buf.getContext('2d'), sctx = screen.getContext('2d');
-    sctx.imageSmoothingEnabled = false; bctx.imageSmoothingEnabled = false;
+    const levelPanel = document.getElementById('levelPanel');
+    const selectionUI = document.getElementById('selectionUI');
+    const previewGrid = document.getElementById('previewGrid');
+    const confirmRemoveBtn = document.getElementById('confirmRemoveBtn');
+    const cancelRemoveBtn = document.getElementById('cancelRemoveBtn');
+    const skipPowerBtn = document.getElementById('skipPowerBtn');
 
-    // ---- World/grid ----
-    const WORLD_W = 720, WORLD_H = 540;
-    const worldCenter = {x: WORLD_W/2, y: WORLD_H/2};
-    const TILE_SIZE = 12;
-    const GRID_W = Math.ceil(WORLD_W / TILE_SIZE);
-    const GRID_H = Math.ceil(WORLD_H / TILE_SIZE);
+    const W = LOGICAL_WIDTH, H = LOGICAL_HEIGHT;
 
-    // ---- Levels / constants ----
-    const LEVELS = [
-      { numBuried: 6, numPalms: 20, numRocks: 14, numBushes: 50, digSeconds: 5.0, noise: 0.38, islets: 0, enemies: 2 },
-      { numBuried: 8, numPalms: 26, numRocks: 20, numBushes: 64, digSeconds: 6.0, noise: 0.46, islets: 0, enemies: 3 },
-      { numBuried: 10, numPalms: 30, numRocks: 28, numBushes: 74, digSeconds: 7.5, noise: 0.52, islets: 1, enemies: 4 },
-      { numBuried: 13, numPalms: 34, numRocks: 36, numBushes: 90, digSeconds: 9.0, noise: 0.6, islets: 2, enemies: 5 },
-      { numBuried: 18, numPalms: 40, numRocks: 44, numBushes: 110, digSeconds: 11.0, noise: 0.72, islets: 3, enemies: 7 }
-    ];
-    const MAX_LEVEL = LEVELS.length;
-    const WATER_SLOW_MULT = 0.455;
+    // Player basket
+    const basket = { w: 140, h: 26, x: (W-140)/2, y: H-48, speed:7, vx:0 };
 
-    // ---- DOM refs ----
-    const hud = document.getElementById('hud');
-    const hintEl = document.getElementById('hint');
+    // Game entities
+    const items = [];      // falling items
+    const particles = [];  // visual feedback
 
-    // ---- State ----
-    let keys = {};
-    window.addEventListener('keydown', e => { keys[e.key] = true; if(e.key.startsWith('Arrow')) e.preventDefault(); });
-    window.addEventListener('keyup', e => { keys[e.key] = false; });
+    const fruitTypes = ['apple','banana','orange','grapes','pear'];
+    const allTypesForRemoval = [...fruitTypes, 'metal'];
 
-    let running=false, paused=false, showFullIsland=false, time=0, currentLevel=1;
-    let lastTime = 0;
+    // Game state + levels
+    let score = 0;
+    let lives = 3;
+    const MAX_LIVES = 3;
+    let running = true;     // false if game over or victory
+    let paused = false;     // true during the level transition / power-up selection
+    let frameCount = 0;
 
-    // ---- Entities ----
-    const player = { x:0, y:0, w:6, h:8, speed:24, _inWater:false };
-    let landTiles = null;
-    let palms=[], bushes=[], rocks=[], buriedItems=[], seaSprites=[], waves=[], particles=[];
-    let enemies=[], arrows=[];
+    const LEVELS = 5;
+    const LEVEL_DURATION_MS = 60000; // 60s per level
 
-    // ---- Small helpers ----
-    function randRange(a,b){ return a + Math.random()*(b-a); }
-    function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
-    function createEmptyGrid(){ const g=[]; for(let y=0;y<GRID_H;y++) g[y] = new Array(GRID_W).fill(false); return g; }
+    let currentLevel = 1;
+    let levelStartTime = performance.now();
+    let levelEndTime = levelStartTime + LEVEL_DURATION_MS;
 
-    // ---- Island generation ----
-    function seedIsland(grid, noise){
-      const cx = Math.floor(worldCenter.x/TILE_SIZE), cy = Math.floor(worldCenter.y/TILE_SIZE);
-      const rxTiles = Math.floor(220 / TILE_SIZE), ryTiles = Math.floor(140 / TILE_SIZE);
-      for(let ty = cy - ryTiles - 3; ty <= cy + ryTiles + 3; ty++){
-        if(ty<0||ty>=GRID_H) continue;
-        for(let tx = cx - rxTiles - 6; tx <= cx + rxTiles + 6; tx++){
-          if(tx<0||tx>=GRID_W) continue;
-          const wx = (tx+0.5)*TILE_SIZE, wy = (ty+0.5)*TILE_SIZE;
-          const dx = (wx - worldCenter.x)/220, dy = (wy - worldCenter.y)/140;
-          const d2 = dx*dx + dy*dy;
-          const pBase = 1 - Math.pow(d2, 0.9);
-          const pNoise = randRange(-noise*0.9, noise*0.9);
-          if(pBase + pNoise > 0.12) grid[ty][tx] = true;
-        }
+    function fruitTargetForLevel(level){ return 20 + (level-1)*20; }
+    let fruitTarget = fruitTargetForLevel(currentLevel);
+    let fruitsSpawnedThisLevel = 0;
+
+    // Spawning & difficulty variables (per-level will be reinitialized on startLevel)
+    let spawnInterval = Math.max(200, Math.round(LEVEL_DURATION_MS / Math.max(1, fruitTarget)));
+    let lastSpawn = performance.now();
+    let burstCount = 1;
+    let metalChance = 0.08 + (currentLevel-1)*0.04;
+    let speedMultiplier = 1.0;
+
+    // Speed change interval per level: Nivel1=45000ms, cada nivel -7000ms
+    function speedChangeIntervalForLevel(level){ return Math.max(5000, 45000 - (level-1)*7000); }
+    let speedChangeInterval = speedChangeIntervalForLevel(currentLevel);
+    let lastSpeedChange = performance.now();
+
+    // Allow banning types for a specific upcoming level: mapping level -> Set(types)
+    const bannedTypesForLevel = {}; // e.g. bannedTypesForLevel[3] = new Set(['banana'])
+
+    /* ---------------------------
+       --- Controls / Input ---
+       --------------------------- */
+    const keys = { left:false, right:false };
+    document.addEventListener('keydown', e => { if(e.key==='ArrowLeft') keys.left=true; if(e.key==='ArrowRight') keys.right=true; });
+    document.addEventListener('keyup', e => { if(e.key==='ArrowLeft') keys.left=false; if(e.key==='ArrowRight') keys.right=false; });
+
+    function pointerToLogicalX(e){
+      const rect = canvas.getBoundingClientRect();
+      const clientX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      const cssX = clientX - rect.left;
+      const scale = LOGICAL_WIDTH / rect.width;
+      return cssX * scale;
+    }
+    function moveBasketToPointer(e){
+      const x = pointerToLogicalX(e);
+      basket.x = Math.max(0, Math.min(W - basket.w, x - basket.w / 2));
+    }
+    canvas.addEventListener('pointermove', moveBasketToPointer);
+    canvas.addEventListener('pointerdown', moveBasketToPointer);
+    canvas.addEventListener('touchmove', (e)=>{ e.preventDefault(); moveBasketToPointer(e); }, {passive:false});
+
+    /* ---------------------------
+       --- UI Helpers ---
+       --------------------------- */
+    function renderLivesUI(){
+      livesContainer.innerHTML = '';
+      for(let i=0;i<MAX_LIVES;i++){
+        const span = document.createElement('span'); span.className='heart';
+        if(i < lives) span.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path fill="#e63946" d="M12 21s-7.5-4.9-10-8.1C-0.9 8.9 3 4 7.5 6.5 9.2 7.6 10 9.3 12 11c2-1.7 2.8-3.4 4.5-4.5C21 4 25 8.9 22 12.9 19.5 16.1 12 21 12 21z"/></svg>`;
+        else span.innerHTML = `<svg viewBox="0 0 24 24" width="22" height="22" xmlns="http://www.w3.org/2000/svg"><path fill="rgba(0,0,0,0.12)" d="M12 21s-7.5-4.9-10-8.1C-0.9 8.9 3 4 7.5 6.5 9.2 7.6 10 9.3 12 11c2-1.7 2.8-3.4 4.5-4.5C21 4 25 8.9 22 12.9 19.5 16.1 12 21 12 21z"/></svg>`;
+        livesContainer.appendChild(span);
       }
     }
-    function smoothGrid(grid, iterations){
-      for(let it=0; it<iterations; it++){
-        const copy = createEmptyGrid();
-        for(let y=0;y<GRID_H;y++){
-          for(let x=0;x<GRID_W;x++){
-            let c=0;
-            for(let oy=-1; oy<=1; oy++) for(let ox=-1; ox<=1; ox++){
-              const nx=x+ox, ny=y+oy;
-              if(nx>=0 && nx<GRID_W && ny>=0 && ny<GRID_H && grid[ny][nx]) c++;
-            }
-            if(c>=5) copy[y][x]=true; else if(c>=3 && grid[y][x]) copy[y][x]=true;
+
+    /* ---------------------------
+       --- Drawing helpers (preview + in-game) ---
+       --------------------------- */
+    function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+    // draw fruit on main canvas (used in-game)
+    function drawFruit(f){
+      const x=f.x, y=f.y, r=f.r;
+      ctx.save();
+      if(f.type==='apple'){
+        ctx.beginPath(); ctx.fillStyle='#ff4757'; ctx.ellipse(x,y,r,r*0.92,0,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.ellipse(x-r*0.36,y-r*0.5,r*0.35,r*0.25,0,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.strokeStyle='#6b3e1b'; ctx.lineWidth=Math.max(2,r*0.12); ctx.moveTo(x+r*0.12,y-r*0.6); ctx.lineTo(x+r*0.12,y-r*0.95); ctx.stroke();
+        ctx.beginPath(); ctx.fillStyle='#4CAF50'; ctx.ellipse(x+r*0.32,y-r*0.9,r*0.28,r*0.14,-0.6,0,Math.PI*2); ctx.fill();
+      } else if(f.type==='banana'){
+        ctx.beginPath(); ctx.fillStyle='#ffd54f'; ctx.moveTo(x-r,y); ctx.quadraticCurveTo(x-r*0.2,y-r*1.2,x+r,y-r*0.2); ctx.quadraticCurveTo(x+r*0.8,y+r*0.7,x-r,y+r*0.2); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.fillStyle='#b07b2a'; ctx.ellipse(x-r*0.9,y+r*0.15,r*0.18,r*0.18,0,0,Math.PI*2); ctx.fill();
+      } else if(f.type==='orange'){
+        ctx.beginPath(); ctx.fillStyle='#ff9f1c'; ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.06)'; for(let i=0;i<6;i++){ ctx.arc(x+Math.cos(i/6*Math.PI*2)*r*0.35,y+Math.sin(i/6*Math.PI*2)*r*0.35,r*0.18,0,Math.PI*2); } ctx.fill();
+        ctx.beginPath(); ctx.fillStyle='#6b3e1b'; ctx.fillRect(x-4,y-r-6,6,6); ctx.beginPath(); ctx.fillStyle='#2f9e44'; ctx.ellipse(x+8,y-r-6,8,4,-0.8,0,Math.PI*2); ctx.fill();
+      } else if(f.type==='grapes'){
+        const baseR = r*0.6; ctx.fillStyle='#6a0dad';
+        for(let row=0;row<4;row++){
+          for(let col=0;col<3-row;col++){
+            const cx = x + (col - (2-row-1)/2) * baseR;
+            const cy = y + (row - 1.2) * baseR;
+            ctx.beginPath(); ctx.arc(cx,cy,baseR*0.9,0,Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.18)'; ctx.arc(cx-baseR*0.4,cy-baseR*0.4,baseR*0.35,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='#6a0dad';
           }
         }
-        grid = copy;
+      } else if(f.type==='pear'){
+        ctx.beginPath(); ctx.fillStyle='#9acd32'; ctx.moveTo(x,y-r*0.9); ctx.quadraticCurveTo(x+r*1.2,y-r*0.2,x+r*0.4,y+r); ctx.quadraticCurveTo(x-r*0.6,y+r*1.1,x-r*0.8,y+r*0.1); ctx.quadraticCurveTo(x-r*0.4,y-r*0.6,x,y-r*0.9); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.fillStyle='#6b3e1b'; ctx.fillRect(x+r*0.12,y-r-6,4,8); ctx.beginPath(); ctx.fillStyle='#3fa34d'; ctx.ellipse(x+r*0.6,y-r-4,r*0.25,r*0.12,-0.6,0,Math.PI*2); ctx.fill();
       }
-      return grid;
+      ctx.restore();
     }
-    function connectIslands(grid){
-      const visited = Array.from({length:GRID_H}, ()=>new Array(GRID_W).fill(false));
-      const comps = [];
-      for(let y=0;y<GRID_H;y++) for(let x=0;x<GRID_W;x++){
-        if(grid[y][x] && !visited[y][x]){
-          const stack=[[x,y]]; visited[y][x]=true; const comp=[];
-          while(stack.length){
-            const [cx,cy]=stack.pop(); comp.push({x:cx,y:cy});
-            for(let oy=-1;oy<=1;oy++) for(let ox=-1;ox<=1;ox++){
-              const nx=cx+ox, ny=cy+oy;
-              if(nx>=0 && nx<GRID_W && ny>=0 && ny<GRID_H && !visited[ny][nx] && grid[ny][nx]){ visited[ny][nx]=true; stack.push([nx,ny]); }
-            }
-          }
-          comps.push(comp);
+
+    function drawMetal(m){
+      ctx.save();
+      ctx.translate(m.x, m.y);
+      ctx.rotate(m.rotation);
+      const w=m.w, h=m.h;
+      const g = ctx.createLinearGradient(-w/2,-h/2,w/2,h/2); g.addColorStop(0,'#c7c9cc'); g.addColorStop(0.5,'#f0f2f3'); g.addColorStop(1,'#b8b9bb');
+      ctx.fillStyle = g;
+      roundRect(ctx, -w/2, -h/2, w, h, 6);
+      ctx.fill();
+      ctx.beginPath(); ctx.fillStyle='#8a8a8a'; ctx.arc(0,0,Math.min(w,h)*0.22,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.fillStyle='#dcdcdc'; ctx.arc(0,0,Math.min(w,h)*0.11,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,0.06)'; ctx.lineWidth=1;
+      for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.moveTo(-w/2+6,i*4); ctx.lineTo(w/2-6,i*4); ctx.stroke(); }
+      ctx.restore();
+    }
+
+    function drawBasket(){
+      ctx.beginPath(); ctx.fillStyle='rgba(0,0,0,0.12)'; ctx.ellipse(basket.x + basket.w/2 + 6, basket.y + basket.h + 10, basket.w*0.45, 12, 0, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle='#7c4a2e'; roundRect(ctx, basket.x, basket.y, basket.w, basket.h, 8); ctx.fill();
+      ctx.fillStyle='#c38d5b'; roundRect(ctx, basket.x + 8, basket.y - 8, basket.w - 16, 12, 6); ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,0.08)'; ctx.lineWidth=2; ctx.strokeRect(basket.x + 6, basket.y + 2, basket.w - 12, basket.h - 6);
+    }
+
+    /* ---------------------------
+       --- Spawn logic (respects banned types for current level) ---
+       --------------------------- */
+    function isBannedForCurrentLevel(type){
+      const banned = bannedTypesForLevel[currentLevel];
+      return banned && banned.has(type);
+    }
+
+    function spawnItem() {
+      // If we've already spawned the target number of fruits this level, prefer metal.
+      const wantsMetal = Math.random() < metalChance;
+      const allowFruit = (fruitsSpawnedThisLevel < fruitTarget);
+      if (!allowFruit) {
+        // Force spawn metal (unless metal is banned)
+        if (!isBannedForCurrentLevel('metal')) {
+          const w = 28 + Math.random()*30;
+          const x = Math.max(w/2, Math.random() * (W - w));
+          const vy = (2.4 + Math.random()*2.4) * speedMultiplier;
+          items.push({ type:'metal', x:x + w/2, y:-20, w, h:w*0.6, vy, rotation:Math.random()*Math.PI, vr:(Math.random()-0.5)*0.08 });
         }
-      }
-      if(comps.length <= 1) return grid;
-      comps.sort((a,b)=>b.length - a.length);
-      const main = comps[0];
-      for(let i=1;i<comps.length;i++){
-        const comp = comps[i];
-        let best=null, bestD=1e9;
-        for(const a of comp) for(const b of main){ const dx=a.x-b.x, dy=a.y-b.y, d=dx*dx+dy*dy; if(d<bestD){ bestD=d; best={a,b}; } }
-        if(!best) continue;
-        let x0=best.a.x,y0=best.a.y,x1=best.b.x,y1=best.b.y;
-        const dx = Math.abs(x1-x0), sx = x0<x1?1:-1;
-        const dy = -Math.abs(y1-y0), sy = y0<y1?1:-1;
-        let err = dx+dy;
-        while(true){
-          grid[y0][x0] = true;
-          if(x0===x1 && y0===y1) break;
-          const e2 = 2*err;
-          if(e2 >= dy){ err += dy; x0 += sx; }
-          if(e2 <= dx){ err += dx; y0 += sy; }
-        }
-      }
-      return grid;
-    }
-    function buildTileIslandSafely(level){
-      try{
-        const cfg = LEVELS[level-1] || LEVELS[0];
-        let grid = createEmptyGrid();
-        seedIsland(grid, cfg.noise);
-        grid = smoothGrid(grid, 3);
-        grid = connectIslands(grid);
-        let any=false;
-        for(let y=0;y<GRID_H;y++) for(let x=0;x<GRID_W;x++) if(grid[y][x]) any=true;
-        if(!any){
-          log('WARN: generación devolvió 0 tiles, forzando isla central.');
-          const cx = Math.floor(GRID_W/2), cy = Math.floor(GRID_H/2);
-          const r = Math.max(3, Math.floor(Math.min(GRID_W, GRID_H) * 0.12));
-          for(let dy=-r; dy<=r; dy++) for(let dx=-r; dx<=r; dx++){
-            const nx = cx + dx, ny = cy + dy;
-            if(nx>=0 && nx<GRID_W && ny>=0 && ny<GRID_H && Math.hypot(dx,dy) <= r) grid[ny][nx] = true;
-          }
-        }
-        landTiles = grid;
-        log('land tiles = ' + countLandTiles(grid));
-      }catch(err){
-        log('ERROR building island: ' + err);
-        const grid = createEmptyGrid();
-        const cx = Math.floor(GRID_W/2), cy = Math.floor(GRID_H/2);
-        for(let dy=-3; dy<=3; dy++) for(let dx=-3; dx<=3; dx++){
-          const nx = cx+dx, ny = cy+dy;
-          if(nx>=0&&nx<GRID_W&&ny>=0&&ny<GRID_H) grid[ny][nx] = true;
-        }
-        landTiles = grid;
-      }
-    }
-    function countLandTiles(grid){ let c=0; for(let y=0;y<GRID_H;y++) for(let x=0;x<GRID_W;x++) if(grid[y][x]) c++; return c; }
-    function isPointInIsland(wx,wy){ if(!landTiles) return false; const tx = Math.floor(wx/TILE_SIZE), ty = Math.floor(wy/TILE_SIZE); if(tx<0||tx>=GRID_W||ty<0||ty>=GRID_H) return false; return !!landTiles[ty][tx]; }
-
-    // ---- Enemies / arrows ----
-    function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-    function spawnEnemiesForLevel(level){
-      const cfg = LEVELS[level-1] || LEVELS[0];
-      enemies = [];
-      const centers=[];
-      for(let ty=0; ty<GRID_H; ty++) for(let tx=0; tx<GRID_W; tx++) if(landTiles[ty][tx]) centers.push({x:tx*TILE_SIZE+TILE_SIZE/2,y:ty*TILE_SIZE+TILE_SIZE/2});
-      const cand = shuffle(centers.slice());
-      let placed=0;
-      for(const c of cand){
-        if(placed>=cfg.enemies) break;
-        if(Math.hypot(c.x-player.x,c.y-player.y) < TILE_SIZE*6) continue;
-        enemies.push({x:c.x,y:c.y-1,w:6,h:8,speed:18,lastShot:-999,cooldown:1.2,wanderTarget:null, spawnX:c.x, spawnY:c.y});
-        placed++;
-      }
-      for(const c of cand){
-        if(placed>=cfg.enemies) break;
-        enemies.push({x:c.x,y:c.y-1,w:6,h:8,speed:18,lastShot:-999,cooldown:1.2,wanderTarget:null, spawnX:c.x, spawnY:c.y});
-        placed++;
-      }
-    }
-
-    const ARROW_SPEED = 170, ARROW_MAX_TURN = Math.PI * 1.2;
-    function spawnArrowFromEnemy(enemy, targetX, targetY){
-      const sx = enemy.x, sy = enemy.y;
-      const dx = targetX - sx, dy = targetY - sy; const d = Math.hypot(dx,dy);
-      if(d===0) return;
-      const angle = Math.atan2(dy,dx);
-      arrows.push({ x:sx, y:sy, vx:Math.cos(angle)*ARROW_SPEED, vy:Math.sin(angle)*ARROW_SPEED, speed:ARROW_SPEED, life:5.0, angle:angle, homing:true });
-    }
-
-    function updateArrows(dt){
-      for(let i=arrows.length-1;i>=0;i--){
-        const a = arrows[i];
-        try{
-          if(a.homing){
-            const px = player.x + player.w/2, py = player.y + player.h/2;
-            const desired = Math.atan2(py - a.y, px - a.x);
-            let diff = desired - a.angle;
-            while(diff > Math.PI) diff -= 2*Math.PI;
-            while(diff < -Math.PI) diff += 2*Math.PI;
-            const maxStep = ARROW_MAX_TURN * dt;
-            if(Math.abs(diff) > maxStep) diff = diff > 0 ? maxStep : -maxStep;
-            a.angle += diff;
-            a.vx = Math.cos(a.angle) * a.speed;
-            a.vy = Math.sin(a.angle) * a.speed;
-          }
-          a.x += a.vx * dt; a.y += a.vy * dt; a.life -= dt;
-          if(a.x < 0 || a.x > WORLD_W || a.y < 0 || a.y > WORLD_H){ arrows.splice(i,1); continue; }
-          const tx = Math.floor(a.x / TILE_SIZE), ty = Math.floor(a.y / TILE_SIZE);
-          if(tx>=0&&tx<GRID_W&&ty>=0&&ty<GRID_H && landTiles[ty][tx]){ arrows.splice(i,1); continue; }
-          const pbox = {x:player.x,y:player.y,w:player.w,h:player.h}, abox = {x:a.x-2,y:a.y-1,w:3,h:2};
-          if(rectIntersect(pbox, abox)){
-            arrows.splice(i,1);
-            log('Has sido golpeado por una flecha — reiniciando nivel.');
-            // immediate restart of current level
-            generateLevelWrapper(currentLevel);
-            running = true;
-            paused = false;
-            lastTime = performance.now();
-            requestAnimationFrame(loop);
-            return;
-          }
-          if(a.life <= 0) arrows.splice(i,1);
-        }catch(err){
-          log('ERROR updateArrows: ' + err);
-          arrows.splice(i,1);
-        }
-      }
-    }
-
-    // enemy AI: limited chase radius
-    const ENEMY_MAX_FOLLOW_TILES = 10, SIGHT_TILES = 4, SHOOT_TILES = 2;
-    function tilesDistance(ax,ay,bx,by){ const atx=Math.floor(ax/TILE_SIZE), aty=Math.floor(ay/TILE_SIZE), btx=Math.floor(bx/TILE_SIZE), bty=Math.floor(by/TILE_SIZE); return Math.hypot(atx-btx, aty-bty); }
-    function hasLineOfSight(ax,ay,bx,by){
-      const atx=Math.floor(ax/TILE_SIZE), aty=Math.floor(ay/TILE_SIZE), btx=Math.floor(bx/TILE_SIZE), bty=Math.floor(by/TILE_SIZE);
-      let x0=atx,y0=aty,x1=btx,y1=bty; const dx=Math.abs(x1-x0), sx=x0<x1?1:-1; const dy=-Math.abs(y1-y0), sy=y0<y1?1:-1; let err=dx+dy;
-      while(true){
-        if(x0<0||x0>=GRID_W||y0<0||y0>=GRID_H) return false;
-        if(!landTiles[y0][x0]) return false;
-        if(x0===x1 && y0===y1) break;
-        const e2 = 2*err;
-        if(e2 >= dy){ err += dy; x0 += sx; }
-        if(e2 <= dx){ err += dx; y0 += sy; }
-      }
-      return true;
-    }
-
-    function enemyUpdate(dt){
-      for(const e of enemies){
-        const px = player.x + player.w/2, py = player.y + player.h/2;
-        const distTilesToPlayer = tilesDistance(e.x, e.y, px, py);
-        const distTilesSpawnToPlayer = tilesDistance(e.spawnX, e.spawnY, px, py);
-        const canChase = distTilesSpawnToPlayer <= ENEMY_MAX_FOLLOW_TILES;
-        const sees = distTilesToPlayer <= SIGHT_TILES && hasLineOfSight(e.x, e.y, px, py) && canChase;
-        if(sees){
-          if(distTilesToPlayer <= SHOOT_TILES){
-            if(time - e.lastShot >= e.cooldown){ e.lastShot = time; spawnArrowFromEnemy(e, px, py); }
-            if(!e.wanderTarget || Math.random() < 0.02){ const angle = Math.atan2(py - e.y, px - e.x) + (Math.random()<0.5?Math.PI/2:-Math.PI/2); e.wanderTarget = { x: e.x + Math.cos(angle)*TILE_SIZE, y: e.y + Math.sin(angle)*TILE_SIZE }; }
-          } else {
-            e.wanderTarget = { x: px, y: py };
-          }
-        } else {
-          const distSpawnToEnemyTiles = tilesDistance(e.spawnX, e.spawnY, e.x, e.y);
-          if(distSpawnToEnemyTiles > 1 && (!e.wanderTarget || e.wanderTarget.x !== e.spawnX || e.wanderTarget.y !== e.spawnY)){
-            e.wanderTarget = { x: e.spawnX, y: e.spawnY };
-          } else if(!e.wanderTarget || Math.random() < 0.01 || Math.hypot(e.wanderTarget.x - e.x, e.wanderTarget.y - e.y) < 6){
-            const rx = e.x + randRange(-TILE_SIZE*4, TILE_SIZE*4), ry = e.y + randRange(-TILE_SIZE*4, TILE_SIZE*4);
-            if(isPointInIsland(rx, ry)) e.wanderTarget = { x: rx, y: ry }; else e.wanderTarget = null;
-          }
-        }
-        if(e.wanderTarget){
-          const dx = e.wanderTarget.x - e.x, dy = e.wanderTarget.y - e.y;
-          const dist = Math.hypot(dx, dy);
-          if(dist > 1){
-            const vx = (dx / dist) * e.speed * dt, vy = (dy / dist) * e.speed * dt;
-            tryMoveEntity(e, vx, vy);
-          } else e.wanderTarget = null;
-        }
-      }
-    }
-
-    function tryMoveEntity(ent, dx, dy){
-      const newX = ent.x + dx, newY = ent.y + dy;
-      const box = { x:newX, y:newY, w:ent.w, h:ent.h };
-      const obstacles = [];
-      for(const p of palms) obstacles.push(palmHitbox(p));
-      for(const r of rocks) obstacles.push(rockHitbox(r));
-      for(const b of obstacles){
-        if(rectIntersect(box,b)){
-          const testX = { x:newX, y:ent.y, w:ent.w, h:ent.h }, testY = { x:ent.x, y:newY, w:ent.w, h:ent.h };
-          if(!rectIntersect(testX,b)){ ent.x = newX; return; } else if(!rectIntersect(testY,b)){ ent.y = newY; return; } else return;
-        }
-      }
-      ent.x = newX; ent.y = newY;
-    }
-
-    // Hitboxes & movement
-    function palmHitbox(p){ return { x: p.x - 2, y: p.y - 8, w: 4, h: 10 }; }
-    function rockHitbox(r){ return { x: r.x - 3, y: r.y - 2, w: 6, h: 4 }; }
-    function rectIntersect(a,b,pad=0){ return a.x < b.x + b.w + pad && a.x + a.w + pad > b.x && a.y < b.y + b.h + pad && a.y + a.h + pad > b.y; }
-    function tryMove(dx,dy){ const newX = player.x + dx, newY = player.y + dy; const pbox={x:newX,y:newY,w:player.w,h:player.h}; const boxes=[]; for(const p of palms) boxes.push(palmHitbox(p)); for(const r of rocks) boxes.push(rockHitbox(r)); for(const b of boxes){ if(rectIntersect(pbox,b)){ const testX={x:newX,y:player.y,w:player.w,h:player.h}, testY={x:player.x,y:newY,w:player.w,h:player.h}; if(!rectIntersect(testX,b)){ player.x=newX; return; } else if(!rectIntersect(testY,b)){ player.y=newY; return; } else return; } } player.x=newX; player.y=newY; }
-
-    // Level builder wrapper
-    function generateLevelWrapper(level){
-      try{
-        showFullIsland = false;
-        document.getElementById('zoomBtn').textContent = 'Ver isla';
-        buildTileIslandSafely(level);
-
-        palms=[]; bushes=[]; rocks=[]; buriedItems=[]; seaSprites=[]; waves=[]; particles=[]; enemies=[]; arrows=[];
-
-        const landCenters=[];
-        for(let ty=0; ty<GRID_H; ty++) for(let tx=0; tx<GRID_W; tx++) if(landTiles[ty][tx]) landCenters.push({x:tx*TILE_SIZE+TILE_SIZE/2, y:ty*TILE_SIZE+TILE_SIZE/2});
-        const cfg = LEVELS[level-1] || LEVELS[0];
-
-        if(landCenters.length){ const c = landCenters[Math.floor(landCenters.length/2)]; player.x = c.x - 8; player.y = c.y - 12; } else { player.x = worldCenter.x - 8; player.y = worldCenter.y - 12; }
-
-        const shuffled = shuffle(landCenters.slice());
-        for(let i=0;i<Math.min(cfg.numPalms, shuffled.length); i++){ const c = shuffled[i]; palms.push({x:c.x + randRange(-3,3), y:c.y + randRange(-3,3), w:10, h:16}); }
-        for(let i=0;i<Math.min(cfg.numBushes, Math.floor(landCenters.length*0.5)); i++){ const c = landCenters[Math.floor(Math.random()*landCenters.length)]; bushes.push({x:c.x + randRange(-2,2), y:c.y + randRange(-2,2), w:6, h:4}); }
-
-        for(let ty=1; ty<GRID_H-1; ty++) for(let tx=1; tx<GRID_W-1; tx++){
-          if(landTiles[ty][tx]){ let neighborWater=false; for(let oy=-1;oy<=1;oy++) for(let ox=-1;ox<=1;ox++){ const nx=tx+ox, ny=ty+oy; if(nx>=0&&nx<GRID_W&&ny>=0&&ny<GRID_H && !landTiles[ny][nx]) neighborWater=true; } if(neighborWater && Math.random()<0.02) rocks.push({x:tx*TILE_SIZE+TILE_SIZE/2+randRange(-2,2), y:ty*TILE_SIZE+TILE_SIZE/2+randRange(-2,2), w:8, h:6}); }
-        }
-
-        const candidates = shuffle(landCenters.slice());
-        const chosen = [];
-        for(const c of candidates){ if(chosen.length>=cfg.numBuried) break; let ok=true; for(const ch of chosen) if(Math.hypot(ch.x-c.x,ch.y-c.y) < TILE_SIZE*2.4){ ok=false; break; } if(ok) chosen.push(c); }
-        let idx=0; while(chosen.length < cfg.numBuried && idx < candidates.length) chosen.push(candidates[idx++]);
-        const realIndex = Math.floor(Math.random()*chosen.length);
-        buriedItems = chosen.map((c,i)=>({ x:c.x-4, y:c.y-3, w:8, h:6, type: i===realIndex ? 'real' : 'fake', buried:true, dugProgress:0, found:false }));
-
-        for(let i=0;i<120;i++) seaSprites.push({ x: randRange(0,WORLD_W), y: randRange(0,WORLD_H), dir: Math.random()>0.5?1:-1, speed: randRange(6,24), bobAmp: randRange(1,4), phase: Math.random()*Math.PI*2, type: Math.random()<0.7?'fish':'bubble' });
-        for(let i=0;i<28;i++) waves.push({ x: randRange(worldCenter.x - 300, worldCenter.x + 300), y: randRange(worldCenter.y - 300, worldCenter.y + 300), t: Math.random()*10, speed: randRange(0.4,1.2), size: randRange(6,14) });
-
-        spawnEnemiesForLevel(level);
-
-        lastTime = performance.now();
-        time = 0;
-
-        updateHUD();
-      }catch(err){
-        log('ERROR generateLevelWrapper: ' + err);
-      }
-    }
-
-    function updateHUD(){ hud.textContent = `Nivel ${currentLevel} — Tesoro: enterrado`; }
-
-    // Drawing
-    function worldToView(wx, wy){
-      if(showFullIsland){
-        let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-        for(let ty=0; ty<GRID_H; ty++) for(let tx=0; tx<GRID_W; tx++) if(landTiles[ty][tx]){ const wxc = tx*TILE_SIZE + TILE_SIZE/2, wyc = ty*TILE_SIZE + TILE_SIZE/2; if(wxc < minX) minX = wxc; if(wxc > maxX) maxX = wxc; if(wyc < minY) minY = wyc; if(wyc > maxY) maxY = wyc; }
-        if(minX===Infinity){ minX = worldCenter.x - 220; minY = worldCenter.y - 140; maxX = worldCenter.x + 220; maxY = worldCenter.y + 140; }
-        const pad = 20;
-        const islandPixelWidth = (maxX - minX) + pad, islandPixelHeight = (maxY - minY) + pad;
-        const fitX = BUF_W / islandPixelWidth, fitY = BUF_H / islandPixelHeight;
-        const base = Math.min(fitX, fitY);
-        zoom = clamp(base, 0.18, 1.0);
-        const centerX = (minX + maxX)/2, centerY = (minY + maxY)/2;
-        cam.x = centerX - (BUF_W / (2 * zoom));
-        cam.y = centerY - (BUF_H / (2 * zoom));
-      } else {
-        zoom = 1.0;
-        cam.x = player.x + player.w/2 - (BUF_W/2)/zoom;
-        cam.y = player.y + player.h/2 - (BUF_H/2)/zoom;
-      }
-      cam.x = clamp(cam.x, 0, Math.max(0, WORLD_W - BUF_W/zoom));
-      cam.y = clamp(cam.y, 0, Math.max(0, WORLD_H - BUF_H/zoom));
-      if(!isFinite(cam.x)) cam.x = 0;
-      if(!isFinite(cam.y)) cam.y = 0;
-      return { x: Math.round((wx - cam.x) * zoom), y: Math.round((wy - cam.y) * zoom) };
-    }
-    let zoom = 1.0, cam = {x:0,y:0};
-
-    function drawTileIsland(){
-      bctx.fillStyle = '#2ea6ff'; bctx.fillRect(0,0,BUF_W,BUF_H);
-      if(!landTiles){
-        log('WARN: landTiles undefined — dibujando fallback visual.');
-        const cx = Math.floor(BUF_W/2), cy = Math.floor(BUF_H/2), r = 18;
-        for(let yy=-r; yy<=r; yy++) for(let xx=-r; xx<=r; xx++){ if(Math.hypot(xx,yy) <= r) setPixel(cx+xx, cy+yy, '#6ec26b'); }
         return;
       }
-      for(let ty=0; ty<GRID_H; ty++){
-        for(let tx=0; tx<GRID_W; tx++){
-          if(landTiles[ty][tx]){
-            let edge=false;
-            for(let oy=-1; oy<=1; oy++) for(let ox=-1; ox<=1; ox++){
-              if(ox===0 && oy===0) continue;
-              const nx=tx+ox, ny=ty+oy;
-              if(nx<0||nx>=GRID_W||ny<0||ny>=GRID_H || !landTiles[ny][nx]) edge=true;
-            }
-            const wx = tx*TILE_SIZE + 1, wy = ty*TILE_SIZE + 1;
-            const v = worldToView(wx, wy);
-            const tw = Math.max(1, Math.round(TILE_SIZE * zoom)), th = Math.max(1, Math.round(TILE_SIZE * zoom));
-            if(edge) fillRectPixel(v.x, v.y, tw, th, '#f3e2b3', true); else fillRectPixel(v.x, v.y, tw, th, '#6ec26b', true);
+
+      // If metal is chosen and not banned (but prefer fruits until target)
+      const spawnMetal = wantsMetal && Math.random() < 0.35;
+      if (spawnMetal && !isBannedForCurrentLevel('metal')) {
+        const w = 28 + Math.random()*30;
+        const x = Math.max(w/2, Math.random() * (W - w));
+        const vy = (2.4 + Math.random()*2.4) * speedMultiplier;
+        items.push({ type:'metal', x:x + w/2, y:-20, w, h:w*0.6, vy, rotation:Math.random()*Math.PI, vr:(Math.random()-0.5)*0.08 });
+        return;
+      }
+
+      // Spawn fruit (respect banned types)
+      let attempts = 0;
+      while(attempts < 6){
+        const type = fruitTypes[Math.floor(Math.random()*fruitTypes.length)];
+        attempts++;
+        if (isBannedForCurrentLevel(type)) continue;
+        const r = 14 + Math.random()*18;
+        const x = r + Math.random()*(W - r*2);
+        let baseVy = (1.6 + Math.random()*2.2) * speedMultiplier;
+        if (type === 'orange') baseVy *= 1.45;
+        if (type === 'grapes') {
+          const amp = 18 + Math.random()*14;
+          const freq = 0.06 + Math.random()*0.06;
+          const phase = Math.random() * Math.PI * 2;
+          items.push({ type, x, baseX: x, y: -r-10, r, vy: baseVy, zigAmp: amp, zigFreq: freq, zigPhase: phase });
+        } else {
+          items.push({ type, x, y: -r-10, r, vy: baseVy, wobble: Math.random()*0.04 });
+        }
+        fruitsSpawnedThisLevel++;
+        return;
+      }
+      // If couldn't find a non-banned fruit after attempts, try spawning metal (if allowed)
+      if (!isBannedForCurrentLevel('metal')) {
+        const w = 28 + Math.random()*30;
+        const x = Math.max(w/2, Math.random() * (W - w));
+        const vy = (2.4 + Math.random()*2.4) * speedMultiplier;
+        items.push({ type:'metal', x:x + w/2, y:-20, w, h:w*0.6, vy, rotation:Math.random()*Math.PI, vr:(Math.random()-0.5)*0.08 });
+      }
+    }
+
+    function spawnBurst(){
+      for(let i=0;i<burstCount;i++) spawnItem();
+    }
+
+    /* ---------------------------
+       --- Particles ---
+       --------------------------- */
+    function spawnHitEffect(x,y,kind){
+      const count = kind === 'fruit' ? 8 : 12;
+      for(let i=0;i<count;i++){
+        particles.push({
+          x,y,
+          vx:(Math.random()-0.5)*(kind==='fruit'?2:4),
+          vy:(Math.random()-0.8)*(kind==='fruit'?2:4),
+          life:30 + Math.random()*20,
+          color: kind==='fruit' ? (Math.random()<0.6? '#fff' : '#ffd') : '#cfcfcf',
+          size: 2 + Math.random()*3
+        });
+      }
+    }
+    function updateParticles(){
+      for(let i=particles.length-1;i>=0;i--){
+        const p = particles[i]; p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.life--;
+        if(p.life<=0) particles.splice(i,1);
+      }
+    }
+    function drawParticles(){
+      for(const p of particles){ ctx.beginPath(); ctx.fillStyle=p.color; ctx.globalAlpha=Math.max(0,p.life/40); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill(); ctx.globalAlpha=1; }
+    }
+
+    /* ---------------------------
+       --- Level transition & power-up UI handling ---
+       --------------------------- */
+    // When level completes, show panel (pause) and let player pick power-up.
+    function onLevelCompletePause(nextLevel){
+      paused = true;
+      // Show panel with message
+      levelPanel.classList.remove('hidden');
+      levelPanel.setAttribute('aria-hidden','false');
+      document.getElementById('levelPanelTitle').textContent = `Nivel ${currentLevel} completado`;
+      // Ensure selectionUI hidden
+      selectionUI.classList.add('hidden');
+      selectionUI.setAttribute('aria-hidden','true');
+    }
+
+    // Hide transition UI and resume to start next level (apply chosen effect already applied)
+    function hideLevelPanelAndStart(nextLevel){
+      levelPanel.classList.add('hidden');
+      levelPanel.setAttribute('aria-hidden','true');
+      paused = false;
+      // Start next level
+      const now = performance.now();
+      startLevel(nextLevel, now);
+    }
+
+    // Card actions
+    levelPanel.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-action]');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      const nextLevel = currentLevel + 1;
+      if (action === 'regenerate') {
+        // Restore all lives
+        lives = MAX_LIVES;
+        renderLivesUI();
+        hideLevelPanelAndStart(nextLevel);
+      } else if (action === 'hitbox') {
+        // Increase basket width by 5%
+        basket.w = Math.min(W*0.9, basket.w * 1.05);
+        // Clamp x
+        basket.x = Math.max(0, Math.min(W - basket.w, basket.x));
+        hideLevelPanelAndStart(nextLevel);
+      } else if (action === 'remove') {
+        // Show selection UI to choose which object to remove for next level
+        showSelectionUIFor(nextLevel);
+      }
+    });
+
+    skipPowerBtn.addEventListener('click', () => {
+      hideLevelPanelAndStart(currentLevel + 1);
+    });
+
+    // Selection UI logic
+    let selectedRemoveType = null;
+    function showSelectionUIFor(nextLevel){
+      // populate previewGrid with all types (fruitTypes + metal)
+      previewGrid.innerHTML = '';
+      selectedRemoveType = null;
+      for(const t of allTypesForRemoval){
+        const item = document.createElement('div');
+        item.className = 'preview-item';
+        item.dataset.type = t;
+        // create small canvas preview
+        const preview = createPreviewCanvasForType(t, 80, 60);
+        item.appendChild(preview);
+        const label = document.createElement('div'); label.textContent = t; label.style.fontWeight = '700'; label.style.marginTop = '6px';
+        item.appendChild(label);
+        item.addEventListener('click', ()=>{
+          // toggle selection
+          if(item.classList.contains('selected')) {
+            item.classList.remove('selected'); selectedRemoveType = null;
+          } else {
+            // deselect siblings
+            for(const c of previewGrid.children) c.classList.remove('selected');
+            item.classList.add('selected');
+            selectedRemoveType = t;
           }
+        });
+        previewGrid.appendChild(item);
+      }
+      selectionUI.classList.remove('hidden');
+      selectionUI.setAttribute('aria-hidden','false');
+    }
+
+    confirmRemoveBtn.addEventListener('click', () => {
+      if (!selectedRemoveType) {
+        alert('Selecciona un objeto para eliminar (por ejemplo "banana" o "metal")');
+        return;
+      }
+      // Set banned for next level only
+      const nextLevel = currentLevel + 1;
+      bannedTypesForLevel[nextLevel] = new Set([selectedRemoveType]);
+      // Hide selection and panel, resume
+      selectionUI.classList.add('hidden');
+      selectionUI.setAttribute('aria-hidden','true');
+      levelPanel.classList.add('hidden');
+      levelPanel.setAttribute('aria-hidden','true');
+      paused = false;
+      // Start next level
+      startLevel(nextLevel, performance.now());
+    });
+
+    cancelRemoveBtn.addEventListener('click', () => {
+      // go back to level panel (still paused)
+      selectionUI.classList.add('hidden');
+      selectionUI.setAttribute('aria-hidden','true');
+      // keep levelPanel visible
+    });
+
+    /* ---------- Small preview canvas creator (for selection UI) ---------- */
+    function createPreviewCanvasForType(type, w = 80, h = 60){
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h; c.style.width = w + 'px'; c.style.height = h + 'px';
+      const g = c.getContext('2d');
+      g.clearRect(0,0,w,h);
+      // scale for drawing relative to canvas size
+      const cx = w/2, cy = h/2 + 6;
+      if (type === 'metal'){
+        // draw metal rectangle
+        const mw = Math.min(56, w - 20), mh = Math.min(34, h - 18);
+        const ggrad = g.createLinearGradient(cx - mw/2, cy - mh/2, cx + mw/2, cy + mh/2);
+        ggrad.addColorStop(0,'#c7c9cc'); ggrad.addColorStop(0.5,'#f0f2f3'); ggrad.addColorStop(1,'#b8b9bb');
+        g.fillStyle = ggrad;
+        roundRect(g, cx - mw/2, cy - mh/2, mw, mh, 6); g.fill();
+        g.beginPath(); g.fillStyle = '#8a8a8a'; g.arc(cx, cy, Math.min(mw,mh)*0.22, 0, Math.PI*2); g.fill();
+      } else {
+        // draw fruit type small
+        const r = Math.min(20, Math.min(w,h)/3);
+        if(type === 'apple'){
+          g.beginPath(); g.fillStyle='#ff4757'; g.ellipse(cx, cy, r, r*0.92, 0, 0, Math.PI*2); g.fill();
+          g.beginPath(); g.fillStyle='rgba(255,255,255,0.35)'; g.ellipse(cx-r*0.36,cy-r*0.5,r*0.35,r*0.25,0,0,Math.PI*2); g.fill();
+        } else if(type === 'banana'){
+          g.beginPath(); g.fillStyle='#ffd54f'; g.moveTo(cx-r,cy); g.quadraticCurveTo(cx-r*0.2,cy-r*1.2,cx+r,cy-r*0.2); g.quadraticCurveTo(cx+r*0.8,cy+r*0.7,cx-r,cy+r*0.2); g.closePath(); g.fill();
+        } else if(type === 'orange'){
+          g.beginPath(); g.fillStyle='#ff9f1c'; g.arc(cx,cy,r,0,Math.PI*2); g.fill();
+          g.beginPath(); g.fillStyle='rgba(255,255,255,0.06)'; for(let i=0;i<6;i++) g.arc(cx+Math.cos(i/6*Math.PI*2)*r*0.35,cy+Math.sin(i/6*Math.PI*2)*r*0.35,r*0.18,0,Math.PI*2); g.fill();
+        } else if(type === 'grapes'){
+          g.fillStyle='#6a0dad';
+          const baseR = r*0.6;
+          for(let row=0;row<4;row++){
+            for(let col=0;col<3-row;col++){
+              const px = cx + (col - (2-row-1)/2) * baseR;
+              const py = cy + (row - 1.2) * baseR;
+              g.beginPath(); g.arc(px,py,baseR*0.9,0,Math.PI*2); g.fill();
+            }
+          }
+        } else if(type === 'pear'){
+          g.beginPath(); g.fillStyle='#9acd32'; g.moveTo(cx,cy-r*0.9); g.quadraticCurveTo(cx+r*1.2,cy-r*0.2,cx+r*0.4,cy+r); g.quadraticCurveTo(cx-r*0.6,cy+r*1.1,cx-r*0.8,cy+r*0.1); g.quadraticCurveTo(cx-r*0.4,cy-r*0.6,cx,cy-r*0.9); g.closePath(); g.fill();
         }
       }
+      return c;
     }
 
-    function fillRectPixel(x,y,w,h,color,outline=false){ bctx.fillStyle = color; bctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h)); if(outline){ bctx.fillStyle='#000'; bctx.fillRect(Math.round(x), Math.round(y)-1, Math.round(w), 1); bctx.fillRect(Math.round(x), Math.round(y)+Math.round(h), Math.round(w), 1); bctx.fillRect(Math.round(x)-1, Math.round(y), 1, Math.round(h)); bctx.fillRect(Math.round(x)+Math.round(w), Math.round(y), 1, Math.round(h)); } }
-    function setPixel(x,y,color){ bctx.fillStyle = color; bctx.fillRect(Math.round(x), Math.round(y), 1, 1); }
-
-    function drawPalm(px,py){ const v = worldToView(px,py); if(showFullIsland) fillRectPixel(v.x-1,v.y-1,2,2,'#2b8c3b',true); else { fillRectPixel(v.x-1,v.y-6,3,6,'#7a4f2a',true); fillRectPixel(v.x-4,v.y-8,3,2,'#2b8c3b',true); fillRectPixel(v.x+2,v.y-9,4,2,'#2b8c3b',true); fillRectPixel(v.x-2,v.y-10,5,2,'#2b8c3b',true); } }
-    function drawBush(x,y){ const v=worldToView(x,y); if(showFullIsland) setPixel(v.x,v.y,'#3fa64a'); else fillRectPixel(v.x-3,v.y-1,6,3,'#3fa64a',true); }
-    function drawRock(x,y){ const v=worldToView(x,y); if(showFullIsland) setPixel(v.x,v.y,'#8f8f8f'); else fillRectPixel(v.x-3,v.y-1,6,2,'#8f8f8f',true); }
-    function drawPlayer(){ const v=worldToView(player.x,player.y); fillRectPixel(v.x-3, v.y+player.h+2, 7, 1, 'rgba(0,0,0,0.25)'); fillRectPixel(v.x-2, v.y+1, 5, 4, '#12343b', true); fillRectPixel(v.x-1, v.y-2, 3, 3, '#f8d6c2', true); fillRectPixel(v.x-2, v.y-3, 5, 2, '#e74c3c', true); setPixel(v.x, v.y-1, '#000'); setPixel(v.x+1, v.y-1, '#000'); }
-
-    function drawAll(){
-      bctx.fillStyle = '#9fd7ff'; bctx.fillRect(0,0,BUF_W,BUF_H);
-      drawTileIsland();
-      for(const r of rocks) drawRock(r.x, r.y);
-      for(const b of bushes) drawBush(b.x, b.y);
-      for(const p of palms) drawPalm(p.x, p.y);
-      for(const s of seaSprites){ if(!isPointInIsland(s.x,s.y)){ const v=worldToView(s.x,s.y); if(v.x<-8||v.x>BUF_W+8||v.y<-8||v.y>BUF_H+8) continue; fillRectPixel(v.x,v.y,3,1,'#ffd54d',true); setPixel(v.x+2,v.y,'#000'); } }
-      for(const w of waves){ const v=worldToView(w.x,w.y); setPixel(v.x,v.y,'rgba(255,255,255,0.9)'); }
-      for(const it of buriedItems){ const v=worldToView(it.x,it.y); if(it.buried) fillRectPixel(v.x,v.y,Math.max(1,Math.round(4*zoom)),Math.max(1,Math.round(2*zoom)),'#b07b4a',true); else { if(it.type==='real'){ fillRectPixel(v.x,v.y,Math.max(1,Math.round(it.w*zoom)),Math.max(1,Math.round(it.h*zoom)),'#8c5a0b',true); fillRectPixel(v.x+1,v.y,Math.max(1,Math.round(2*zoom)),1,'#ffda7a',true); } else fillRectPixel(v.x,v.y,Math.max(1,Math.round(it.w*zoom)),Math.max(1,Math.round(it.h*zoom)),'#7a6f55',true); } }
-      for(const e of enemies){ const v=worldToView(e.x,e.y); fillRectPixel(v.x-3,v.y+e.h+2,7,1,'rgba(0,0,0,0.25)'); fillRectPixel(v.x-2,v.y+1,5,4,'#2b6cf6',true); fillRectPixel(v.x-1,v.y-2,3,3,'#f8d6c2',true); fillRectPixel(v.x-2,v.y-3,5,2,'#3b82f6',true); setPixel(v.x,v.y-1,'#000'); setPixel(v.x+1,v.y-1,'#000'); }
-      for(const a of arrows){ const v=worldToView(a.x,a.y); fillRectPixel(v.x-1,v.y,3,1,'#ffd54d',true); setPixel(v.x+2,v.y,'#000'); }
-      for(const pt of particles){ const v=worldToView(pt.x,pt.y); const alpha = Math.max(0, Math.min(1, pt.life/pt.max)); fillRectPixel(Math.round(v.x), Math.round(v.y), 1, 1, 'rgba(255,255,255,'+alpha+')'); }
-      drawPlayer();
-      const near = findNearbyBuriedItem(14);
-      if(near && near.buried){ const v = worldToView(near.x + near.w/2, near.y - 6); fillRectPixel(v.x-8, v.y-6, 16, 3, '#222'); fillRectPixel(v.x-7, v.y-5, Math.max(1, Math.round(14*(near.dugProgress/100))), 1, '#ffd65a', true); }
-      sctx.clearRect(0,0,screen.width,screen.height);
-      sctx.drawImage(buf,0,0,screen.width,screen.height);
-    }
-
-    // Digging helpers
-    function findNearbyBuriedItem(pad){ for(const it of buriedItems){ const box={x:it.x,y:it.y,w:it.w,h:it.h}; const pbox={x:player.x,y:player.y,w:player.w,h:player.h}; if(rectIntersect(pbox, box, pad)) return it; } return null; }
-    function handleDigging(dt){ const cfg = LEVELS[currentLevel-1] || LEVELS[0]; const it = findNearbyBuriedItem(14); if(!it){ hintEl.textContent=''; return; } if(it.buried) hintEl.textContent='Presiona ESPACIO para desenterrar'; else hintEl.textContent = it.type==='real'? 'Tesoro real: recógelo' : 'Objeto falso descubierto'; if(it.buried && (keys[' '] || keys['Spacebar'] || keys['Space'])){ it.dugProgress += (dt / cfg.digSeconds) * 100; if(it.dugProgress>100) it.dugProgress=100; } else it.dugProgress = Math.max(0, it.dugProgress - (6 * dt)); if(it.buried && it.dugProgress >= 100){ it.buried=false; it.found=true; if(it.type==='real'){ hud.textContent = `Nivel ${currentLevel} — Tesoro: descubierto`; for(let k=0;k<20;k++) particles.push({x:it.x + randRange(-6,6), y:it.y + randRange(-6,6), vx:randRange(-0.8,0.8), vy:randRange(-1.2,-0.2), size:1, life:0.8, max:0.8}); } else { for(let k=0;k<10;k++) particles.push({x:it.x + randRange(-4,4), y:it.y + randRange(-4,4), vx:randRange(-0.6,0.6), vy:randRange(-0.9,-0.2), size:1, life:0.6, max:0.6}); } } if(!it.buried && it.type==='real' && rectIntersect(player, {x:it.x,y:it.y,w:it.w,h:it.h}, 0)){ running=false; document.getElementById('levelTitle').textContent = `Nivel ${currentLevel} completado`; document.getElementById('levelMsg').textContent = currentLevel < MAX_LEVEL ? 'Puedes avanzar al siguiente nivel o repetir este nivel.' : 'Has completado el último nivel.'; document.getElementById('levelCompleteOverlay').style.display = 'flex'; } }
-
-    // UI wiring
-    document.getElementById('startBtn').onclick = ()=>{ document.getElementById('startOverlay').style.display='none'; currentLevel=1; generateLevelWrapper(currentLevel); running=true; paused=false; lastTime = performance.now(); requestAnimationFrame(loop); };
-    document.getElementById('exitBtn').onclick = ()=>{ alert('Cierra la pestaña para salir.'); };
-    document.getElementById('pauseBtn').onclick = ()=>{ if(!running) return; paused = !paused; document.getElementById('pauseBtn').textContent = paused? 'Reanudar' : 'Pausa'; };
-    document.getElementById('zoomBtn').onclick = ()=>{ showFullIsland = !showFullIsland; document.getElementById('zoomBtn').textContent = showFullIsland? 'Seguir jugador' : 'Ver isla'; };
-    document.getElementById('nextLevelBtn').onclick = ()=>{ document.getElementById('levelCompleteOverlay').style.display='none'; if(currentLevel < MAX_LEVEL){ currentLevel++; generateLevelWrapper(currentLevel); running=true; paused=false; lastTime = performance.now(); requestAnimationFrame(loop); } else { /* end */ } };
-    document.getElementById('retryLevelBtn').onclick = ()=>{ document.getElementById('levelCompleteOverlay').style.display='none'; generateLevelWrapper(currentLevel); running=true; paused=false; lastTime = performance.now(); requestAnimationFrame(loop); };
-    document.getElementById('deathOkBtn').onclick = ()=>{ document.getElementById('deathOverlay').style.display='none'; generateLevelWrapper(currentLevel); running=true; paused=false; lastTime = performance.now(); requestAnimationFrame(loop); };
-
-    // init
-    try{
-      generateLevelWrapper(1);
-      drawAll();
-      log('Inicializado correctamente (vista previa).');
-    }catch(err){
-      log('ERROR init: ' + err);
-    }
-
-    // main loop
-    function loop(ts){
-      if(!running) return;
-      if(!lastTime) lastTime = ts;
-      const dtMs = Math.min(100, ts - lastTime);
-      const dt = dtMs / 1000;
-      lastTime = ts;
-      if(!paused){
-        try{ update(dt); } catch(err){ log('ERROR update loop: ' + err); }
+    /* ---------------------------
+       --- Update / Draw / Loop ---
+       --------------------------- */
+    function update(now) {
+      if (!running) return;
+      if (paused) {
+        // still update small particle effects if desired, but skip physics/spawns
+        return;
       }
-      try{ drawAll(); } catch(err){ log('ERROR drawAll: ' + err); }
-      requestAnimationFrame(loop);
-    }
 
-    // update wrapper
-    function update(dt){
-      if(paused) return;
-      time += dt;
-      // player movement
-      let mx=0,my=0;
-      if(keys['ArrowLeft']) mx -= 1;
-      if(keys['ArrowRight']) mx += 1;
-      if(keys['ArrowUp']) my -= 1;
-      if(keys['ArrowDown']) my += 1;
-      if(mx!==0 && my!==0){ mx *= 0.7071; my *= 0.7071; }
-      const footX = player.x + player.w/2, footY = player.y + player.h;
-      const inWater = !isPointInIsland(footX, footY);
-      const speed = player.speed * (inWater ? WATER_SLOW_MULT : 1.0);
-      if(mx || my){
-        const dx = mx * speed * dt, dy = my * speed * dt;
-        tryMove(dx, dy);
-        if(inWater && (!player._inWater || Math.random() < 0.04)) spawnSplash(footX, footY);
+      frameCount++;
+
+      // Keyboard movement fallback
+      if(keys.left) basket.vx = -basket.speed;
+      else if(keys.right) basket.vx = basket.speed;
+      else basket.vx = 0;
+      basket.x += basket.vx;
+      basket.x = Math.max(0, Math.min(W - basket.w, basket.x));
+
+      // Spawn logic: try to spawn so we reach the fruit target distributed over level duration
+      if (now - lastSpawn >= spawnInterval) {
+        lastSpawn = now;
+        spawnBurst();
       }
-      player._inWater = inWater;
 
-      enemyUpdate(dt);
+      // Speed changes inside a level
+      if (now - lastSpeedChange >= speedChangeInterval) {
+        lastSpeedChange = now;
+        const factor = 1.25;
+        speedMultiplier *= factor;
+        // apply to existing items
+        for(const it of items) it.vy *= factor;
+        // increase metal chance slightly
+        metalChance = Math.min(0.6, metalChance + 0.03);
+      }
 
-      // check physical collision with enemies (if enemy touches player -> restart)
-      for(const e of enemies){
-        if(rectIntersect({x:player.x,y:player.y,w:player.w,h:player.h}, {x:e.x,y:e.y,w:e.w,h:e.h})){
-          log('Has sido tocado por un enemigo — reiniciando nivel.');
-          generateLevelWrapper(currentLevel);
-          running = true;
-          paused = false;
-          lastTime = performance.now();
-          requestAnimationFrame(loop);
+      // Level end check
+      if (now >= levelEndTime) {
+        // Level complete - pause and show UI to pick power-up before starting next level
+        if (currentLevel < LEVELS) {
+          onLevelCompletePause(currentLevel + 1);
+          return; // do not auto-start next level
+        } else {
+          // Completed final level -> victory
+          running = false;
+          overlay.classList.remove('hidden');
+          document.getElementById('overlay-title').textContent = '¡Victoria!';
+          document.getElementById('overlay-sub').textContent = 'Has completado todos los niveles.';
+          finalScore.textContent = `Puntuación final: ${score}`;
           return;
         }
       }
 
-      updateArrows(dt);
-      updateParticles(dt);
-      updateSea(dt);
-      handleDigging(dt);
+      // Items physics & collisions
+      for (let i = items.length - 1; i >= 0; i--) {
+        const it = items[i];
+        it.y += it.vy;
+
+        if (it.type === 'metal') {
+          it.rotation += it.vr;
+          const left = it.x - it.w/2, right = it.x + it.w/2;
+          if (it.y + it.h/2 >= basket.y && it.y - it.h/2 <= basket.y + basket.h) {
+            if (right >= basket.x && left <= basket.x + basket.w) {
+              lives = Math.max(0, lives - 1);
+              spawnHitEffect(it.x, it.y, 'metal');
+              items.splice(i,1);
+              checkGameOver();
+              continue;
+            }
+          }
+          if (it.y - it.h/2 > H) {
+            items.splice(i,1);
+            continue;
+          }
+        } else {
+          // fruits: grapes zig-zag; apples unchanged; oranges faster already at spawn
+          if (it.type === 'grapes') {
+            it.x = it.baseX + Math.sin(frameCount * it.zigFreq + it.zigPhase) * it.zigAmp;
+          }
+          if (it.y + it.r >= basket.y && it.y - it.r <= basket.y + basket.h) {
+            if (it.x >= basket.x - 6 && it.x <= basket.x + basket.w + 6) {
+              score += Math.max(1, Math.round(it.r/8));
+              spawnHitEffect(it.x, it.y, 'fruit');
+              items.splice(i,1);
+              continue;
+            }
+          }
+          if (it.y - it.r > H) {
+            // missed fruit -> lose one life
+            lives = Math.max(0, lives - 1);
+            spawnHitEffect(it.x, H-10, 'miss');
+            items.splice(i,1);
+            checkGameOver();
+            continue;
+          }
+        }
+      }
+
+      hudText.textContent = `Puntuación: ${score}`;
+      renderLivesUI();
+
+      // Update level HUD values
+      const timeLeftMs = Math.max(0, levelEndTime - now);
+      const secsLeft = Math.ceil(timeLeftMs / 1000);
+      levelNumEl.textContent = currentLevel;
+      timeLeftEl.textContent = secsLeft;
+      fruitsLeftEl.textContent = Math.max(0, fruitTarget - fruitsSpawnedThisLevel);
     }
 
-    // helper particle/sea
-    function updateParticles(dt){ for(let i=particles.length-1;i>=0;i--){ const p=particles[i]; p.x+=p.vx*60*dt; p.y+=p.vy*60*dt; p.vy+=0.06*60*dt; p.life-=dt; if(p.life<=0) particles.splice(i,1); } }
-    function updateSea(dt){ for(const s of seaSprites){ s.x += s.dir * s.speed * dt; s.y += Math.sin(time*1.2 + s.phase) * (s.bobAmp * 0.02); if(s.x < -40) s.x = WORLD_W + 40; if(s.x > WORLD_W + 40) s.x = -40; } for(const w of waves){ w.t += dt * w.speed; if(w.t > 10){ w.x = randRange(worldCenter.x - 300, worldCenter.x + 300); w.y = randRange(worldCenter.y - 300, worldCenter.y + 300); w.t = 0; } } }
-    function spawnSplash(x,y){ for(let i=0;i<8;i++) particles.push({ x,y, vx: randRange(-0.8,0.8), vy: randRange(-1.4,-0.4), size: randRange(0.4,1.2), life:0.5+Math.random()*0.8, max: 0.5+Math.random()*0.8 }); }
+    function draw(){
+      // Clear & background
+      ctx.clearRect(0,0,W,H);
+      const skyGrad = ctx.createLinearGradient(0,0,0,H); skyGrad.addColorStop(0,'#eaf9ff'); skyGrad.addColorStop(1,'#fff');
+      ctx.fillStyle = skyGrad; ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = '#e6f7ff'; ctx.fillRect(0, H-40, W, 40);
 
-    // shortcuts
-    window.addEventListener('keydown', e=>{ if(e.key === 'p' || e.key === 'P') document.getElementById('pauseBtn').click(); if(e.key === 'z' || e.key === 'Z') document.getElementById('zoomBtn').click(); });
+      // draw metals behind
+      for(const it of items) if(it.type === 'metal') drawMetal(it);
+      // draw fruits
+      for(const it of items) if(it.type !== 'metal') drawFruit(it);
 
-    // debug accessor
-    window.__game = ()=>({ currentLevel, landCount: landTiles?countLandTiles(landTiles):0, enemies: enemies.length, arrows: arrows.length });
+      drawParticles();
+      drawBasket();
+    }
+
+    function loop(now){
+      if(!now) now = performance.now();
+      update(now);
+      updateParticles();
+      draw();
+      if(running) requestAnimationFrame(loop);
+    }
+
+    /* ---------------------------
+       --- Level management ---
+       --------------------------- */
+    function startLevel(level, now) {
+      currentLevel = level;
+      fruitTarget = fruitTargetForLevel(level);
+      fruitsSpawnedThisLevel = 0;
+      // compute spawn interval to distribute fruits approx across minute
+      spawnInterval = Math.max(200, Math.round(LEVEL_DURATION_MS / Math.max(1, fruitTarget)));
+      lastSpawn = now;
+      // reset some dynamic difficulty per level
+      metalChance = Math.min(0.6, 0.08 + (level-1)*0.04);
+      speedChangeInterval = speedChangeIntervalForLevel(level);
+      lastSpeedChange = now;
+      speedMultiplier = 1.0;
+      // set timer bounds
+      levelStartTime = now;
+      levelEndTime = now + LEVEL_DURATION_MS;
+      // update HUD
+      levelNumEl.textContent = currentLevel;
+      fruitsLeftEl.textContent = fruitTarget;
+      // If there's a banned type for this level (set previously by player), it's already in bannedTypesForLevel[level]
+    }
+
+    function checkGameOver(){
+      if (lives <= 0){
+        running = false;
+        overlay.classList.remove('hidden');
+        document.getElementById('overlay-title').textContent = 'Juego terminado';
+        document.getElementById('overlay-sub').textContent = 'Te has quedado sin vidas.';
+        finalScore.textContent = `Puntuación final: ${score}`;
+      }
+    }
+
+    /* ---------------------------
+       --- Game reset / restart ---
+       --------------------------- */
+    function resetGame(){
+      items.length = 0; particles.length = 0;
+      score = 0; lives = MAX_LIVES; running = true; paused = false; frameCount = 0;
+      currentLevel = 1;
+      // clear banned types
+      for(const k in bannedTypesForLevel) delete bannedTypesForLevel[k];
+      const now = performance.now();
+      startLevel(1, now);
+      hudText.textContent = `Puntuación: ${score}`;
+      renderLivesUI();
+      overlay.classList.add('hidden');
+      requestAnimationFrame(loop);
+    }
+
+    restartBtn.addEventListener('click', resetGame);
+
+    /* ---------------------------
+       --- Start the game loop ---
+       --------------------------- */
+    renderLivesUI();
+    hudText.textContent = `Puntuación: ${score}`;
+    startLevel(1, performance.now());
+    requestAnimationFrame(loop);
 
   })();
   </script>
