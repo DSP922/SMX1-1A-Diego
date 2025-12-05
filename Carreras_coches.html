@@ -193,6 +193,197 @@
             </div>
         <p>Color seleccionado: <strong id="selected-color-name">Ninguno</strong></p>
         <hr style="width: 80%; border-color: #ccc;">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏎️ F1 Kart: El Desafío (Corregido y Funcional)</title>
+    <style>
+        /* --- ESTILOS CSS --- */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #333;
+        }
+
+        #game-container {
+            width: 1000px;
+            height: 700px;
+            background-color: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- MENÚ VISUALMENTE ATRACTIVO --- */
+        #main-menu {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #main-menu h1 {
+            font-size: 4em;
+            margin-bottom: 0.5em;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .menu-button {
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            margin: 10px;
+            font-size: 1.5em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+            box-shadow: 0 4px #c43800;
+        }
+
+        .menu-button:hover {
+            background-color: #e64a19;
+            transform: translateY(-2px);
+            box-shadow: 0 6px #c43800;
+        }
+
+        .menu-button:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px #c43800;
+        }
+
+        /* --- PANTALLA DE SELECCIÓN --- */
+        #selection-screen {
+            background-color: #eee;
+            padding: 20px;
+            text-align: center;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            flex-grow: 1;
+        }
+
+        #color-selector, #map-selector, #difficulty-selector {
+            margin-bottom: 25px;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 5px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .color-option.selected {
+            border-color: #ff5722;
+            transform: scale(1.1);
+        }
+        
+        .map-card {
+            background-color: #fff;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 8px;
+            display: inline-block;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: box-shadow 0.2s;
+            border: 3px solid transparent;
+        }
+
+        .map-card.selected {
+            border-color: #2a5298;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .difficulty-button {
+            background-color: #666;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .difficulty-button.selected {
+            background-color: #4CAF50;
+            box-shadow: 0 3px #388E3C;
+        }
+
+        /* --- PANTALLA DE JUEGO --- */
+        #game-screen {
+            display: none;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        #game-canvas {
+            background-color: #b4e0b4; /* Césped Pastel */
+            flex-grow: 1;
+        }
+        
+        #hud {
+            padding: 10px;
+            background-color: #222;
+            color: white;
+            font-size: 1.1em;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        /* --- UTILS --- */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    
+    <div id="main-menu">
+        <h1>🏎️ F1 KART CHALLENGE</h1>
+        <button class="menu-button" onclick="showSelectionScreen()">JUGAR</button>
+        <button class="menu-button" id="difficulty-display" onclick="showSelectionScreen()">DIFICULTAD: NORMAL</button>
+        <button class="menu-button" onclick="window.close(); alert('¡Gracias por jugar!');" style="background-color: #c0392b; box-shadow: 0 4px #a02a1b;">SALIR</button>
+    </div>
+
+    <div id="selection-screen" class="hidden">
+        <h2>⚙️ Configuración de Carrera</h2>
+        
+        <h3>Elige la Dificultad de los Bots:</h3>
+        <div id="difficulty-selector">
+            </div>
+        <p>Dificultad seleccionada: <strong id="selected-difficulty-name">Normal</strong></p>
+        <hr style="width: 80%; border-color: #ccc;">
+
+        <h3>Elige el Color de tu Kart:</h3>
+        <div id="color-selector">
+            </div>
+        <p>Color seleccionado: <strong id="selected-color-name">Ninguno</strong></p>
+        <hr style="width: 80%; border-color: #ccc;">
 
         <h3>Elige el Circuito:</h3>
         <div id="map-selector">
@@ -219,7 +410,7 @@
 </div>
 
 <script>
-    // --- LÓGICA JAVASCRIPT ---
+    // --- LÓGICA JAVASCRIPT CORREGIDA ---
 
     // 1. CONFIGURACIÓN
     const COLORES_DISPONIBLES = {
@@ -234,7 +425,6 @@
         "El Laberinto", "Pista de Hielo (Deslizante)"
     ];
     
-    // Multiplicador de velocidad de los bots
     const DIFICULTAD_MULTIPLIER = {
         "Facil": 0.7,
         "Normal": 0.9,
@@ -243,22 +433,39 @@
     };
 
     const BOT_COUNT = 9;
-    let selectedColor = { name: "Rojo Pastel", hex: COLORES_DISPONIBLES["Rojo Pastel"] }; // Default
-    let selectedMap = "El Bucle de la Muerte"; // Default
-    let selectedDifficulty = "Normal"; // Default
+    let selectedColor = { name: "Rojo Pastel", hex: COLORES_DISPONIBLES["Rojo Pastel"] }; 
+    let selectedMap = "El Bucle de la Muerte"; 
+    let selectedDifficulty = "Normal"; 
 
     // Variables de Juego Globales
     let playerKart = { x: 0, y: 0, angle: 90, speed: 0, maxSpeed: 4, color: null };
     let botKarts = [];
-    let gameLoopRequest = null; // Usar requestAnimationFrame para un bucle más suave
+    let gameLoopRequest = null; 
     let keys = {}; 
 
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
+    
+    // Función para dibujar el menú de dificultad al inicio
+    function renderDifficultyOptions() {
+        const selector = document.getElementById('difficulty-selector');
+        selector.innerHTML = ''; // Limpiar
+        for (const [name] of Object.entries(DIFICULTAD_MULTIPLIER)) {
+            const button = document.createElement('button');
+            button.className = 'difficulty-button';
+            button.textContent = name;
+            button.setAttribute('data-difficulty', name);
+            button.onclick = () => selectDifficulty(name);
+            if (name === selectedDifficulty) {
+                button.classList.add('selected');
+            }
+            selector.appendChild(button);
+        }
+    }
+
 
     // 2. NAVEGACIÓN Y MENÚS
     function hideAllScreens() {
-        // Detener el bucle de juego si está corriendo
         if (gameLoopRequest) {
             cancelAnimationFrame(gameLoopRequest);
             gameLoopRequest = null;
@@ -274,26 +481,25 @@
     function showMainMenu() {
         hideAllScreens();
         document.getElementById('main-menu').classList.remove('hidden');
+        // Asegurarse de que el texto del botón de dificultad se actualice
         document.getElementById('difficulty-display').textContent = `DIFICULTAD: ${selectedDifficulty.toUpperCase()}`;
     }
 
     function showSelectionScreen() {
         hideAllScreens();
         document.getElementById('selection-screen').classList.remove('hidden');
+        
+        renderDifficultyOptions(); // Renderiza y selecciona la dificultad actual
         renderColorOptions();
         renderMapOptions();
         
-        // Asegurarse de que el botón de dificultad en la selección esté seleccionado
-        document.querySelectorAll('.difficulty-button').forEach(btn => {
-            if (btn.getAttribute('data-difficulty') === selectedDifficulty) {
-                btn.classList.add('selected');
-            } else {
-                btn.classList.remove('selected');
-            }
-        });
+        // Actualizar nombres de selección
+        document.getElementById('selected-difficulty-name').textContent = selectedDifficulty;
+        document.getElementById('selected-color-name').textContent = selectedColor.name;
+        document.getElementById('selected-map-name').textContent = selectedMap;
     }
 
-    // 3. SELECCIÓN DE DIFICULTAD
+    // 3. SELECCIÓN DE DIFICULTAD (Corregida)
     function selectDifficulty(difficulty) {
         selectedDifficulty = difficulty;
         document.getElementById('selected-difficulty-name').textContent = difficulty;
@@ -302,10 +508,10 @@
         document.querySelector(`.difficulty-button[data-difficulty="${difficulty}"]`).classList.add('selected');
     }
 
-    // 4. SELECCIÓN DE COLOR
+    // 4. SELECCIÓN DE COLOR (Corregida)
     function renderColorOptions() {
         const selector = document.getElementById('color-selector');
-        if (selector.children.length > 0) return; // Evitar renderizado doble
+        if (selector.children.length > 0) return; 
         
         for (const [name, hex] of Object.entries(COLORES_DISPONIBLES)) {
             const div = document.createElement('div');
@@ -320,7 +526,6 @@
             }
             selector.appendChild(div);
         }
-        document.getElementById('selected-color-name').textContent = selectedColor.name;
     }
 
     function selectColor(name, element) {
@@ -330,10 +535,10 @@
         document.getElementById('selected-color-name').textContent = name;
     }
 
-    // 5. SELECCIÓN DE MAPA
+    // 5. SELECCIÓN DE MAPA (Corregida)
     function renderMapOptions() {
         const selector = document.getElementById('map-selector');
-        if (selector.children.length > 0) return; // Evitar renderizado doble
+        if (selector.children.length > 0) return;
 
         MAPAS.forEach(mapName => {
             const card = document.createElement('div');
@@ -345,7 +550,6 @@
             }
             selector.appendChild(card);
         });
-        document.getElementById('selected-map-name').textContent = selectedMap;
     }
 
     function selectMap(name, element) {
@@ -364,7 +568,7 @@
 
         // 6.1 Configuración del Jugador
         playerKart.color = selectedColor.hex;
-        playerKart.x = 100;
+        playerKart.x = 100; // Posición de inicio corregida
         playerKart.y = 100;
         playerKart.angle = 90;
         playerKart.speed = 0;
@@ -394,12 +598,14 @@
 
         for (let i = 0; i < BOT_COUNT; i++) {
             botKarts.push({
-                x: 100 + i * 15, y: 120, // Posición escalonada
-                angle: 90,
+                // Posición de inicio escalonada, cerca del jugador
+                x: 100 + (i % 3) * 30, 
+                y: 120 + Math.floor(i / 3) * 30, 
+                angle: 90 + (Math.random() - 0.5) * 10, // Ángulo ligeramente variado
                 speed: 0,
                 maxSpeed: playerKart.maxSpeed * botSpeedFactor * (0.9 + Math.random() * 0.2), 
                 color: shuffledColors[i],
-                rotationSpeed: (Math.random() * 4) - 2 // Rotación inicial aleatoria
+                rotationSpeed: (Math.random() * 4) - 2 
             });
         }
     }
@@ -425,12 +631,11 @@
         } else if (keys['ArrowDown'] || keys['s']) {
             playerKart.speed = Math.max(playerKart.speed - acceleration * 1.5, -playerKart.maxSpeed / 2);
         } else {
-            // Aplicar fricción (desaceleración natural)
             playerKart.speed *= (1 - friction);
             if (Math.abs(playerKart.speed) < 0.1) playerKart.speed = 0;
         }
 
-        // Girar (solo si hay movimiento)
+        // Girar
         if (Math.abs(playerKart.speed) > 0.1) {
             if (keys['ArrowLeft'] || keys['a']) {
                 playerKart.angle += turnSpeed * (playerKart.speed > 0 ? 1 : -1);
@@ -449,10 +654,8 @@
         if (playerKart.x < kartSize || playerKart.x > canvas.width - kartSize || 
             playerKart.y < kartSize || playerKart.y > canvas.height - kartSize) {
             
-            // Reversa simple al chocar con el borde y reducir velocidad
             playerKart.speed = -playerKart.speed * 0.5;
             
-            // Ajustar posición
             playerKart.x = Math.max(kartSize, Math.min(canvas.width - kartSize, playerKart.x));
             playerKart.y = Math.max(kartSize, Math.min(canvas.height - kartSize, playerKart.y));
         }
@@ -463,8 +666,8 @@
         botKarts.forEach(bot => {
             bot.speed = bot.maxSpeed * 0.9;
             
-            // Simulación de AI: Gira para "seguir" un camino simple o evitar chocar (ligeramente)
-            if (Math.random() < 0.1) {
+            // Simulación de AI: Giro aleatorio para evitar que se queden quietos
+            if (Math.random() < 0.05) {
                 bot.rotationSpeed = (Math.random() - 0.5) * 6; 
             }
             bot.angle += bot.rotationSpeed;
@@ -476,7 +679,6 @@
             // Mantener bots dentro de los límites del mapa (simulación de colisión con borde)
             const padding = 50;
             if (bot.x < padding || bot.x > canvas.width - padding || bot.y < padding || bot.y > canvas.height - padding) {
-                // Cambiar ángulo al chocar
                 if (bot.x < padding || bot.x > canvas.width - padding) {
                     bot.angle = 180 - bot.angle;
                 }
@@ -493,19 +695,17 @@
         updatePlayerMovement();
         updateBotMovement();
         renderGame();
-        // El HUD se puede actualizar aquí si hay datos dinámicos como vueltas o posición
         
         gameLoopRequest = requestAnimationFrame(gameLoop);
     }
     
     // 10. RENDERIZADO DEL JUEGO
     function renderGame() {
-        // Limpiar
-        ctx.fillStyle = "#b4e0b4"; // Césped Pastel
+        // Limpiar (Césped Pastel)
+        ctx.fillStyle = "#b4e0b4"; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 10.1. Dibujar Carretera (El Bucle de la Muerte - ejemplo del mapa más simple)
-        // Coordenadas para la carretera del mapa 'El Bucle de la Muerte'
+        // 10.1. Dibujar Carretera (El Bucle de la Muerte)
         const pathPoints = [
             [100, 100], [canvas.width - 100, 100], 
             [canvas.width - 100, canvas.height - 100], [100, canvas.height - 100], [100, 100]
@@ -528,8 +728,7 @@
         ctx.lineWidth = 5;
         ctx.stroke(roadPath); 
         
-        // 10.2. Decoraciones y Obstáculos (Banderas, Arbustos)
-        // Arbusto central (Obstáculo)
+        // 10.2. Decoraciones y Obstáculos (Arbusto central)
         ctx.fillStyle = "#006400";
         ctx.beginPath();
         ctx.arc(canvas.width / 2, canvas.height / 2, 40, 0, Math.PI * 2);
@@ -545,9 +744,10 @@
         ctx.font = "20px Arial";
         ctx.fillText("META", 110, 125);
 
-
         // 10.3. Dibujar Karts (Jugador y Bots)
-        [...botKarts, playerKart].forEach(kart => drawKart(kart)); // Dibujar jugador al final para que esté encima
+        // Dibujar bots primero, luego jugador para que el jugador esté encima
+        [...botKarts].forEach(kart => drawKart(kart)); 
+        drawKart(playerKart); 
     }
 
     function drawKart(kart) {
@@ -555,7 +755,6 @@
         ctx.translate(kart.x, kart.y);
         ctx.rotate((-kart.angle * Math.PI / 180)); 
 
-        // Cuerpo principal (Simulación F1 Kart)
         const width = 30;
         const height = 16;
 
@@ -572,9 +771,9 @@
 
         // Ruedas (negro)
         ctx.fillStyle = "black";
-        ctx.fillRect(-12, -10, 5, 20); // Trasera Izq
-        ctx.fillRect(2, -10, 5, 20);  // Trasera Der
-        ctx.fillRect(width / 2 - 5, -10, 5, 20); // Delantera Izq (pequeña simulación)
+        ctx.fillRect(-12, -10, 5, 20); 
+        ctx.fillRect(2, -10, 5, 20); 
+        ctx.fillRect(width / 2 - 5, -10, 5, 20); 
         
         // Para distinguir al jugador
         if (kart === playerKart) {
@@ -588,10 +787,11 @@
 
     // 11. INICIALIZACIÓN
     document.addEventListener('DOMContentLoaded', () => {
-        // Inicializar la selección de menú por defecto (porque no hay inputs)
-        document.getElementById('selected-color-name').textContent = selectedColor.name;
-        document.getElementById('selected-map-name').textContent = selectedMap;
-        
+        // Inicializar los valores por defecto antes de mostrar el menú
+        selectedColor = { name: "Rojo Pastel", hex: COLORES_DISPONIBLES["Rojo Pastel"] };
+        selectedMap = "El Bucle de la Muerte";
+        selectedDifficulty = "Normal";
+
         showMainMenu();
     });
 </script>
