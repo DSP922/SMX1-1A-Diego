@@ -29,26 +29,10 @@
       z-index: 50;
       color: white;
       gap: 18px;
-      opacity: 0;
-      transform: scale(0.98);
     }
-    .level-panel.visible { animation: panelIn 420ms cubic-bezier(.2,.9,.2,1) forwards; }
-    @keyframes panelIn {
-      from { opacity: 0; transform: scale(0.96) translateY(8px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .level-panel h2 { font-size: 28px; margin: 6px 0; transform-origin: center; animation: titlePop 520ms ease forwards; }
-    @keyframes titlePop {
-      from { transform: translateY(-6px) scale(0.98); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
-    .cards { display:flex; gap:18px; align-items:stretch; transform: translateY(8px); opacity: 0; animation: cardsIn 520ms 140ms cubic-bezier(.2,.9,.2,1) forwards; }
-    @keyframes cardsIn {
-      from { transform: translateY(18px) scale(0.99); opacity: 0; }
-      to { transform: translateY(0) scale(1); opacity: 1; }
-    }
-
+    .level-panel.hidden { display: none; }
+    .level-panel h2 { font-size: 28px; margin: 6px 0; }
+    .cards { display:flex; gap:18px; align-items:stretch; }
     .card {
       background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
       border-radius: 12px;
@@ -56,10 +40,7 @@
       width: 220px;
       text-align:center;
       border: 1px solid rgba(255,255,255,0.08);
-      transform-origin: center;
-      transition: transform 220ms ease, box-shadow 220ms ease;
     }
-    .card:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
     .card h3 { margin-bottom:8px; font-size:18px; color:#fff; }
     .card p { font-size:13px; color:#eee; margin-bottom:12px; }
     .card button { padding:8px 12px; border-radius:8px; border: none; cursor:pointer; font-weight:700; }
@@ -102,7 +83,7 @@
   <div class="container">
     <canvas id="gameCanvas" width="800" height="600" aria-label="Canvas del juego - atrapa las frutas"></canvas>
 
-    <!-- Game over / victory overlay -->
+    <!-- Game over / victory overlay (re-using previous overlay) -->
     <div id="overlay" class="overlay hidden" role="dialog" aria-modal="true" style="z-index:45">
       <div class="overlay-content">
         <h1 id="overlay-title">Juego terminado</h1>
@@ -124,7 +105,7 @@
         </div>
         <div class="card" id="cardHitbox">
           <h3>Aumentar hitbox</h3>
-          <p>Aumenta el ancho de la cesta un 7% (mejor captura).</p>
+          <p>Aumenta el ancho de la cesta un 5% (mejor captura).</p>
           <button class="primary" data-action="hitbox">Elegir</button>
           <div class="small-muted">Se aplica permanentemente</div>
         </div>
@@ -135,7 +116,7 @@
           <div class="small-muted">Se aplica sólo al siguiente nivel</div>
         </div>
       </div>
-      <button id="skipPowerBtn" class="card" style="margin-top:12px; width:260px; background:transparent; border:1px solid rgba(255,255,255,0.1); color:white">Continuar sin elegir</button>
+      <button id="skipPowerBtn" class="card" style="margin-top:12px; width:260px; background:transparent; border:1px solid rgba(255,255,255,0.1);">Continuar sin elegir</button>
     </div>
 
     <!-- Selection UI for choosing which fruit/metal to remove -->
@@ -206,8 +187,8 @@
 
     const W = LOGICAL_WIDTH, H = LOGICAL_HEIGHT;
 
-    // Player basket (speed increased by 10%)
-    const basket = { w: 140, h: 26, x: (W-140)/2, y: H-48, speed: 7 * 1.10, vx:0 };
+    // Player basket
+    const basket = { w: 140, h: 26, x: (W-140)/2, y: H-48, speed:7, vx:0 };
 
     // Game entities
     const items = [];      // falling items
@@ -294,23 +275,14 @@
     function drawFruit(f){
       const x=f.x, y=f.y, r=f.r;
       ctx.save();
-      if(f.type==='banana'){
-        // rotate around center
-        ctx.translate(x, y);
-        const rot = f.rotation || 0;
-        ctx.rotate(rot);
-        // draw banana centered at 0,0
-        ctx.beginPath(); ctx.fillStyle='#ffd54f';
-        ctx.moveTo(-r, 0);
-        ctx.quadraticCurveTo(-r*0.2, -r*1.2, r, -r*0.2);
-        ctx.quadraticCurveTo(r*0.8, r*0.7, -r, r*0.2);
-        ctx.closePath(); ctx.fill();
-        ctx.beginPath(); ctx.fillStyle='#b07b2a'; ctx.ellipse(-r*0.9, r*0.15, r*0.18, r*0.18, 0, 0, Math.PI*2); ctx.fill();
-      } else if(f.type==='apple'){
+      if(f.type==='apple'){
         ctx.beginPath(); ctx.fillStyle='#ff4757'; ctx.ellipse(x,y,r,r*0.92,0,0,Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.35)'; ctx.ellipse(x-r*0.36,y-r*0.5,r*0.35,r*0.25,0,0,Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.strokeStyle='#6b3e1b'; ctx.lineWidth=Math.max(2,r*0.12); ctx.moveTo(x+r*0.12,y-r*0.6); ctx.lineTo(x+r*0.12,y-r*0.95); ctx.stroke();
         ctx.beginPath(); ctx.fillStyle='#4CAF50'; ctx.ellipse(x+r*0.32,y-r*0.9,r*0.28,r*0.14,-0.6,0,Math.PI*2); ctx.fill();
+      } else if(f.type==='banana'){
+        ctx.beginPath(); ctx.fillStyle='#ffd54f'; ctx.moveTo(x-r,y); ctx.quadraticCurveTo(x-r*0.2,y-r*1.2,x+r,y-r*0.2); ctx.quadraticCurveTo(x+r*0.8,y+r*0.7,x-r,y+r*0.2); ctx.closePath(); ctx.fill();
+        ctx.beginPath(); ctx.fillStyle='#b07b2a'; ctx.ellipse(x-r*0.9,y+r*0.15,r*0.18,r*0.18,0,0,Math.PI*2); ctx.fill();
       } else if(f.type==='orange'){
         ctx.beginPath(); ctx.fillStyle='#ff9f1c'; ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
         ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.06)'; for(let i=0;i<6;i++){ ctx.arc(x+Math.cos(i/6*Math.PI*2)*r*0.35,y+Math.sin(i/6*Math.PI*2)*r*0.35,r*0.18,0,Math.PI*2); } ctx.fill();
@@ -365,10 +337,11 @@
     }
 
     function spawnItem() {
+      // If we've already spawned the target number of fruits this level, prefer metal.
       const wantsMetal = Math.random() < metalChance;
       const allowFruit = (fruitsSpawnedThisLevel < fruitTarget);
-
       if (!allowFruit) {
+        // Force spawn metal (unless metal is banned)
         if (!isBannedForCurrentLevel('metal')) {
           const w = 28 + Math.random()*30;
           const x = Math.max(w/2, Math.random() * (W - w));
@@ -378,6 +351,7 @@
         return;
       }
 
+      // If metal is chosen and not banned (but prefer fruits until target)
       const spawnMetal = wantsMetal && Math.random() < 0.35;
       if (spawnMetal && !isBannedForCurrentLevel('metal')) {
         const w = 28 + Math.random()*30;
@@ -389,7 +363,7 @@
 
       // Spawn fruit (respect banned types)
       let attempts = 0;
-      while(attempts < 8){
+      while(attempts < 6){
         const type = fruitTypes[Math.floor(Math.random()*fruitTypes.length)];
         attempts++;
         if (isBannedForCurrentLevel(type)) continue;
@@ -401,26 +375,14 @@
           const amp = 18 + Math.random()*14;
           const freq = 0.06 + Math.random()*0.06;
           const phase = Math.random() * Math.PI * 2;
-          items.push({ type, x, baseX: x, y: -r-10, r, vy: baseVy, zigAmp: amp, zigFreq: freq, zigPhase: phase, returning:false, baseVy });
-        } else if (type === 'banana') {
-          // banana: rotates and moves horizontally slowly (oscillation)
-          const amp = 20 + Math.random()*18;
-          const freq = 0.02 + Math.random()*0.02; // slow
-          const phase = Math.random()*Math.PI*2;
-          const rotSpeed = (Math.random()*0.03 + 0.01) * (Math.random()<0.5?-1:1);
-          items.push({ type, x, baseX: x, y: -r-10, r, vy: baseVy, horizAmp: amp, horizFreq: freq, phase, rotation: 0, rotSpeed, returning:false, baseVy });
-        } else if (type === 'pear') {
-          // pear: special (will return up when caught)
-          items.push({ type, x, y: -r-10, r, vy: baseVy, returning:false, returnedOnce:false, baseVy });
+          items.push({ type, x, baseX: x, y: -r-10, r, vy: baseVy, zigAmp: amp, zigFreq: freq, zigPhase: phase });
         } else {
-          // apple or other fruits: straight fall
-          items.push({ type, x, y: -r-10, r, vy: baseVy, returning:false, baseVy });
+          items.push({ type, x, y: -r-10, r, vy: baseVy, wobble: Math.random()*0.04 });
         }
         fruitsSpawnedThisLevel++;
         return;
       }
-
-      // fallback to metal if can't find fruit
+      // If couldn't find a non-banned fruit after attempts, try spawning metal (if allowed)
       if (!isBannedForCurrentLevel('metal')) {
         const w = 28 + Math.random()*30;
         const x = Math.max(w/2, Math.random() * (W - w));
@@ -462,20 +424,26 @@
     /* ---------------------------
        --- Level transition & power-up UI handling ---
        --------------------------- */
+    // When level completes, show panel (pause) and let player pick power-up.
     function onLevelCompletePause(nextLevel){
       paused = true;
+      // Show panel with message
       levelPanel.classList.remove('hidden');
-      levelPanel.classList.add('visible');
       levelPanel.setAttribute('aria-hidden','false');
-      spawnHitEffect(W*0.5, 60, 'fruit');
+      document.getElementById('levelPanelTitle').textContent = `Nivel ${currentLevel} completado`;
+      // Ensure selectionUI hidden
+      selectionUI.classList.add('hidden');
+      selectionUI.setAttribute('aria-hidden','true');
     }
 
+    // Hide transition UI and resume to start next level (apply chosen effect already applied)
     function hideLevelPanelAndStart(nextLevel){
       levelPanel.classList.add('hidden');
-      levelPanel.classList.remove('visible');
       levelPanel.setAttribute('aria-hidden','true');
       paused = false;
-      startLevel(nextLevel, performance.now());
+      // Start next level
+      const now = performance.now();
+      startLevel(nextLevel, now);
     }
 
     // Card actions
@@ -485,15 +453,18 @@
       const action = btn.dataset.action;
       const nextLevel = currentLevel + 1;
       if (action === 'regenerate') {
+        // Restore all lives
         lives = MAX_LIVES;
         renderLivesUI();
         hideLevelPanelAndStart(nextLevel);
       } else if (action === 'hitbox') {
-        // Increase basket width by 7%
-        basket.w = Math.min(W*0.9, basket.w * 1.07);
+        // Increase basket width by 5%
+        basket.w = Math.min(W*0.9, basket.w * 1.05);
+        // Clamp x
         basket.x = Math.max(0, Math.min(W - basket.w, basket.x));
         hideLevelPanelAndStart(nextLevel);
       } else if (action === 'remove') {
+        // Show selection UI to choose which object to remove for next level
         showSelectionUIFor(nextLevel);
       }
     });
@@ -505,19 +476,24 @@
     // Selection UI logic
     let selectedRemoveType = null;
     function showSelectionUIFor(nextLevel){
+      // populate previewGrid with all types (fruitTypes + metal)
       previewGrid.innerHTML = '';
       selectedRemoveType = null;
       for(const t of allTypesForRemoval){
         const item = document.createElement('div');
         item.className = 'preview-item';
         item.dataset.type = t;
+        // create small canvas preview
         const preview = createPreviewCanvasForType(t, 80, 60);
         item.appendChild(preview);
         const label = document.createElement('div'); label.textContent = t; label.style.fontWeight = '700'; label.style.marginTop = '6px';
         item.appendChild(label);
         item.addEventListener('click', ()=>{
-          if(item.classList.contains('selected')) { item.classList.remove('selected'); selectedRemoveType = null; }
-          else {
+          // toggle selection
+          if(item.classList.contains('selected')) {
+            item.classList.remove('selected'); selectedRemoveType = null;
+          } else {
+            // deselect siblings
             for(const c of previewGrid.children) c.classList.remove('selected');
             item.classList.add('selected');
             selectedRemoveType = t;
@@ -534,19 +510,24 @@
         alert('Selecciona un objeto para eliminar (por ejemplo "banana" o "metal")');
         return;
       }
+      // Set banned for next level only
       const nextLevel = currentLevel + 1;
       bannedTypesForLevel[nextLevel] = new Set([selectedRemoveType]);
+      // Hide selection and panel, resume
       selectionUI.classList.add('hidden');
       selectionUI.setAttribute('aria-hidden','true');
       levelPanel.classList.add('hidden');
       levelPanel.setAttribute('aria-hidden','true');
       paused = false;
+      // Start next level
       startLevel(nextLevel, performance.now());
     });
 
     cancelRemoveBtn.addEventListener('click', () => {
+      // go back to level panel (still paused)
       selectionUI.classList.add('hidden');
       selectionUI.setAttribute('aria-hidden','true');
+      // keep levelPanel visible
     });
 
     /* ---------- Small preview canvas creator (for selection UI) ---------- */
@@ -555,8 +536,10 @@
       c.width = w; c.height = h; c.style.width = w + 'px'; c.style.height = h + 'px';
       const g = c.getContext('2d');
       g.clearRect(0,0,w,h);
+      // scale for drawing relative to canvas size
       const cx = w/2, cy = h/2 + 6;
       if (type === 'metal'){
+        // draw metal rectangle
         const mw = Math.min(56, w - 20), mh = Math.min(34, h - 18);
         const ggrad = g.createLinearGradient(cx - mw/2, cy - mh/2, cx + mw/2, cy + mh/2);
         ggrad.addColorStop(0,'#c7c9cc'); ggrad.addColorStop(0.5,'#f0f2f3'); ggrad.addColorStop(1,'#b8b9bb');
@@ -564,12 +547,29 @@
         roundRect(g, cx - mw/2, cy - mh/2, mw, mh, 6); g.fill();
         g.beginPath(); g.fillStyle = '#8a8a8a'; g.arc(cx, cy, Math.min(mw,mh)*0.22, 0, Math.PI*2); g.fill();
       } else {
+        // draw fruit type small
         const r = Math.min(20, Math.min(w,h)/3);
-        if(type === 'apple'){ g.beginPath(); g.fillStyle='#ff4757'; g.ellipse(cx,cy,r,r*0.92,0,0,Math.PI*2); g.fill(); }
-        else if(type === 'banana'){ g.beginPath(); g.fillStyle='#ffd54f'; g.moveTo(cx-r,cy); g.quadraticCurveTo(cx-r*0.2,cy-r*1.2,cx+r,cy-r*0.2); g.quadraticCurveTo(cx+r*0.8,cy+r*0.7,cx-r,cy+r*0.2); g.closePath(); g.fill(); }
-        else if(type === 'orange'){ g.beginPath(); g.fillStyle='#ff9f1c'; g.arc(cx,cy,r,0,Math.PI*2); g.fill(); }
-        else if(type === 'grapes'){ g.fillStyle='#6a0dad'; const baseR = r*0.6; for(let row=0;row<4;row++){ for(let col=0;col<3-row;col++){ const px = cx + (col - (2-row-1)/2) * baseR; const py = cy + (row - 1.2) * baseR; g.beginPath(); g.arc(px,py,baseR*0.9,0,Math.PI*2); g.fill(); } } }
-        else if(type === 'pear'){ g.beginPath(); g.fillStyle='#9acd32'; g.moveTo(cx,cy-r*0.9); g.quadraticCurveTo(cx+r*1.2,cy-r*0.2,cx+r*0.4,cy+r); g.quadraticCurveTo(cx-r*0.6,cy+r*1.1,cx-r*0.8,cy+r*0.1); g.quadraticCurveTo(cx-r*0.4,cy-r*0.6,cx,cy-r*0.9); g.closePath(); g.fill(); }
+        if(type === 'apple'){
+          g.beginPath(); g.fillStyle='#ff4757'; g.ellipse(cx, cy, r, r*0.92, 0, 0, Math.PI*2); g.fill();
+          g.beginPath(); g.fillStyle='rgba(255,255,255,0.35)'; g.ellipse(cx-r*0.36,cy-r*0.5,r*0.35,r*0.25,0,0,Math.PI*2); g.fill();
+        } else if(type === 'banana'){
+          g.beginPath(); g.fillStyle='#ffd54f'; g.moveTo(cx-r,cy); g.quadraticCurveTo(cx-r*0.2,cy-r*1.2,cx+r,cy-r*0.2); g.quadraticCurveTo(cx+r*0.8,cy+r*0.7,cx-r,cy+r*0.2); g.closePath(); g.fill();
+        } else if(type === 'orange'){
+          g.beginPath(); g.fillStyle='#ff9f1c'; g.arc(cx,cy,r,0,Math.PI*2); g.fill();
+          g.beginPath(); g.fillStyle='rgba(255,255,255,0.06)'; for(let i=0;i<6;i++) g.arc(cx+Math.cos(i/6*Math.PI*2)*r*0.35,cy+Math.sin(i/6*Math.PI*2)*r*0.35,r*0.18,0,Math.PI*2); g.fill();
+        } else if(type === 'grapes'){
+          g.fillStyle='#6a0dad';
+          const baseR = r*0.6;
+          for(let row=0;row<4;row++){
+            for(let col=0;col<3-row;col++){
+              const px = cx + (col - (2-row-1)/2) * baseR;
+              const py = cy + (row - 1.2) * baseR;
+              g.beginPath(); g.arc(px,py,baseR*0.9,0,Math.PI*2); g.fill();
+            }
+          }
+        } else if(type === 'pear'){
+          g.beginPath(); g.fillStyle='#9acd32'; g.moveTo(cx,cy-r*0.9); g.quadraticCurveTo(cx+r*1.2,cy-r*0.2,cx+r*0.4,cy+r); g.quadraticCurveTo(cx-r*0.6,cy+r*1.1,cx-r*0.8,cy+r*0.1); g.quadraticCurveTo(cx-r*0.4,cy-r*0.6,cx,cy-r*0.9); g.closePath(); g.fill();
+        }
       }
       return c;
     }
@@ -580,21 +580,20 @@
     function update(now) {
       if (!running) return;
       if (paused) {
-        // allow small particle updates
-        updateParticles();
+        // still update small particle effects if desired, but skip physics/spawns
         return;
       }
 
       frameCount++;
 
-      // Keyboard fallback
+      // Keyboard movement fallback
       if(keys.left) basket.vx = -basket.speed;
       else if(keys.right) basket.vx = basket.speed;
       else basket.vx = 0;
       basket.x += basket.vx;
       basket.x = Math.max(0, Math.min(W - basket.w, basket.x));
 
-      // Spawn
+      // Spawn logic: try to spawn so we reach the fruit target distributed over level duration
       if (now - lastSpawn >= spawnInterval) {
         lastSpawn = now;
         spawnBurst();
@@ -605,16 +604,20 @@
         lastSpeedChange = now;
         const factor = 1.25;
         speedMultiplier *= factor;
+        // apply to existing items
         for(const it of items) it.vy *= factor;
+        // increase metal chance slightly
         metalChance = Math.min(0.6, metalChance + 0.03);
       }
 
       // Level end check
       if (now >= levelEndTime) {
+        // Level complete - pause and show UI to pick power-up before starting next level
         if (currentLevel < LEVELS) {
           onLevelCompletePause(currentLevel + 1);
-          return;
+          return; // do not auto-start next level
         } else {
+          // Completed final level -> victory
           running = false;
           overlay.classList.remove('hidden');
           document.getElementById('overlay-title').textContent = '¡Victoria!';
@@ -624,13 +627,12 @@
         }
       }
 
-      // Items update & collisions
+      // Items physics & collisions
       for (let i = items.length - 1; i >= 0; i--) {
         const it = items[i];
+        it.y += it.vy;
 
-        // Update motion per type
         if (it.type === 'metal') {
-          it.y += it.vy;
           it.rotation += it.vr;
           const left = it.x - it.w/2, right = it.x + it.w/2;
           if (it.y + it.h/2 >= basket.y && it.y - it.h/2 <= basket.y + basket.h) {
@@ -642,83 +644,29 @@
               continue;
             }
           }
-          if (it.y - it.h/2 > H) { items.splice(i,1); continue; }
+          if (it.y - it.h/2 > H) {
+            items.splice(i,1);
+            continue;
+          }
         } else {
-          // fruits
-          // bananas: horizontal oscillation + rotation
-          if (it.type === 'banana') {
-            it.x = (it.baseX || it.x) + Math.sin(frameCount * it.horizFreq + (it.phase || 0)) * (it.horizAmp || 20);
-            it.rotation = (it.rotation || 0) + (it.rotSpeed || 0.02);
-            it.y += it.vy;
-          } else if (it.type === 'grapes') {
+          // fruits: grapes zig-zag; apples unchanged; oranges faster already at spawn
+          if (it.type === 'grapes') {
             it.x = it.baseX + Math.sin(frameCount * it.zigFreq + it.zigPhase) * it.zigAmp;
-            it.y += it.vy;
-          } else {
-            it.y += it.vy;
           }
-
-          // If pear was caught and marked returning, let it go up and then come down slower
-          const isReturnPhase = !!it.returning;
-
-          // collision only if not returning upwards
-          if (!isReturnPhase && it.y + it.r >= basket.y && it.y - it.r <= basket.y + basket.h) {
+          if (it.y + it.r >= basket.y && it.y - it.r <= basket.y + basket.h) {
             if (it.x >= basket.x - 6 && it.x <= basket.x + basket.w + 6) {
-              // Special: pear -> when caught, it returns upwards (visual); do normal catch behavior otherwise
-              if (it.type === 'pear') {
-                // give normal score for catching
-                score += Math.max(1, Math.round(it.r/8));
-                // set to returning upwards: invert vy and place x to basket center so it goes straight up
-                it.returning = true;
-                // preserve baseVy if present, else set from current vy
-                it.baseVy = it.baseVy || Math.abs(it.vy) || 2.0;
-                it.vy = -Math.abs(it.baseVy) * 1.6;
-                it.x = basket.x + basket.w/2;
-                it.returnedOnce = it.returnedOnce || false;
-                // spawn small effect
-                spawnHitEffect(it.x, it.y, 'fruit');
-                // do not remove - let it travel upward
-                continue;
-              } else {
-                // Normal fruit: caught -> score + remove
-                score += Math.max(1, Math.round(it.r/8));
-                spawnHitEffect(it.x, it.y, 'fruit');
-                items.splice(i,1);
-                continue;
-              }
-            }
-          }
-
-          // If returning pear goes above top:
-          if (it.returning && (it.y + (it.r||10) < -20)) {
-            // If hasn't returned before, flip to falling again but slower
-            if (!it.returnedOnce) {
-              it.returning = false;
-              it.returnedOnce = true;
-              // slow down the fall: use baseVy if available, else derive
-              const base = it.baseVy || Math.abs(it.vy) || 2.0;
-              it.vy = Math.abs(base) * 0.5; // cae más lento ahora
-              // keep x as current x (or randomize a bit)
-              it.x = Math.max(it.r || 10, Math.min(W - (it.r || 10), it.x + (Math.random()-0.5)*40));
-              continue;
-            } else {
-              // If already returned once, remove to avoid infinite loop
+              score += Math.max(1, Math.round(it.r/8));
+              spawnHitEffect(it.x, it.y, 'fruit');
               items.splice(i,1);
               continue;
             }
           }
-
-          // If fruit reaches bottom and is not returning -> miss
-          if (!it.returning && (it.y - (it.r||10) > H)) {
+          if (it.y - it.r > H) {
+            // missed fruit -> lose one life
             lives = Math.max(0, lives - 1);
             spawnHitEffect(it.x, H-10, 'miss');
             items.splice(i,1);
             checkGameOver();
-            continue;
-          }
-
-          // If an item that was returning somehow goes below bottom, just remove
-          if (it.returning && (it.y - (it.r||10) > H)) {
-            items.splice(i,1);
             continue;
           }
         }
@@ -735,17 +683,8 @@
       fruitsLeftEl.textContent = Math.max(0, fruitTarget - fruitsSpawnedThisLevel);
     }
 
-    function checkGameOver(){
-      if (lives <= 0){
-        running = false;
-        overlay.classList.remove('hidden');
-        document.getElementById('overlay-title').textContent = 'Juego terminado';
-        document.getElementById('overlay-sub').textContent = 'Te has quedado sin vidas.';
-        finalScore.textContent = `Puntuación final: ${score}`;
-      }
-    }
-
     function draw(){
+      // Clear & background
       ctx.clearRect(0,0,W,H);
       const skyGrad = ctx.createLinearGradient(0,0,0,H); skyGrad.addColorStop(0,'#eaf9ff'); skyGrad.addColorStop(1,'#fff');
       ctx.fillStyle = skyGrad; ctx.fillRect(0,0,W,H);
@@ -753,7 +692,7 @@
 
       // draw metals behind
       for(const it of items) if(it.type === 'metal') drawMetal(it);
-      // draw fruits (they may overlap)
+      // draw fruits
       for(const it of items) if(it.type !== 'metal') drawFruit(it);
 
       drawParticles();
@@ -775,16 +714,31 @@
       currentLevel = level;
       fruitTarget = fruitTargetForLevel(level);
       fruitsSpawnedThisLevel = 0;
+      // compute spawn interval to distribute fruits approx across minute
       spawnInterval = Math.max(200, Math.round(LEVEL_DURATION_MS / Math.max(1, fruitTarget)));
       lastSpawn = now;
+      // reset some dynamic difficulty per level
       metalChance = Math.min(0.6, 0.08 + (level-1)*0.04);
       speedChangeInterval = speedChangeIntervalForLevel(level);
       lastSpeedChange = now;
       speedMultiplier = 1.0;
+      // set timer bounds
       levelStartTime = now;
       levelEndTime = now + LEVEL_DURATION_MS;
+      // update HUD
       levelNumEl.textContent = currentLevel;
       fruitsLeftEl.textContent = fruitTarget;
+      // If there's a banned type for this level (set previously by player), it's already in bannedTypesForLevel[level]
+    }
+
+    function checkGameOver(){
+      if (lives <= 0){
+        running = false;
+        overlay.classList.remove('hidden');
+        document.getElementById('overlay-title').textContent = 'Juego terminado';
+        document.getElementById('overlay-sub').textContent = 'Te has quedado sin vidas.';
+        finalScore.textContent = `Puntuación final: ${score}`;
+      }
     }
 
     /* ---------------------------
@@ -794,6 +748,7 @@
       items.length = 0; particles.length = 0;
       score = 0; lives = MAX_LIVES; running = true; paused = false; frameCount = 0;
       currentLevel = 1;
+      // clear banned types
       for(const k in bannedTypesForLevel) delete bannedTypesForLevel[k];
       const now = performance.now();
       startLevel(1, now);
