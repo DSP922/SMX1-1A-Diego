@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Duelo en el Tatami</title>
+  <style>
+    :root {
+      --bg: #101820;
+      --ink: #f5f5f5;
+      --accent: #f4b400;
+      --health: #3ad29f;
+      --danger: #ff6b6b;
+      --panel: rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: "Trebuchet MS", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #2d3d5f, #101820 60%);
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .arena {
+      width: min(1200px, 95vw);
+      display: grid;
+      gap: 16px;
+    }
+
+    .menu {
+      background: var(--panel);
+      padding: 28px;
+      border-radius: 16px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .menu.hidden {
+      display: none;
+    }
+
+    .menu h1 {
+      margin-top: 0;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .menu button {
+      margin-top: 16px;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 999px;
+      background: var(--accent);
+      color: #101820;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .hud {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .hud.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .player-panel {
+      background: var(--panel);
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .player-name {
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.9rem;
+    }
+
+    .bar {
+      height: 16px;
+      margin-top: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      width: 100%;
+      transition: width 0.2s ease;
+    }
+
+    .bar-fill.health {
+      background: linear-gradient(90deg, var(--health), #2f9f7c);
+    }
+
+    .bar-fill.health.low {
+      background: linear-gradient(90deg, var(--danger), #ff3b3b);
+    }
+
+    .bar-fill.energy {
+      background: linear-gradient(90deg, #7c9bff, #5b6aff);
+    }
+
+    .round-info {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 8px 18px;
+      background: var(--panel);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .canvas-wrap {
+      background: #1f2a37;
+      border-radius: 16px;
+      padding: 10px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .canvas-wrap.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+      background: #1b1f2b;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .controls.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .controls-card {
+      background: var(--panel);
+      border-radius: 12px;
+      padding: 12px 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .controls-card h3 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+      color: var(--accent);
+    }
+
+    .status-message {
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent);
+      min-height: 24px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .status-message.active {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="arena">
+    <section class="menu" id="menu">
+      <h1>Duelo en el Tatami</h1>
+      <p>Juego de pelea 1v1 en un templo chino. Elige tu estilo: Akira con patadas y Kenji con puños.</p>
+      <p>El combate es al mejor de 3 rondas, cada una con 120 segundos.</p>
+      <button id="startButton">Iniciar juego</button>
+    </section>
+
+    <div class="hud" id="hud">
+      <div class="player-panel">
+        <div class="player-name">Akira - Patadas</div>
+        <div class="bar"><div id="p1Health" class="bar-fill health"></div></div>
+        <div class="bar"><div id="p1Energy" class="bar-fill energy"></div></div>
+      </div>
+      <div class="round-info">
+        <div>Ronda <span id="roundNumber">1</span> / 3</div>
+        <div>Tiempo: <span id="roundTimer">120</span>s</div>
+      </div>
+      <div class="player-panel">
+        <div class="player-name">Kenji - Puños</div>
+        <div class="bar"><div id="p2Health" class="bar-fill health"></div></div>
+        <div class="bar"><div id="p2Energy" class="bar-fill energy"></div></div>
+      </div>
+    </div>
+
+    <div class="canvas-wrap" id="canvasWrap">
+      <canvas id="fightCanvas" width="1100" height="520"></canvas>
+    </div>
+
+    <div class="status-message" id="statusMessage"></div>
+
+    <div class="controls" id="controls">
+      <div class="controls-card">
+        <h3>Akira (Patadas)</h3>
+        <p>Movimiento: A / D · Saltar: W · Bloquear: S</p>
+        <p>Patada rápida: F · Patada giratoria: G (consume energía)</p>
+        <p>Salto lateral: H (habilidad evasiva)</p>
+      </div>
+      <div class="controls-card">
+        <h3>Kenji (Puños)</h3>
+        <p>Movimiento: ◀ / ▶ · Saltar: ▲ · Bloquear: ▼</p>
+        <p>Combo de puños: J · Gancho fuerte: K (consume energía)</p>
+        <p>Dash corto: L (habilidad ofensiva)</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("fightCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const ui = {
+      p1Health: document.getElementById("p1Health"),
+      p2Health: document.getElementById("p2Health"),
+      p1Energy: document.getElementById("p1Energy"),
+      p2Energy: document.getElementById("p2Energy"),
+      roundNumber: document.getElementById("roundNumber"),
+      roundTimer: document.getElementById("roundTimer"),
+      statusMessage: document.getElementById("statusMessage"),
+      menu: document.getElementById("menu"),
+      hud: document.getElementById("hud"),
+      canvasWrap: document.getElementById("canvasWrap"),
+      controls: document.getElementById("controls"),
+    };
+
+    const state = {
+      round: 1,
+      maxRounds: 3,
+      roundTime: 120,
+      timeLeft: 120,
+      roundActive: false,
+      message: "",
+      lastTimestamp: 0,
+    };
+
+    const keys = new Set();
+
+    const fighters = [
+      {
+        name: "Akira",
+        x: 260,
+        y: 350,
+        width: 70,
+        height: 140,
+        color: "#ffd166",
+        stance: "kicks",
+        dir: 1,
+        hp: 100,
+        energy: 100,
+        score: 0,
+        vx: 0,
+        vy: 0,
+        grounded: true,
+        blocking: false,
+        attackCooldown: 0,
+        specialCooldown: 0,
+        evadeCooldown: 0,
+        isAttacking: false,
+        attackTimer: 0,
+      },
+      {
+        name: "Kenji",
+        x: 840,
+        y: 350,
+        width: 70,
+        height: 140,
+        color: "#8ecae6",
+        stance: "punches",
+        dir: -1,
+        hp: 100,
+        energy: 100,
+        score: 0,
+        vx: 0,
+        vy: 0,
+        grounded: true,
+        blocking: false,
+        attackCooldown: 0,
+        specialCooldown: 0,
+        evadeCooldown: 0,
+        isAttacking: false,
+        attackTimer: 0,
+      },
+    ];
+
+    const floorY = 420;
+
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+    const setMessage = (text) => {
+      state.message = text;
+      ui.statusMessage.textContent = text;
+    };
+
+    const resetFighters = () => {
+      fighters[0].x = 260;
+      fighters[1].x = 840;
+      fighters.forEach((fighter) => {
+        fighter.y = 350;
+        fighter.vx = 0;
+        fighter.vy = 0;
+        fighter.grounded = true;
+        fighter.hp = 100;
+        fighter.energy = 100;
+        fighter.blocking = false;
+        fighter.attackCooldown = 0;
+        fighter.specialCooldown = 0;
+        fighter.evadeCooldown = 0;
+        fighter.isAttacking = false;
+        fighter.attackTimer = 0;
+      });
+    };
+
+    const startRound = () => {
+      state.timeLeft = state.roundTime;
+      state.roundActive = true;
+      setMessage("¡Comienza la ronda!");
+      resetFighters();
+    };
+
+    const endRound = (winner) => {
+      state.roundActive = false;
+      if (winner) {
+        winner.score += 1;
+        setMessage(`Ronda para ${winner.name}.`);
+      } else {
+        setMessage("Ronda empatada.");
+      }
+      if (state.round >= state.maxRounds || fighters.some((f) => f.score === 2)) {
+        const champion = fighters[0].score === fighters[1].score ? null : fighters.reduce((best, current) => (current.score > best.score ? current : best));
+        setMessage(champion ? `¡${champion.name} gana el combate!` : "¡Combate empatado!");
+      } else {
+        state.round += 1;
+        ui.roundNumber.textContent = state.round;
+        setTimeout(startRound, 1800);
+      }
+    };
+
+    const applyDamage = (attacker, defender, baseDamage) => {
+      if (!state.roundActive || attacker.attackCooldown > 0) return;
+      const distance = Math.abs(attacker.x - defender.x);
+      const attackRange = attacker.stance === "kicks" ? 120 : 95;
+      if (distance > attackRange) return;
+
+      let damage = baseDamage;
+      if (defender.blocking) {
+        damage *= 0.4;
+      }
+      defender.hp = clamp(defender.hp - damage, 0, 100);
+      attacker.attackCooldown = 0.35;
+      attacker.isAttacking = true;
+      attacker.attackTimer = 0.2;
+    };
+
+    const handleInputs = (dt) => {
+      const [p1, p2] = fighters;
+      if (!state.roundActive) return;
+
+      p1.vx = 0;
+      if (keys.has("KeyA")) p1.vx = -220;
+      if (keys.has("KeyD")) p1.vx = 220;
+      if (keys.has("KeyW") && p1.grounded) {
+        p1.vy = -420;
+        p1.grounded = false;
+      }
+      p1.blocking = keys.has("KeyS");
+
+      if (keys.has("KeyF")) {
+        applyDamage(p1, p2, 9);
+      }
+      if (keys.has("KeyG") && p1.energy >= 20 && p1.specialCooldown <= 0) {
+        p1.energy -= 20;
+        p1.specialCooldown = 1.2;
+        applyDamage(p1, p2, 18);
+      }
+      if (keys.has("KeyH") && p1.evadeCooldown <= 0) {
+        p1.evadeCooldown = 1.6;
+        p1.x -= 120;
+      }
+
+      p2.vx = 0;
+      if (keys.has("ArrowLeft")) p2.vx = -220;
+      if (keys.has("ArrowRight")) p2.vx = 220;
+      if (keys.has("ArrowUp") && p2.grounded) {
+        p2.vy = -420;
+        p2.grounded = false;
+      }
+      p2.blocking = keys.has("ArrowDown");
+
+      if (keys.has("KeyJ")) {
+        applyDamage(p2, p1, 8);
+      }
+      if (keys.has("KeyK") && p2.energy >= 22 && p2.specialCooldown <= 0) {
+        p2.energy -= 22;
+        p2.specialCooldown = 1.3;
+        applyDamage(p2, p1, 20);
+      }
+      if (keys.has("KeyL") && p2.evadeCooldown <= 0) {
+        p2.evadeCooldown = 1.5;
+        p2.x += 110;
+      }
+
+      fighters.forEach((fighter, index) => {
+        const minX = 80;
+        const maxX = canvas.width - 80;
+        fighter.x = clamp(fighter.x + fighter.vx * dt, minX, maxX);
+        if (index === 0 && fighter.x > fighters[1].x - 110) fighter.x = fighters[1].x - 110;
+        if (index === 1 && fighter.x < fighters[0].x + 110) fighter.x = fighters[0].x + 110;
+      });
+    };
+
+    const updateFighters = (dt) => {
+      fighters.forEach((fighter) => {
+        fighter.vy += 900 * dt;
+        fighter.y += fighter.vy * dt;
+        if (fighter.y + fighter.height >= floorY) {
+          fighter.y = floorY - fighter.height;
+          fighter.vy = 0;
+          fighter.grounded = true;
+        }
+        fighter.attackCooldown = Math.max(0, fighter.attackCooldown - dt);
+        fighter.specialCooldown = Math.max(0, fighter.specialCooldown - dt);
+        fighter.evadeCooldown = Math.max(0, fighter.evadeCooldown - dt);
+        fighter.attackTimer = Math.max(0, fighter.attackTimer - dt);
+        if (fighter.attackTimer === 0) {
+          fighter.isAttacking = false;
+        }
+        fighter.energy = clamp(fighter.energy + 8 * dt, 0, 100);
+      });
+
+      if (fighters.some((fighter) => fighter.hp <= 0) && state.roundActive) {
+        const winner = fighters.find((fighter) => fighter.hp > 0) || null;
+        endRound(winner);
+      }
+    };
+
+    const updateTimer = (dt) => {
+      if (!state.roundActive) return;
+      state.timeLeft = Math.max(0, state.timeLeft - dt);
+      ui.roundTimer.textContent = Math.ceil(state.timeLeft);
+      if (state.timeLeft <= 0) {
+        const winner = fighters[0].hp === fighters[1].hp ? null : fighters.reduce((best, current) => (current.hp > best.hp ? current : best));
+        endRound(winner);
+      }
+    };
+
+    const updateHud = () => {
+      ui.p1Health.style.width = `${fighters[0].hp}%`;
+      ui.p2Health.style.width = `${fighters[1].hp}%`;
+      ui.p1Energy.style.width = `${fighters[0].energy}%`;
+      ui.p2Energy.style.width = `${fighters[1].energy}%`;
+
+      ui.p1Health.classList.toggle("low", fighters[0].hp <= 35);
+      ui.p2Health.classList.toggle("low", fighters[1].hp <= 35);
+    };
+
+    const drawTempleBackdrop = () => {
+      ctx.fillStyle = "#1d2432";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#0f1624";
+      ctx.fillRect(0, 0, canvas.width, 180);
+
+      ctx.fillStyle = "#3c2b1f";
+      ctx.fillRect(0, 120, canvas.width, 40);
+
+      ctx.fillStyle = "#5c3f2d";
+      ctx.fillRect(0, 140, canvas.width, 20);
+
+      const roofColor = "#b03a2e";
+      ctx.fillStyle = roofColor;
+      ctx.beginPath();
+      ctx.moveTo(120, 120);
+      ctx.lineTo(300, 40);
+      ctx.lineTo(480, 120);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.beginPath();
+      ctx.moveTo(620, 120);
+      ctx.lineTo(800, 40);
+      ctx.lineTo(980, 120);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = "#d9c5a0";
+      ctx.fillRect(160, 120, 180, 180);
+      ctx.fillRect(660, 120, 180, 180);
+
+      ctx.fillStyle = "#4a2a1a";
+      ctx.fillRect(230, 150, 40, 150);
+      ctx.fillRect(730, 150, 40, 150);
+
+      ctx.fillStyle = "#182236";
+      ctx.fillRect(0, 300, canvas.width, canvas.height - 300);
+    };
+
+    const drawTatami = () => {
+      const tatamiTop = floorY - 20;
+      ctx.fillStyle = "#d6c88f";
+      ctx.fillRect(0, tatamiTop, canvas.width, canvas.height - tatamiTop);
+
+      ctx.strokeStyle = "rgba(90, 70, 40, 0.4)";
+      ctx.lineWidth = 2;
+
+      const rows = 4;
+      const cols = 8;
+      const tileWidth = canvas.width / cols;
+      const tileHeight = (canvas.height - tatamiTop) / rows;
+
+      for (let row = 0; row < rows; row += 1) {
+        for (let col = 0; col < cols; col += 1) {
+          ctx.strokeRect(col * tileWidth, tatamiTop + row * tileHeight, tileWidth, tileHeight);
+        }
+      }
+    };
+
+    const drawFighter = (fighter) => {
+      const { x, y, width, height, color, stance, isAttacking, blocking } = fighter;
+      const giColor = stance === "kicks" ? "#f4f1de" : "#e0fbfc";
+
+      ctx.save();
+      ctx.translate(x, y);
+
+      ctx.fillStyle = giColor;
+      ctx.fillRect(-width / 2, 30, width, height - 30);
+
+      ctx.fillStyle = "#1b1b1b";
+      ctx.fillRect(-width / 2, 85, width, 10);
+
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(0, 20, 20, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = "#2b2b2b";
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      if (stance === "kicks") {
+        ctx.moveTo(-10, 80);
+        ctx.lineTo(-40, 120);
+        ctx.moveTo(10, 80);
+        ctx.lineTo(40, 120);
+      } else {
+        ctx.moveTo(-10, 70);
+        ctx.lineTo(-30, 100);
+        ctx.moveTo(10, 70);
+        ctx.lineTo(30, 100);
+      }
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(-15, 140);
+      ctx.lineTo(-25, 190);
+      ctx.moveTo(15, 140);
+      ctx.lineTo(25, 190);
+      ctx.stroke();
+
+      if (blocking) {
+        ctx.strokeStyle = "#ffd166";
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(0, 80, 38, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      if (isAttacking) {
+        ctx.strokeStyle = stance === "kicks" ? "#ff9f1c" : "#ff6b6b";
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(0, 120);
+        ctx.lineTo(stance === "kicks" ? 80 : 60, 110);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    };
+
+    const drawScene = () => {
+      drawTempleBackdrop();
+      drawTatami();
+      fighters.forEach(drawFighter);
+    };
+
+    const gameLoop = (timestamp) => {
+      const delta = (timestamp - state.lastTimestamp) / 1000 || 0;
+      state.lastTimestamp = timestamp;
+
+      handleInputs(delta);
+      updateFighters(delta);
+      updateTimer(delta);
+      updateHud();
+      drawScene();
+
+      requestAnimationFrame(gameLoop);
+    };
+
+    const startGame = () => {
+      ui.menu.classList.add("hidden");
+      ui.hud.classList.add("active");
+      ui.canvasWrap.classList.add("active");
+      ui.controls.classList.add("active");
+      ui.statusMessage.classList.add("active");
+      state.round = 1;
+      fighters.forEach((fighter) => {
+        fighter.score = 0;
+      });
+      ui.roundNumber.textContent = state.round;
+      startRound();
+    };
+
+    window.addEventListener("keydown", (event) => {
+      keys.add(event.code);
+    });
+
+    window.addEventListener("keyup", (event) => {
+      keys.delete(event.code);
+    });
+
+    document.getElementById("startButton").addEventListener("click", () => {
+      if (!state.roundActive) {
+        startGame();
+      }
+    });
+
+    drawScene();
+  </script>
+</body>
+</html>
