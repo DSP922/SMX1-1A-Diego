@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Factory - Premium Soccer Merchandise</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-light: #999999;
+            --nav-bg: #1a1a1a;
+            --nav-text: #e0e0e0;
+            --nav-hover: rgba(255, 255, 255, 0.08);
+            --border-color: #dddddd;
+            --button-bg: #333333;
+            --button-hover: #1a1a1a;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --shadow-hover: rgba(0, 0, 0, 0.12);
+            --input-bg: #ffffff;
+            --input-border: #dddddd;
+            --input-focus: #333333;
+            --accent: #ff6b6b;
+        }
+
+        body.dark-theme {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #e8e8e8;
+            --text-secondary: #b0b0b0;
+            --text-light: #808080;
+            --nav-bg: #0a0a0a;
+            --nav-text: #e8e8e8;
+            --nav-hover: rgba(255, 255, 255, 0.12);
+            --border-color: #333333;
+            --button-bg: #2a2a2a;
+            --button-hover: #3a3a3a;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.5);
+            --input-bg: #1a1a1a;
+            --input-border: #333333;
+            --input-focus: #555555;
+            --accent: #ff8888;
+        }
+
+        body.modern-theme {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #0d1117;
+            --text-secondary: #57606a;
+            --text-light: #8b949e;
+            --nav-bg: #010409;
+            --nav-text: #c9d1d9;
+            --nav-hover: rgba(255, 255, 255, 0.1);
+            --border-color: #d0d7de;
+            --button-bg: #238636;
+            --button-hover: #2ea043;
+            --shadow: rgba(0, 0, 0, 0.06);
+            --shadow-hover: rgba(0, 0, 0, 0.1);
+            --input-bg: #ffffff;
+            --input-border: #d0d7de;
+            --input-focus: #238636;
+            --accent: #da3633;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        nav {
+            background-color: var(--nav-bg);
+            padding: 12px 20px;
+            box-shadow: 0 2px 10px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            margin-right: 15px;
+        }
+
+        nav a {
+            color: var(--nav-text);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            position: relative;
+        }
+
+        nav a:hover {
+            color: #fff;
+            background-color: var(--nav-hover);
+        }
+
+        nav a.active {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-center {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            width: 100%;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            background: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            padding: 0 8px;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-light);
+        }
+
+        .search-bar button {
+            background: none;
+            border: none;
+            color: var(--button-bg);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 350px;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 4px 12px var(--shadow);
+            margin-top: 2px;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--bg-primary);
+        }
+
+        .search-result-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .search-result-info {
+            flex: 1;
+        }
+
+        .search-result-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .search-result-price {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cart-count, .favorites-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .icon-btn {
+            position: relative;
+            background: none;
+            border: none;
+            color: var(--nav-text);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            color: #fff;
+            background-color: var(--nav-hover);
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .theme-btn {
+            padding: 6px 10px;
+            background-color: var(--nav-hover);
+            color: var(--nav-text);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .theme-btn:hover {
+            background-color: var(--nav-text);
+            color: var(--nav-bg);
+        }
+
+        .theme-btn.active {
+            background-color: var(--nav-text);
+            color: var(--nav-bg);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 40px auto;
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--button-bg) 0%, var(--nav-bg) 100%);
+            color: #fff;
+            padding: 80px 40px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 50px;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .hero h1 {
+            font-size: 44px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #ccc;
+            font-weight: 300;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 32px;
+            font-size: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background-color: var(--button-bg);
+            color: #fff;
+            border: 2px solid var(--button-bg);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--button-hover);
+            border-color: var(--button-hover);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: #fff;
+            border: 2px solid #666;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--text-primary);
+        }
+
+        .filter-section {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: var(--button-bg);
+            color: #fff;
+            border-color: var(--button-bg);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .product-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 6px 16px var(--shadow-hover);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: var(--accent);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            z-index: 10;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 220px;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 18px;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            font-size: 18px;
+            color: var(--text-primary);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .product-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .product-rating {
+            color: var(--text-light);
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-add-cart {
+            flex: 1;
+            padding: 10px;
+            background-color: var(--button-bg);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add-cart:hover {
+            background-color: var(--button-hover);
+        }
+
+        .btn-wishlist {
+            padding: 10px 12px;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        .btn-wishlist:hover, .btn-wishlist.favorited {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        .form-container {
+            background: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-container h2 {
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--input-focus);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--button-bg);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--button-hover);
+        }
+
+        .cart-container {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .cart-empty-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .cart-items {
+            margin-bottom: 30px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px;
+            background: var(--bg-primary);
+            margin-bottom: 8px;
+            border-radius: 6px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .cart-item-info {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .cart-item-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .cart-item-price {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .qty-btn {
+            width: 28px;
+            height: 28px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .qty-btn:hover {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .cart-item-total {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .btn-remove {
+            padding: 8px 12px;
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-remove:hover {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .cart-summary {
+            background: var(--bg-primary);
+            padding: 25px;
+            border-radius: 6px;
+            border-left: 3px solid var(--button-bg);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .summary-row.total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--button-bg);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-checkout:hover {
+            background-color: var(--button-hover);
+        }
+
+        .offers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .offer-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 6px 16px var(--shadow-hover);
+        }
+
+        .offer-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: var(--button-bg);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .offer-image {
+            width: 100%;
+            height: 200px;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+
+        .offer-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .offer-info {
+            padding: 20px;
+        }
+
+        .offer-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .offer-description {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .offer-dates {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 12px;
+        }
+
+        .btn-claim-offer {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--button-bg);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-claim-offer:hover {
+            background-color: var(--button-hover);
+        }
+
+        .settings-container {
+            background: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .settings-container h2 {
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .settings-section {
+            margin-bottom: 35px;
+        }
+
+        .settings-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background: var(--bg-primary);
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+
+        .setting-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 26px;
+            background-color: var(--border-color);
+            border-radius: 13px;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background-color: var(--button-bg);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background-color: white;
+            border-radius: 50%;
+            transition: left 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 22px;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 12px;
+            background-color: #666;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        footer {
+            background: var(--nav-bg);
+            color: var(--text-light);
+            text-align: center;
+            padding: 35px;
+            margin-top: 50px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav-center {
+                width: 100%;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="nav-container">
+            <div class="nav-left">
+                <span class="logo">Football Factory</span>
+                <a href="#" onclick="showSection('home')" class="nav-link active">Home</a>
+                <a href="#" onclick="showSection('add-items')" class="nav-link">Add Products</a>
+                <a href="#" onclick="showSection('offers')" class="nav-link">Offers</a>
+                <a href="#" onclick="showSection('settings')" class="nav-link">Account</a>
+            </div>
+            <div class="nav-center">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search (try: CR7)" onkeyup="handleSearch(event)">
+                    <button onclick="performSearch()">🔍</button>
+                </div>
+                <div class="search-results" id="searchResults"></div>
+            </div>
+            <div class="nav-right">
+                <div class="nav-icons">
+                    <button class="icon-btn" onclick="showSection('favorites')" title="Favorites">♡ <span class="favorites-count" id="favoritesCount">0</span></button>
+                    <button class="icon-btn" onclick="showSection('cart')" title="Cart">🛒 <span class="cart-count" id="cartCount">0</span></button>
+                </div>
+                <div class="theme-selector">
+                    <button class="theme-btn active" onclick="setTheme('light')">Light</button>
+                    <button class="theme-btn" onclick="setTheme('dark')">Dark</button>
+                    <button class="theme-btn" onclick="setTheme('modern')">Modern</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Home Section -->
+        <div id="home" class="section active">
+            <div class="hero">
+                <h1>Football Factory</h1>
+                <p>Premium Soccer Merchandise for True Fans</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="showSection('offers')">View Offers</button>
+                    <button class="btn btn-secondary" onclick="showSection('add-items')">Sell Your Items</button>
+                </div>
+            </div>
+
+            <h2 class="section-title">Featured Products</h2>
+            <div class="filter-section" id="filterSection"></div>
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <!-- Search Results Section -->
+        <div id="search-results" class="section">
+            <h2 class="section-title">Search Results</h2>
+            <div id="searchResultsContent"></div>
+        </div>
+
+        <!-- Favorites Section -->
+        <div id="favorites" class="section">
+            <h2 class="section-title">Your Favorite Products</h2>
+            <div id="favoritesContent"></div>
+        </div>
+
+        <!-- Shopping Cart Section -->
+        <div id="cart" class="section">
+            <h2 class="section-title">Shopping Cart</h2>
+            <div class="cart-container">
+                <div id="cartContent"></div>
+            </div>
+        </div>
+
+        <!-- Add Items Section -->
+        <div id="add-items" class="section">
+            <div class="form-container">
+                <h2>Add New Product</h2>
+                <div class="success-message" id="successMessage">✓ Product added successfully!</div>
+                <form onsubmit="addItem(event)">
+                    <div class="form-group">
+                        <label for="itemName">Product Name</label>
+                        <input type="text" id="itemName" placeholder="e.g., Official Soccer Jersey" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemCategory">Category</label>
+                        <select id="itemCategory" required>
+                            <option value="">Select a category</option>
+                            <option value="Jerseys">Jerseys & Kits</option>
+                            <option value="Shoes">Soccer Shoes</option>
+                            <option value="Balls">Soccer Balls</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Equipment">Training Equipment</option>
+                            <option value="Apparel">Apparel</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemImage">Product Image URL</label>
+                        <input type="url" id="itemImage" placeholder="https://example.com/image.jpg" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemPrice">Price ($)</label>
+                        <input type="number" id="itemPrice" placeholder="0.00" step="0.01" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemDescription">Description</label>
+                        <textarea id="itemDescription" placeholder="Describe your product..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="itemQuantity">Quantity Available</label>
+                        <input type="number" id="itemQuantity" placeholder="10" min="1" required>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Add Product</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Offers Section -->
+        <div id="offers" class="section">
+            <h2 class="section-title">Special Offers</h2>
+            <div class="offers-grid" id="offersGrid"></div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings" class="section">
+            <div class="settings-container">
+                <h2>Account Settings</h2>
+
+                <div class="settings-section">
+                    <h3>Profile</h3>
+                    <div class="setting-item">
+                        <span class="setting-label">Username</span>
+                        <span style="font-weight: 500;">DSP922</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">Email</span>
+                        <span style="font-weight: 500;">user@footballfactory.com</span>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Preferences</h3>
+                    <div class="setting-item">
+                        <span class="setting-label">Notifications</span>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <button class="btn-logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 Football Factory. All Rights Reserved.</p>
+        <p>Premium Soccer Merchandise Marketplace | Trusted by Fans Worldwide</p>
+    </footer>
+
+    <script>
+        const soccerProducts = [
+            {id: 1, name: "Official Premier League Jersey", price: 54.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★★", description: "Authentic soccer jersey", category: "Jerseys", badge: "Popular", searchTags: ["jersey"]},
+            {id: 2, name: "Away Kit Bundle", price: 89.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Complete team kit", category: "Jerseys", badge: "Bundle", searchTags: ["kit"]},
+            {id: 3, name: "Vintage Retro Jersey", price: 49.99, image: "https://images.unsplash.com/photo-1518611505868-48510c2e2e3d?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Classic vintage design", category: "Jerseys", searchTags: ["vintage"]},
+            {id: 4, name: "Youth Soccer Jersey", price: 34.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Youth jersey", category: "Jerseys", searchTags: ["youth"]},
+            {id: 5, name: "Professional Soccer Cleats", price: 89.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "Professional cleats", category: "Shoes", badge: "Best Seller", searchTags: ["cleats", "shoes"]},
+            {id: 6, name: "Indoor Soccer Shoes", price: 64.99, image: "https://images.unsplash.com/photo-1600181549214-3469e92fc770?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Indoor shoes", category: "Shoes", searchTags: ["indoor"]},
+            {id: 7, name: "Futsal Shoes", price: 74.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Futsal shoes", category: "Shoes", searchTags: ["futsal"]},
+            {id: 8, name: "Training Shoes", price: 59.99, image: "https://images.unsplash.com/photo-1608889335556-a770b6ce441a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Training shoes", category: "Shoes", searchTags: ["training"]},
+            {id: 9, name: "Professional Match Ball", price: 39.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★★", description: "Match ball", category: "Balls", badge: "Official", searchTags: ["ball", "match"]},
+            {id: 10, name: "Training Soccer Ball", price: 24.99, image: "https://images.unsplash.com/photo-1579952363873-27f3bade9e55?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Training ball", category: "Balls", searchTags: ["ball"]},
+            {id: 11, name: "Youth Soccer Ball", price: 19.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Youth ball", category: "Balls", searchTags: ["ball"]},
+            {id: 12, name: "Futsal Ball", price: 29.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Futsal ball", category: "Balls", searchTags: ["futsal"]},
+            {id: 13, name: "Protective Shin Guards", price: 24.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Shin guards", category: "Accessories", searchTags: ["shin"]},
+            {id: 14, name: "Goalkeeper Gloves", price: 44.99, image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&h=500&fit=crop", rating: "★★★★★", description: "Goalkeeper gloves", category: "Accessories", badge: "New", searchTags: ["gloves"]},
+            {id: 15, name: "Compression Arm Sleeve", price: 19.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Sleeve", category: "Accessories", searchTags: ["sleeve"]},
+            {id: 16, name: "Sports Headband", price: 9.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Headband", category: "Accessories", searchTags: ["headband"]},
+            {id: 17, name: "Training Cones Set", price: 19.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Cones", category: "Equipment", searchTags: ["cones"]},
+            {id: 18, name: "Soccer Goal Target Sheet", price: 34.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★★", description: "Target sheet", category: "Equipment", badge: "Pro", searchTags: ["target"]},
+            {id: 19, name: "Training Ladder", price: 29.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Agility ladder", category: "Equipment", searchTags: ["ladder"]},
+            {id: 20, name: "Ball Bag", price: 24.99, image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Ball carrier", category: "Equipment", searchTags: ["bag"]},
+            {id: 21, name: "Performance Socks", price: 14.99, image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Socks", category: "Apparel", searchTags: ["socks"]},
+            {id: 22, name: "Soccer Shorts", price: 34.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Shorts", category: "Apparel", searchTags: ["shorts"]},
+            {id: 23, name: "Training Jacket", price: 59.99, image: "https://images.unsplash.com/photo-1516422340519-89d6c6f0b4ca?w=500&h=500&fit=crop", rating: "★★★★★", description: "Jacket", category: "Apparel", badge: "New", searchTags: ["jacket"]},
+            {id: 24, name: "Thermal Base Layer", price: 44.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Base layer", category: "Apparel", searchTags: ["thermal"]},
+            {id: 999, name: "CR7 Exclusive Signature Collection", price: 1299.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★★", description: "Limited CR7 signed collection - jersey, cleats, merchandise", category: "Exclusive", badge: "ULTRA RARE", searchTags: ["cr7", "cristiano", "ronaldo"], hidden: true}
+        ];
+
+        const offers = [
+            {id: 1, title: "Spring Sale", discount: "30% OFF", description: "Spring soccer gear", image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", dates: "Until March 31"},
+            {id: 2, title: "Buy 2 Get 1 Free", discount: "BOGO", description: "Balls and shoes", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", dates: "Until March 20"},
+            {id: 3, title: "Cleats Sale", discount: "25% OFF", description: "Premium cleats", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", dates: "Until March 25"},
+            {id: 4, title: "Team Bundle", discount: "BUNDLE", description: "Team kits", image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", dates: "Until April 15"}
+        ];
+
+        let cart = [];
+        let userProducts = [];
+        let favorites = [];
+        let currentTheme = 'light';
+        let activeFilter = 'All';
+
+        function init() {
+            loadTheme();
+            displayProducts();
+            displayOffers();
+            createFilterButtons();
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+        }
+
+        function setTheme(theme) {
+            document.body.classList.remove('dark-theme', 'modern-theme');
+            if (theme === 'dark') document.body.classList.add('dark-theme');
+            if (theme === 'modern') document.body.classList.add('modern-theme');
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`button[onclick="setTheme('${theme}')"]`).classList.add('active');
+            localStorage.setItem('theme', theme);
+        }
+
+        function createFilterButtons() {
+            const section = document.getElementById('filterSection');
+            ['All', 'Jerseys', 'Shoes', 'Balls', 'Accessories', 'Equipment', 'Apparel'].forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `filter-btn ${cat === 'All' ? 'active' : ''}`;
+                btn.textContent = cat;
+                btn.onclick = (e) => { e.preventDefault(); filterProducts(cat); };
+                section.appendChild(btn);
+            });
+        }
+
+        function filterProducts(category) {
+            activeFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            displayProducts();
+        }
+
+        function displayProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+            const all = [...soccerProducts.filter(p => !p.hidden), ...userProducts];
+            const filtered = activeFilter === 'All' ? all : all.filter(p => p.category === activeFilter);
+            filtered.forEach(p => {
+                const fav = favorites.some(f => f.id === p.id);
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+                    <div class="product-image"><img src="${p.image}" alt="${p.name}" onerror="this.src='https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop'"></div>
+                    <div class="product-info">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-price">$${p.price.toFixed(2)}</div>
+                        <div class="product-description">${p.description}</div>
+                        <div class="product-rating">${p.rating}</div>
+                        <div class="product-actions">
+                            <button class="btn-add-cart" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">Add</button>
+                            <button class="btn-wishlist ${fav ? 'favorited' : ''}" onclick="toggleFavorite(${p.id}, '${p.name}')">♡</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function displayOffers() {
+            const grid = document.getElementById('offersGrid');
+            grid.innerHTML = '';
+            offers.forEach(o => {
+                const card = document.createElement('div');
+                card.className = 'offer-card';
+                card.innerHTML = `
+                    <div class="offer-badge">${o.discount}</div>
+                    <div class="offer-image"><img src="${o.image}" alt="${o.title}"></div>
+                    <div class="offer-info">
+                        <div class="offer-title">${o.title}</div>
+                        <div class="offer-description">${o.description}</div>
+                        <div class="offer-dates">${o.dates}</div>
+                        <button class="btn-claim-offer" onclick="claimOffer('${o.title}')">Claim</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase();
+            const results = document.getElementById('searchResults');
+            
+            if (query.length === 0) {
+                results.classList.remove('active');
+                return;
+            }
+
+            const all = [...soccerProducts, ...userProducts];
+            const items = all.filter(p => 
+                (p.name.toLowerCase().includes(query) || p.description.toLowerCase().includes(query) || (p.searchTags && p.searchTags.some(t => t.includes(query)))) &&
+                (!p.hidden || (p.searchTags && p.searchTags.some(t => t.includes(query))))
+            ).slice(0, 8);
+
+            results.innerHTML = items.map(p => `
+                <div class="search-result-item" onclick="selectSearchResult(${p.id})">
+                    <img src="${p.image}" alt="${p.name}">
+                    <div class="search-result-info">
+                        <div class="search-result-name">${p.name}</div>
+                        <div class="search-result-price">$${p.price.toFixed(2)}</div>
+                    </div>
+                </div>
+            `).join('');
+            results.classList.add('active');
+        }
+
+        function selectSearchResult(id) {
+            const p = [...soccerProducts, ...userProducts].find(x => x.id === id);
+            document.getElementById('searchInput').value = p.name;
+            document.getElementById('searchResults').classList.remove('active');
+            performSearch(p);
+        }
+
+        function performSearch(p) {
+            if (!p) return;
+            document.getElementById('searchResultsContent').innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'products-grid';
+            const fav = favorites.some(f => f.id === p.id);
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
+                ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+                <div class="product-image"><img src="${p.image}" alt="${p.name}"></div>
+                <div class="product-info">
+                    <div class="product-name">${p.name}</div>
+                    <div class="product-price">$${p.price.toFixed(2)}</div>
+                    <div class="product-description">${p.description}</div>
+                    <div class="product-rating">${p.rating}</div>
+                    <div class="product-actions">
+                        <button class="btn-add-cart" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">Add</button>
+                        <button class="btn-wishlist ${fav ? 'favorited' : ''}" onclick="toggleFavorite(${p.id}, '${p.name}')">♡</button>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(card);
+            document.getElementById('searchResultsContent').appendChild(grid);
+            showSection('search-results');
+        }
+
+        function addToCart(id, name, price) {
+            const item = cart.find(i => i.id === id);
+            if (item) item.quantity++;
+            else cart.push({id, name, price, quantity: 1});
+            updateCartCount();
+            alert(`"${name}" added!`);
+        }
+
+        function updateCartCount() {
+            document.getElementById('cartCount').textContent = cart.reduce((s, i) => s + i.quantity, 0);
+        }
+
+        function toggleFavorite(id, name) {
+            const idx = favorites.findIndex(f => f.id === id);
+            if (idx >= 0) {
+                favorites.splice(idx, 1);
+                alert(`Removed from favorites`);
+            } else {
+                const p = [...soccerProducts, ...userProducts].find(x => x.id === id);
+                if (p) {
+                    favorites.push(p);
+                    alert(`Added to favorites!`);
+                }
+            }
+            document.getElementById('favoritesCount').textContent = favorites.length;
+            displayProducts();
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (id === 'cart') displayCart();
+            if (id === 'favorites') displayFavorites();
+            window.scrollTo(0, 0);
+        }
+
+        function displayCart() {
+            const content = document.getElementById('cartContent');
+            if (cart.length === 0) {
+                content.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">🛒</div><h3>Empty Cart</h3><p>Add items to your cart</p><button class="btn btn-primary" onclick="showSection('home')" style="margin-top: 20px;">Shop Now</button></div>`;
+                return;
+            }
+            let html = '<div class="cart-items">';
+            let total = 0;
+            cart.forEach((i, idx) => {
+                const sum = i.price * i.quantity;
+                total += sum;
+                html += `<div class="cart-item"><div class="cart-item-info"><div class="cart-item-name">${i.name}</div><div class="cart-item-price">$${i.price.toFixed(2)}</div></div><div class="cart-item-quantity"><button class="qty-btn" onclick="updateQty(${idx}, -1)">−</button><span>${i.quantity}</span><button class="qty-btn" onclick="updateQty(${idx}, 1)">+</button></div><div class="cart-item-total">$${sum.toFixed(2)}</div><button class="btn-remove" onclick="removeCart(${idx})">Remove</button></div>`;
+            });
+            html += `</div><div class="cart-summary"><div class="summary-row"><span>Subtotal:</span><span>$${total.toFixed(2)}</span></div><div class="summary-row"><span>Shipping:</span><span>$9.99</span></div><div class="summary-row"><span>Tax:</span><span>$${(total * 0.08).toFixed(2)}</span></div><div class="summary-row total"><span>Total:</span><span>$${(total + 9.99 + total * 0.08).toFixed(2)}</span></div><button class="btn-checkout" onclick="checkout()">Checkout</button></div>`;
+            content.innerHTML = html;
+        }
+
+        function updateQty(idx, change) {
+            cart[idx].quantity += change;
+            if (cart[idx].quantity <= 0) removeCart(idx);
+            else { updateCartCount(); displayCart(); }
+        }
+
+        function removeCart(idx) {
+            cart.splice(idx, 1);
+            updateCartCount();
+            displayCart();
+        }
+
+        function displayFavorites() {
+            const content = document.getElementById('favoritesContent');
+            if (favorites.length === 0) {
+                content.innerHTML = `<div class="cart-empty"><div class="cart-empty-icon">♡</div><h3>No Favorites</h3><p>Add items to your favorites</p><button class="btn btn-primary" onclick="showSection('home')" style="margin-top: 20px;">Browse</button></div>`;
+                return;
+            }
+            const grid = document.createElement('div');
+            grid.className = 'products-grid';
+            favorites.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}<div class="product-image"><img src="${p.image}" alt="${p.name}"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-price">$${p.price.toFixed(2)}</div><div class="product-description">${p.description}</div><div class="product-rating">${p.rating}</div><div class="product-actions"><button class="btn-add-cart" onclick="addToCart(${p.id}, '${p.name}', ${p.price})">Add</button><button class="btn-wishlist favorited" onclick="toggleFavorite(${p.id}, '${p.name}')">♡</button></div></div>`;
+                grid.appendChild(card);
+            });
+            content.innerHTML = '';
+            content.appendChild(grid);
+        }
+
+        function addItem(e) {
+            e.preventDefault();
+            userProducts.push({
+                id: Date.now(),
+                name: document.getElementById('itemName').value,
+                price: parseFloat(document.getElementById('itemPrice').value),
+                description: document.getElementById('itemDescription').value,
+                image: document.getElementById('itemImage').value,
+                rating: "★★★★☆",
+                category: document.getElementById('itemCategory').value,
+                searchTags: []
+            });
+            displayProducts();
+            document.getElementById('successMessage').classList.add('show');
+            setTimeout(() => document.getElementById('successMessage').classList.remove('show'), 3000);
+            e.target.reset();
+        }
+
+        function claimOffer(title) {
+            alert(`Offer claimed: "${title}"`);
+        }
+
+        function toggleSetting(el) {
+            el.classList.toggle('active');
+        }
+
+        function checkout() {
+            alert('Thank you for your purchase!');
+            cart = [];
+            updateCartCount();
+            showSection('home');
+        }
+
+        function logout() {
+            if (confirm('Logout?')) {
+                alert('Logged out!');
+                location.reload();
+            }
+        }
+
+        window.addEventListener('load', init);
+        document.addEventListener('click', (e) => {
+            if (e.target.id !== 'searchInput') {
+                document.getElementById('searchResults').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
