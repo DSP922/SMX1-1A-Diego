@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Factory - Premium Soccer Merchandise</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f5f5f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --text-light: #999999;
+            --nav-bg: #ffffff;
+            --nav-text: #1a1a1a;
+            --nav-hover: rgba(0, 0, 0, 0.08);
+            --border-color: #dddddd;
+            --button-bg: #ff6b35;
+            --button-hover: #e55a2b;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --shadow-hover: rgba(0, 0, 0, 0.12);
+            --input-bg: #ffffff;
+            --input-border: #dddddd;
+            --input-focus: #ff6b35;
+            --accent: #ff6b35;
+        }
+
+        body.dark-theme {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #e8e8e8;
+            --text-secondary: #b0b0b0;
+            --text-light: #808080;
+            --nav-bg: #0a0a0a;
+            --nav-text: #e8e8e8;
+            --nav-hover: rgba(255, 255, 255, 0.12);
+            --border-color: #333333;
+            --button-bg: #ff6b35;
+            --button-hover: #e55a2b;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.5);
+            --input-bg: #1a1a1a;
+            --input-border: #333333;
+        }
+
+        body.modern-theme {
+            --bg-primary: #f0f2f5;
+            --bg-secondary: #ffffff;
+            --text-primary: #0d1117;
+            --text-secondary: #57606a;
+            --text-light: #8b949e;
+            --nav-bg: #ffffff;
+            --nav-text: #0d1117;
+            --button-bg: #238636;
+            --button-hover: #2ea043;
+            --input-focus: #238636;
+            --accent: #238636;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* LANDING PAGE STYLES */
+        .landing-page {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .landing-page.hidden {
+            display: none;
+        }
+
+        .landing-container {
+            text-align: center;
+            color: #fff;
+            max-width: 600px;
+            padding: 40px;
+        }
+
+        .landing-logo {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .landing-title {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .landing-subtitle {
+            font-size: 20px;
+            color: #ccc;
+            margin-bottom: 60px;
+            font-weight: 300;
+        }
+
+        .landing-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 50px;
+        }
+
+        .landing-btn {
+            padding: 15px 40px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .landing-btn-primary {
+            background-color: #ff6b35;
+            color: #fff;
+        }
+
+        .landing-btn-primary:hover {
+            background-color: #e55a2b;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 107, 53, 0.3);
+        }
+
+        .landing-btn-secondary {
+            background-color: transparent;
+            color: #fff;
+            border: 2px solid #fff;
+        }
+
+        .landing-btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .news-feed {
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 30px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 40px;
+        }
+
+        .news-feed-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #ff6b35;
+        }
+
+        .news-item {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            text-align: left;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .news-item-title {
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+
+        .news-item-desc {
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        .news-item-date {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        /* MODAL STYLES */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1500;
+            padding: 20px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .product-modal {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+            position: relative;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-primary);
+            z-index: 1501;
+        }
+
+        .modal-close:hover {
+            opacity: 0.7;
+        }
+
+        .modal-content {
+            padding: 30px;
+            position: relative;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 350px;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 25px;
+        }
+
+        .modal-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .modal-badge {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            background-color: var(--accent);
+            color: #fff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .modal-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .modal-rating {
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+
+        .modal-price {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .modal-description {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .modal-category {
+            display: inline-block;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-bottom: 25px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn-add {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .modal-btn-add:hover {
+            background-color: var(--button-hover);
+        }
+
+        .modal-btn-wishlist {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .modal-btn-wishlist:hover,
+        .modal-btn-wishlist.favorited {
+            background-color: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        /* NAVIGATION */
+        nav {
+            background-color: var(--nav-bg);
+            padding: 12px 20px;
+            box-shadow: 0 2px 10px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--button-bg);
+            display: none;
+        }
+
+        .nav-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--button-bg);
+            letter-spacing: 1px;
+            white-space: nowrap;
+            margin-right: 15px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        nav a {
+            color: var(--nav-text);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        nav a:hover {
+            color: var(--button-bg);
+            background-color: var(--nav-hover);
+        }
+
+        nav a.active {
+            color: var(--button-bg);
+            border-bottom: 3px solid var(--button-bg);
+        }
+
+        .nav-center {
+            flex: 1;
+            min-width: 250px;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            padding: 8px 12px;
+            width: 100%;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            background: none;
+            color: var(--text-primary);
+            font-size: 13px;
+            outline: none;
+            padding: 0 8px;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--text-light);
+        }
+
+        .search-bar button {
+            background: none;
+            border: none;
+            color: var(--button-bg);
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 350px;
+            overflow-y: auto;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 4px 12px var(--shadow);
+            margin-top: 2px;
+        }
+
+        .search-results.active {
+            display: block;
+        }
+
+        .search-result-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--bg-primary);
+        }
+
+        .search-result-item img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .search-result-info {
+            flex: 1;
+        }
+
+        .search-result-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .search-result-price {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .nav-icons {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cart-count, .favorites-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--accent);
+            color: #fff;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .icon-btn {
+            position: relative;
+            background: none;
+            border: none;
+            color: var(--nav-text);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .icon-btn:hover {
+            color: var(--button-bg);
+            background-color: var(--nav-hover);
+        }
+
+        .theme-selector {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .theme-btn {
+            padding: 6px 10px;
+            background-color: var(--nav-hover);
+            color: var(--nav-text);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .theme-btn:hover {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .theme-btn.active {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 40px auto;
+            width: 100%;
+            padding: 0 20px;
+            display: none;
+        }
+
+        .container.active {
+            display: block;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.4s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* SLIDER BANNER */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            background: linear-gradient(135deg, #1abc9c 0%, #3498db 100%);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 50px;
+        }
+
+        .slide {
+            display: none;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            width: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .slide.active {
+            display: flex;
+        }
+
+        .slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slide-content {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: #fff;
+            z-index: 10;
+        }
+
+        .slide-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .slide-desc {
+            font-size: 16px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+
+        .slide-btn {
+            padding: 12px 32px;
+            background-color: #000;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .slide-btn:hover {
+            background-color: var(--button-bg);
+        }
+
+        .slider-nav {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 20;
+        }
+
+        .slider-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .slider-dot.active {
+            background-color: #fff;
+        }
+
+        .slide-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 30px;
+            color: #fff;
+            cursor: pointer;
+            z-index: 15;
+            padding: 10px;
+        }
+
+        .slide-arrow.prev {
+            left: 20px;
+        }
+
+        .slide-arrow.next {
+            right: 20px;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--button-bg) 0%, #e55a2b 100%);
+            color: #fff;
+            padding: 60px 40px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 50px;
+        }
+
+        .hero h1 {
+            font-size: 44px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #fff;
+            font-weight: 300;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 40px;
+            color: var(--text-primary);
+        }
+
+        .filter-section {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: var(--button-bg);
+            color: #fff;
+            border-color: var(--button-bg);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .product-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 6px 16px var(--shadow-hover);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: var(--accent);
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            z-index: 10;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 180px;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 15px;
+        }
+
+        .product-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .product-price {
+            font-size: 16px;
+            color: var(--button-bg);
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .product-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .product-rating {
+            color: var(--text-light);
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-view {
+            flex: 1;
+            padding: 8px;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-view:hover {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .btn-add-cart {
+            flex: 1;
+            padding: 8px;
+            background-color: var(--button-bg);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-add-cart:hover {
+            background-color: var(--button-hover);
+        }
+
+        .cart-container {
+            background: var(--bg-secondary);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .cart-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .cart-items {
+            margin-bottom: 30px;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: var(--bg-primary);
+            margin-bottom: 8px;
+            border-radius: 6px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .cart-item-info {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .cart-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .cart-item-price {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .cart-item-quantity {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qty-btn {
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--border-color);
+            background-color: var(--input-bg);
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .qty-btn:hover {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .cart-item-total {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            min-width: 70px;
+            text-align: right;
+        }
+
+        .btn-remove {
+            padding: 6px 10px;
+            background-color: var(--bg-primary);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-remove:hover {
+            background-color: var(--button-bg);
+            color: #fff;
+        }
+
+        .cart-summary {
+            background: var(--bg-primary);
+            padding: 25px;
+            border-radius: 6px;
+            border-left: 3px solid var(--button-bg);
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .summary-row.total {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-checkout {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--button-bg);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-checkout:hover {
+            background-color: var(--button-hover);
+        }
+
+        .form-container {
+            background: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-container h2 {
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            background-color: var(--input-bg);
+            color: var(--text-primary);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--input-focus);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--button-bg);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--button-hover);
+        }
+
+        .offers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .offer-card {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .offer-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 6px 16px var(--shadow-hover);
+        }
+
+        .offer-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: var(--button-bg);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        .offer-image {
+            width: 100%;
+            height: 180px;
+            background: var(--bg-primary);
+            overflow: hidden;
+        }
+
+        .offer-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .offer-info {
+            padding: 18px;
+        }
+
+        .offer-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .offer-description {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .offer-dates {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+
+        .btn-claim-offer {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--button-bg);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-claim-offer:hover {
+            background-color: var(--button-hover);
+        }
+
+        .settings-container {
+            background: var(--bg-secondary);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .settings-container h2 {
+            color: var(--text-primary);
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 15px;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .settings-section {
+            margin-bottom: 35px;
+        }
+
+        .settings-section h3 {
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background: var(--bg-primary);
+            margin-bottom: 8px;
+            border-radius: 6px;
+        }
+
+        .setting-label {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .toggle-switch {
+            width: 48px;
+            height: 26px;
+            background-color: var(--border-color);
+            border-radius: 13px;
+            cursor: pointer;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background-color: var(--button-bg);
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 22px;
+            height: 22px;
+            background-color: white;
+            border-radius: 50%;
+            transition: left 0.3s ease;
+        }
+
+        .toggle-switch.active .toggle-slider {
+            left: 22px;
+        }
+
+        .btn-logout {
+            width: 100%;
+            padding: 12px;
+            background-color: #666;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .success-message {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 14px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        footer {
+            background: var(--text-primary);
+            color: var(--text-light);
+            text-align: center;
+            padding: 35px;
+            margin-top: 50px;
+            font-size: 13px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav-center {
+                width: 100%;
+            }
+
+            .hero h1 {
+                font-size: 28px;
+            }
+
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .slider-container {
+                height: 250px;
+            }
+
+            .cart-item {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .landing-title {
+                font-size: 36px;
+            }
+
+            .landing-subtitle {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LANDING PAGE -->
+    <div class="landing-page" id="landingPage">
+        <div class="landing-container">
+            <div class="landing-logo">⚽</div>
+            <h1 class="landing-title">Football Factory</h1>
+            <p class="landing-subtitle">Premium Soccer Merchandise</p>
+            
+            <div class="landing-buttons">
+                <button class="landing-btn landing-btn-primary" onclick="enterStore()">Enter Store</button>
+                <button class="landing-btn landing-btn-secondary" onclick="closePage()">Exit</button>
+            </div>
+
+            <div class="news-feed">
+                <div class="news-feed-title">📢 Latest Offers</div>
+                <div class="news-item">
+                    <div class="news-item-title">Spring Sale - 30% OFF!</div>
+                    <div class="news-item-desc">All spring soccer gear on sale</div>
+                    <div class="news-item-date">Updated Today</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-item-title">Buy 2 Get 1 Free</div>
+                    <div class="news-item-desc">Balls and shoes BOGO</div>
+                    <div class="news-item-date">Ends March 20</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-item-title">Premium Cleats 25% OFF</div>
+                    <div class="news-item-desc">Professional cleats discount</div>
+                    <div class="news-item-date">Ends March 25</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-item-title">Team Bundle Special</div>
+                    <div class="news-item-desc">Complete team kits</div>
+                    <div class="news-item-date">Ends April 15</div>
+                </div>
+                <div class="news-item">
+                    <div class="news-item-title">New Stock Available</div>
+                    <div class="news-item-desc">Fresh inventory of top brands</div>
+                    <div class="news-item-date">This week</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRODUCT MODAL -->
+    <div class="modal-overlay" id="productModal">
+        <div class="product-modal" id="productModalContent"></div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <span class="logo">⚽ FOOTBALL FACTORY</span>
+                <div class="nav-links">
+                    <a onclick="showSection('home')">TODO</a>
+                    <a onclick="showSection('home')" class="active">EQUIPACION</a>
+                    <a onclick="showSection('home')">EQUIPOS</a>
+                    <a onclick="showSection('home')">BOTAS</a>
+                    <a onclick="showSection('home')">ROPA</a>
+                    <a onclick="showSection('home')">FUTBOL SALA</a>
+                    <a onclick="showSection('home')">ACCESORIOS</a>
+                    <a onclick="showSection('home')">STREETWEAR</a>
+                </div>
+            </div>
+
+            <div class="nav-center">
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search..." onkeyup="handleSearch(event)">
+                    <button onclick="performSearch()">🔍</button>
+                </div>
+                <div class="search-results" id="searchResults"></div>
+            </div>
+
+            <div class="nav-right">
+                <div class="nav-icons">
+                    <button class="icon-btn" onclick="showSection('favorites')">♡ <span class="favorites-count" id="favoritesCount">0</span></button>
+                    <button class="icon-btn" onclick="showSection('cart')">🛒 <span class="cart-count" id="cartCount">0</span></button>
+                </div>
+                <div class="theme-selector">
+                    <button class="theme-btn active" onclick="setTheme('light')">L</button>
+                    <button class="theme-btn" onclick="setTheme('dark')">D</button>
+                    <button class="theme-btn" onclick="setTheme('modern')">M</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container" id="mainContainer">
+        <!-- Home Section -->
+        <div id="home" class="section active">
+            <!-- SLIDER BANNER -->
+            <div class="slider-container">
+                <button class="slide-arrow prev" onclick="prevSlide()">❮</button>
+                <button class="slide-arrow next" onclick="nextSlide()">❯</button>
+                
+                <div class="slide active">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=400&fit=crop" alt="Professional Cleats">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Ice Cold Precision</h2>
+                        <p class="slide-desc">Domina el juego con precisión y velocidad</p>
+                        <button class="slide-btn" onclick="showSection('home')">Comprar</button>
+                    </div>
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=1200&h=400&fit=crop" alt="Team Jersey">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Ultimate Team Collection</h2>
+                        <p class="slide-desc">Uniformes de los mejores equipos</p>
+                        <button class="slide-btn" onclick="showSection('home')">Explorar</button>
+                    </div>
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&h=400&fit=crop" alt="Soccer Ball">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Match Balls</h2>
+                        <p class="slide-desc">Balones oficiales para competencia</p>
+                        <button class="slide-btn" onclick="showSection('home')">Ver</button>
+                    </div>
+                </div>
+                <div class="slide">
+                    <img src="https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=1200&h=400&fit=crop" alt="Accessories">
+                    <div class="slide-content">
+                        <h2 class="slide-title">Complete Your Gear</h2>
+                        <p class="slide-desc">Accesorios profesionales</p>
+                        <button class="slide-btn" onclick="showSection('home')">Descubrir</button>
+                    </div>
+                </div>
+
+                <div class="slider-nav" id="sliderNav">
+                    <div class="slider-dot active" onclick="goToSlide(0)"></div>
+                    <div class="slider-dot" onclick="goToSlide(1)"></div>
+                    <div class="slider-dot" onclick="goToSlide(2)"></div>
+                    <div class="slider-dot" onclick="goToSlide(3)"></div>
+                </div>
+            </div>
+
+            <h2 class="section-title">Featured Products</h2>
+            <div class="filter-section" id="filterSection"></div>
+            <div class="products-grid" id="productsGrid"></div>
+        </div>
+
+        <!-- Favorites Section -->
+        <div id="favorites" class="section">
+            <h2 class="section-title">Your Favorites</h2>
+            <div id="favoritesContent"></div>
+        </div>
+
+        <!-- Shopping Cart Section -->
+        <div id="cart" class="section">
+            <h2 class="section-title">Shopping Cart</h2>
+            <div class="cart-container">
+                <div id="cartContent"></div>
+            </div>
+        </div>
+
+        <!-- Add Items Section -->
+        <div id="add-items" class="section">
+            <div class="form-container">
+                <h2>Add New Product</h2>
+                <div class="success-message" id="successMessage">✓ Product added successfully!</div>
+                <form onsubmit="addItem(event)">
+                    <div class="form-group">
+                        <label>Product Name</label>
+                        <input type="text" id="itemName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="itemCategory" required>
+                            <option value="">Select</option>
+                            <option value="Jerseys">Jerseys</option>
+                            <option value="Shoes">Shoes</option>
+                            <option value="Balls">Balls</option>
+                            <option value="Accessories">Accessories</option>
+                            <option value="Equipment">Equipment</option>
+                            <option value="Apparel">Apparel</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL</label>
+                        <input type="url" id="itemImage" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Price</label>
+                        <input type="number" id="itemPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="itemDescription" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Quantity</label>
+                        <input type="number" id="itemQuantity" min="1" value="1" required>
+                    </div>
+                    <button type="submit" class="btn-submit">Add Product</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Offers Section -->
+        <div id="offers" class="section">
+            <h2 class="section-title">Special Offers</h2>
+            <div class="offers-grid" id="offersGrid"></div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings" class="section">
+            <div class="settings-container">
+                <h2>Account Settings</h2>
+                <div class="settings-section">
+                    <h3>Profile</h3>
+                    <div class="setting-item">
+                        <span class="setting-label">Username</span>
+                        <span>DSP922</span>
+                    </div>
+                    <div class="setting-item">
+                        <span class="setting-label">Email</span>
+                        <span>user@footballfactory.com</span>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h3>Preferences</h3>
+                    <div class="setting-item">
+                        <span class="setting-label">Notifications</span>
+                        <div class="toggle-switch active" onclick="toggleSetting(this)">
+                            <div class="toggle-slider"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <button class="btn-logout" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <p>&copy; 2026 Football Factory. All Rights Reserved.</p>
+        <p>Premium Soccer Merchandise | Trusted Worldwide</p>
+    </footer>
+
+    <script>
+        const soccerProducts = [
+            // JERSEYS (25)
+            {id: 1, name: "Manchester United Home Jersey", price: 89.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★★", description: "Official Manchester United jersey", category: "Jerseys", badge: "Popular", searchTags: ["jersey", "manchester"]},
+            {id: 2, name: "Barcelona Away Kit", price: 94.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Barcelona away kit set", category: "Jerseys", badge: "Bundle", searchTags: ["kit", "barcelona"]},
+            {id: 3, name: "Real Madrid Jersey", price: 84.99, image: "https://images.unsplash.com/photo-1518611505868-48510c2e2e3d?w=500&h=500&fit=crop", rating: "★★★★★", description: "Real Madrid official jersey", category: "Jerseys", searchTags: ["jersey", "real madrid"]},
+            {id: 4, name: "Liverpool Home Jersey", price: 79.99, image: "https://images.unsplash.com/photo-1570299677577-501c62fd7147?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Liverpool FC jersey", category: "Jerseys", searchTags: ["jersey", "liverpool"]},
+            {id: 5, name: "Chelsea Blue Jersey", price: 81.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Chelsea official jersey", category: "Jerseys", searchTags: ["jersey", "chelsea"]},
+            {id: 6, name: "Arsenal Red Jersey", price: 78.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Arsenal FC jersey", category: "Jerseys", searchTags: ["jersey", "arsenal"]},
+            {id: 7, name: "Bayern Munich Jersey", price: 85.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Bayern Munich official jersey", category: "Jerseys", searchTags: ["jersey", "bayern"]},
+            {id: 8, name: "PSG Paris Jersey", price: 92.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★★", description: "PSG official jersey", category: "Jerseys", badge: "New", searchTags: ["jersey", "psg"]},
+            {id: 9, name: "Juventus Jersey", price: 83.99, image: "https://images.unsplash.com/photo-1518611505868-48510c2e2e3d?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Juventus official jersey", category: "Jerseys", searchTags: ["jersey", "juventus"]},
+            {id: 10, name: "AC Milan Jersey", price: 80.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "AC Milan official jersey", category: "Jerseys", searchTags: ["jersey", "milan"]},
+            {id: 11, name: "Inter Milan Jersey", price: 82.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Inter Milan official jersey", category: "Jerseys", searchTags: ["jersey", "inter"]},
+            {id: 12, name: "Dortmund Yellow Jersey", price: 77.99, image: "https://images.unsplash.com/photo-1518611505868-48510c2e2e3d?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Borussia Dortmund jersey", category: "Jerseys", searchTags: ["jersey", "dortmund"]},
+            {id: 13, name: "Atletico Madrid Jersey", price: 79.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Atletico Madrid official jersey", category: "Jerseys", searchTags: ["jersey", "atletico"]},
+            {id: 14, name: "Napoli Jersey", price: 74.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Napoli official jersey", category: "Jerseys", searchTags: ["jersey", "napoli"]},
+            {id: 15, name: "Roma Jersey", price: 75.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "AS Roma official jersey", category: "Jerseys", searchTags: ["jersey", "roma"]},
+            {id: 16, name: "Vintage Retro Jersey", price: 64.99, image: "https://images.unsplash.com/photo-1518611505868-48510c2e2e3d?w=500&h=500&fit=crop", rating: "★★★★★", description: "Classic 90s retro jersey", category: "Jerseys", badge: "Retro", searchTags: ["jersey", "vintage"]},
+            {id: 17, name: "Youth Soccer Jersey", price: 39.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Junior size jersey", category: "Jerseys", searchTags: ["jersey", "youth"]},
+            {id: 18, name: "Goalkeeper Jersey", price: 69.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "GK jersey with padding", category: "Jerseys", searchTags: ["jersey", "goalkeeper"]},
+            {id: 19, name: "Training Jersey Pack", price: 54.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Multi-pack training jerseys", category: "Jerseys", searchTags: ["jersey", "training"]},
+            {id: 20, name: "Long Sleeve Jersey", price: 49.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Winter long sleeve jersey", category: "Jerseys", searchTags: ["jersey", "sleeve"]},
+            {id: 21, name: "Performance Jersey", price: 59.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Moisture-wicking jersey", category: "Jerseys", searchTags: ["jersey", "performance"]},
+            {id: 22, name: "Custom Jersey", price: 44.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Customizable jersey", category: "Jerseys", searchTags: ["jersey", "custom"]},
+            {id: 23, name: "Fan Edition Jersey", price: 39.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Fan edition replica", category: "Jerseys", searchTags: ["jersey", "fan"]},
+            {id: 24, name: "Team Bundle Kit", price: 199.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★★", description: "Full team kit set", category: "Jerseys", badge: "Bundle", searchTags: ["kit", "bundle"]},
+            {id: 25, name: "Heritage Jersey", price: 89.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Heritage collection jersey", category: "Jerseys", searchTags: ["jersey", "heritage"]},
+
+            // SHOES (25)
+            {id: 26, name: "Nike Phantom Elite", price: 189.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "Nike Phantom elite cleats", category: "Shoes", badge: "Best", searchTags: ["cleats", "nike"]},
+            {id: 27, name: "Adidas Predator Pro", price: 199.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "Adidas Predator boots", category: "Shoes", searchTags: ["cleats", "adidas"]},
+            {id: 28, name: "Puma Future Z", price: 179.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Puma Future Z cleats", category: "Shoes", searchTags: ["cleats", "puma"]},
+            {id: 29, name: "New Balance Tekela", price: 169.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★☆", description: "New Balance Tekela boots", category: "Shoes", searchTags: ["cleats", "newbalance"]},
+            {id: 30, name: "Mizuno Morelia", price: 179.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Mizuno Morelia cleats", category: "Shoes", searchTags: ["cleats", "mizuno"]},
+            {id: 31, name: "Nike Mercurial Superfly", price: 189.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "Nike Mercurial speed boots", category: "Shoes", searchTags: ["cleats", "nike"]},
+            {id: 32, name: "Adidas Copa Sense", price: 159.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Adidas Copa Sense boots", category: "Shoes", searchTags: ["cleats", "adidas"]},
+            {id: 33, name: "Indoor Soccer Shoes", price: 89.99, image: "https://images.unsplash.com/photo-1600181549214-3469e92fc770?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Indoor court shoes", category: "Shoes", searchTags: ["shoes", "indoor"]},
+            {id: 34, name: "Futsal Shoes", price: 99.99, image: "https://images.unsplash.com/photo-1600181549214-3469e92fc770?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Professional futsal shoes", category: "Shoes", searchTags: ["shoes", "futsal"]},
+            {id: 35, name: "Training Shoes Premium", price: 79.99, image: "https://images.unsplash.com/photo-1608889335556-a770b6ce441a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Training shoes", category: "Shoes", searchTags: ["shoes", "training"]},
+            {id: 36, name: "Casual Soccer Shoes", price: 69.99, image: "https://images.unsplash.com/photo-1608889335556-a770b6ce441a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Casual shoes", category: "Shoes", searchTags: ["shoes", "casual"]},
+            {id: 37, name: "Youth Soccer Cleats", price: 64.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Junior cleats", category: "Shoes", searchTags: ["cleats", "youth"]},
+            {id: 38, name: "Waterproof Boots", price: 119.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★☆", description: "All-weather boots", category: "Shoes", searchTags: ["boots", "waterproof"]},
+            {id: 39, name: "Anti-Slip Cleats", price: 139.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "Enhanced grip cleats", category: "Shoes", searchTags: ["cleats", "grip"]},
+            {id: 40, name: "Lightweight Sprint Boots", price: 159.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "Ultra-light boots", category: "Shoes", badge: "Light", searchTags: ["boots", "lightweight"]},
+            {id: 41, name: "All-Weather Shoes", price: 129.99, image: "https://images.unsplash.com/photo-1608889335556-a770b6ce441a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Weather resistant", category: "Shoes", searchTags: ["shoes", "weather"]},
+            {id: 42, name: "Vintage Leather Cleats", price: 144.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "Classic leather", category: "Shoes", badge: "Retro", searchTags: ["cleats", "leather"]},
+            {id: 43, name: "Professional Stud Cleats", price: 174.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Replaceable stud system", category: "Shoes", searchTags: ["cleats", "studs"]},
+            {id: 44, name: "Artificial Grass Shoes", price: 94.99, image: "https://images.unsplash.com/photo-1600181549214-3469e92fc770?w=500&h=500&fit=crop", rating: "★★★★☆", description: "AG shoes", category: "Shoes", searchTags: ["shoes", "artificial"]},
+            {id: 45, name: "Turf Soccer Shoes", price: 84.99, image: "https://images.unsplash.com/photo-1608889335556-a770b6ce441a?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Turf shoes", category: "Shoes", searchTags: ["shoes", "turf"]},
+            {id: 46, name: "Hard Ground Cleats", price: 109.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★☆", description: "HG cleats", category: "Shoes", searchTags: ["cleats", "hardground"]},
+            {id: 47, name: "Firm Ground Boots", price: 124.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "FG boots", category: "Shoes", searchTags: ["boots", "firmground"]},
+            {id: 48, name: "Soft Ground Cleats", price: 134.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "SG cleats", category: "Shoes", searchTags: ["cleats", "softground"]},
+            {id: 49, name: "Comfort Training Shoes", price: 74.99, image: "https://images.unsplash.com/photo-1608889335556-a770b6ce441a?w=500&h=500&fit=crop", rating: "★★★★★", description: "Comfort shoes", category: "Shoes", searchTags: ["shoes", "comfort"]},
+            {id: 50, name: "Pro Edition Cleats", price: 189.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "Pro cleats", category: "Shoes", badge: "Pro", searchTags: ["cleats", "pro"]},
+
+            // BALLS (15)
+            {id: 51, name: "FIFA Official Match Ball", price: 149.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★★", description: "Official FIFA ball", category: "Balls", badge: "Official", searchTags: ["ball", "match"]},
+            {id: 52, name: "Professional Training Ball", price: 49.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Training ball", category: "Balls", searchTags: ["ball", "training"]},
+            {id: 53, name: "Premier League Ball", price: 139.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★★", description: "Premier League official", category: "Balls", searchTags: ["ball", "premier"]},
+            {id: 54, name: "Youth Soccer Ball", price: 24.99, image: "https://images.unsplash.com/photo-1579952363873-27f3bade9e55?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Youth size", category: "Balls", searchTags: ["ball", "youth"]},
+            {id: 55, name: "Futsal Ball", price: 59.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Futsal ball", category: "Balls", searchTags: ["ball", "futsal"]},
+            {id: 56, name: "Beach Soccer Ball", price: 34.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Beach ball", category: "Balls", searchTags: ["ball", "beach"]},
+            {id: 57, name: "Champions League Ball", price: 129.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★★", description: "Champions League", category: "Balls", badge: "Premium", searchTags: ["ball", "champions"]},
+            {id: 58, name: "Euro Cup Ball", price: 139.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★★", description: "Euro official", category: "Balls", searchTags: ["ball", "euro"]},
+            {id: 59, name: "World Cup Ball", price: 179.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★★", description: "World Cup official", category: "Balls", badge: "WC", searchTags: ["ball", "worldcup"]},
+            {id: 60, name: "Premium Leather Ball", price: 89.99, image: "https://images.unsplash.com/photo-1579952363873-27f3bade9e55?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Leather ball", category: "Balls", searchTags: ["ball", "leather"]},
+            {id: 61, name: "Training Weighted Ball", price: 64.99, image: "https://images.unsplash.com/photo-1579952363873-27f3bade9e55?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Weighted training", category: "Balls", searchTags: ["ball", "weighted"]},
+            {id: 62, name: "Glow Ball", price: 54.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Glow in dark", category: "Balls", searchTags: ["ball", "glow"]},
+            {id: 63, name: "Tournament Ball", price: 99.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★★", description: "Tournament quality", category: "Balls", searchTags: ["ball", "tournament"]},
+            {id: 64, name: "Kids Soccer Ball", price: 16.99, image: "https://images.unsplash.com/photo-1579952363873-27f3bade9e55?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Kids size", category: "Balls", searchTags: ["ball", "kids"]},
+            {id: 65, name: "Practice Ball", price: 19.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★☆☆", description: "Basic practice", category: "Balls", searchTags: ["ball", "practice"]},
+
+            // ACCESSORIES (15)
+            {id: 66, name: "Shin Guards", price: 49.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Professional shin guards", category: "Accessories", searchTags: ["shin", "protection"]},
+            {id: 67, name: "Goalkeeper Gloves", price: 94.99, image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&h=500&fit=crop", rating: "★★★★★", description: "GK gloves", category: "Accessories", badge: "New", searchTags: ["gloves", "keeper"]},
+            {id: 68, name: "Compression Sleeve", price: 34.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Arm sleeve", category: "Accessories", searchTags: ["sleeve", "compression"]},
+            {id: 69, name: "Sports Headband", price: 12.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Headband", category: "Accessories", searchTags: ["headband", "sweat"]},
+            {id: 70, name: "Ankle Support", price: 39.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Ankle brace", category: "Accessories", searchTags: ["ankle", "support"]},
+            {id: 71, name: "Knee Pads", price: 29.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Knee protection", category: "Accessories", searchTags: ["knee", "pads"]},
+            {id: 72, name: "Elbow Guard", price: 24.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Elbow pad", category: "Accessories", searchTags: ["elbow", "guard"]},
+            {id: 73, name: "Compression Shorts", price: 44.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Compression", category: "Accessories", searchTags: ["shorts", "compression"]},
+            {id: 74, name: "Ball Bag", price: 34.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Ball carrier", category: "Accessories", searchTags: ["bag", "carrier"]},
+            {id: 75, name: "Referee Kit", price: 89.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Referee uniform", category: "Accessories", searchTags: ["referee", "kit"]},
+            {id: 76, name: "Sports Socks", price: 14.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Performance socks", category: "Accessories", searchTags: ["socks", "performance"]},
+            {id: 77, name: "Thermal Layer", price: 44.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Thermal base", category: "Accessories", searchTags: ["thermal", "layer"]},
+            {id: 78, name: "Captain Armband", price: 11.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Captain band", category: "Accessories", searchTags: ["armband", "captain"]},
+            {id: 79, name: "Wrist Guard", price: 19.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Wrist support", category: "Accessories", searchTags: ["wrist", "guard"]},
+            {id: 80, name: "Mouth Guard", price: 14.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Teeth protection", category: "Accessories", searchTags: ["mouth", "guard"]},
+
+            // EQUIPMENT (15)
+            {id: 81, name: "Training Cones", price: 19.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Cone set", category: "Equipment", searchTags: ["cones", "training"]},
+            {id: 82, name: "Goal Target Sheet", price: 34.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★★", description: "Target sheet", category: "Equipment", badge: "Pro", searchTags: ["target", "goal"]},
+            {id: 83, name: "Training Ladder", price: 29.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Agility ladder", category: "Equipment", searchTags: ["ladder", "agility"]},
+            {id: 84, name: "Ball Rebounder", price: 79.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★★", description: "Return trainer", category: "Equipment", searchTags: ["rebounder", "solo"]},
+            {id: 85, name: "Training Hurdles", price: 64.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Hurdle set", category: "Equipment", searchTags: ["hurdles", "jumping"]},
+            {id: 86, name: "Training Net", price: 89.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Goal net", category: "Equipment", searchTags: ["net", "goal"]},
+            {id: 87, name: "Speed Ladder", price: 34.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★★", description: "Speed training", category: "Equipment", searchTags: ["ladder", "speed"]},
+            {id: 88, name: "Dummy Markers", price: 39.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Markers set", category: "Equipment", searchTags: ["markers", "dummy"]},
+            {id: 89, name: "Training Vests", price: 44.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Practice vest", category: "Equipment", searchTags: ["vest", "training"]},
+            {id: 90, name: "Fitness Tracker", price: 99.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★★", description: "Performance tracker", category: "Equipment", badge: "Tech", searchTags: ["tracker", "fitness"]},
+            {id: 91, name: "Goal Posts", price: 199.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★★", description: "Training goals", category: "Equipment", searchTags: ["goals", "posts"]},
+            {id: 92, name: "Ball Cart", price: 129.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Storage cart", category: "Equipment", searchTags: ["cart", "storage"]},
+            {id: 93, name: "Practice Bibs", price: 24.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Team bibs", category: "Equipment", searchTags: ["bibs", "practice"]},
+            {id: 94, name: "Cones & Discs", price: 44.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Set combo", category: "Equipment", searchTags: ["cones", "discs"]},
+            {id: 95, name: "Coaching Board", price: 54.99, image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Tactical board", category: "Equipment", searchTags: ["board", "coaching"]},
+
+            // APPAREL (15)
+            {id: 96, name: "Soccer Shorts", price: 34.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Soccer shorts", category: "Apparel", searchTags: ["shorts", "apparel"]},
+            {id: 97, name: "Training Jacket", price: 59.99, image: "https://images.unsplash.com/photo-1516422340519-89d6c6f0b4ca?w=500&h=500&fit=crop", rating: "★★★★★", description: "Training jacket", category: "Apparel", badge: "New", searchTags: ["jacket", "training"]},
+            {id: 98, name: "Beanie Cap", price: 19.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Winter beanie", category: "Apparel", searchTags: ["beanie", "cap"]},
+            {id: 99, name: "Baseball Cap", price: 24.99, image: "https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Baseball cap", category: "Apparel", searchTags: ["cap", "baseball"]},
+            {id: 100, name: "Polo Shirt", price: 39.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Polo shirt", category: "Apparel", searchTags: ["polo", "shirt"]},
+            {id: 101, name: "Hoodie", price: 49.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Soccer hoodie", category: "Apparel", searchTags: ["hoodie", "casual"]},
+            {id: 102, name: "Sweatpants", price: 44.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Sweatpants", category: "Apparel", searchTags: ["sweatpants", "casual"]},
+            {id: 103, name: "T-Shirt", price: 24.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Soccer t-shirt", category: "Apparel", searchTags: ["tshirt", "casual"]},
+            {id: 104, name: "Windbreaker", price: 59.99, image: "https://images.unsplash.com/photo-1516422340519-89d6c6f0b4ca?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Windbreaker", category: "Apparel", searchTags: ["windbreaker", "outdoor"]},
+            {id: 105, name: "Long Sleeve Shirt", price: 34.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Long sleeve", category: "Apparel", searchTags: ["longsleeve", "shirt"]},
+            {id: 106, name: "Rain Jacket", price: 69.99, image: "https://images.unsplash.com/photo-1516422340519-89d6c6f0b4ca?w=500&h=500&fit=crop", rating: "★★★★★", description: "Rain jacket", category: "Apparel", searchTags: ["rain", "jacket"]},
+            {id: 107, name: "Sports Gloves", price: 29.99, image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Sports gloves", category: "Apparel", searchTags: ["gloves", "sports"]},
+            {id: 108, name: "Scarf", price: 19.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Team scarf", category: "Apparel", searchTags: ["scarf", "fan"]},
+            {id: 109, name: "Track Pants", price: 44.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Track pants", category: "Apparel", searchTags: ["pants", "track"]},
+            {id: 110, name: "Sports Socks", price: 14.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★☆", description: "Sports socks", category: "Apparel", searchTags: ["socks", "apparel"]},
+
+            // EXCLUSIVE (5 - Hidden)
+            {id: 111, name: "CR7 Exclusive Signature", price: 249.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★★", description: "Cristiano Ronaldo exclusive", category: "Exclusive", badge: "ULTRA RARE", searchTags: ["cr7", "cristiano", "exclusive"], hidden: true},
+            {id: 112, name: "Messi Exclusive Collection", price: 299.99, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop", rating: "★★★★★", description: "Lionel Messi collection", category: "Exclusive", badge: "LIMITED", searchTags: ["messi", "exclusive"]},
+            {id: 113, name: "Neymar Signature Cleats", price: 399.99, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", rating: "★★★★★", description: "Neymar Jr exclusive", category: "Exclusive", badge: "SIGNED", searchTags: ["neymar", "exclusive"]},
+            {id: 114, name: "World Champions Collection", price: 599.99, image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", rating: "★★★★★", description: "Champions exclusive", category: "Exclusive", badge: "COLLECTOR", searchTags: ["champion", "exclusive"]},
+            {id: 115, name: "Legendary Players Bundle", price: 899.99, image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", rating: "★★★★★", description: "Legendary bundle", category: "Exclusive", badge: "RARE", searchTags: ["legendary", "exclusive"]}
+        ];
+
+        const offers = [
+            {id: 1, title: "Spring Sale", discount: "30% OFF", description: "Spring soccer gear", image: "https://images.unsplash.com/photo-1553302221-be5b8045187a?w=500&h=500&fit=crop", dates: "Until March 31"},
+            {id: 2, title: "Buy 2 Get 1 Free", discount: "BOGO", description: "Balls and shoes", image: "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=500&h=500&fit=crop", dates: "Until March 20"},
+            {id: 3, title: "Cleats Sale", discount: "25% OFF", description: "Premium cleats", image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop", dates: "Until March 25"},
+            {id: 4, title: "Team Bundle", discount: "BUNDLE", description: "Team kits", image: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=500&h=500&fit=crop", dates: "Until April 15"}
+        ];
+
+        let cart = [];
+        let userProducts = [];
+        let favorites = [];
+        let currentTheme = 'light';
+        let activeFilter = 'All';
+        let currentSlide = 0;
+
+        function enterStore() {
+            document.getElementById('landingPage').classList.add('hidden');
+            document.getElementById('navbar').style.display = 'block';
+            document.getElementById('mainContainer').classList.add('active');
+            document.getElementById('footer').style.display = 'block';
+            init();
+        }
+
+        function closePage() {
+            window.close();
+        }
+
+        function openProductModal(product) {
+            const modal = document.getElementById('productModal');
+            const content = document.getElementById('productModalContent');
+            const isFavorited = favorites.some(f => f.id === product.id);
+
+            content.innerHTML = `
+                <button class="modal-close" onclick="closeProductModal()">✕</button>
+                <div class="modal-content">
+                    ${product.badge ? `<div class="modal-badge">${product.badge}</div>` : ''}
+                    <div class="modal-image">
+                        <img src="${product.image}" alt="${product.name}">
+                    </div>
+                    <h2 class="modal-title">${product.name}</h2>
+                    <div class="modal-rating">${product.rating}</div>
+                    <div class="modal-price">$${product.price.toFixed(2)}</div>
+                    <div class="modal-category">${product.category}</div>
+                    <p class="modal-description">${product.description}</p>
+                    <div class="modal-actions">
+                        <button class="modal-btn modal-btn-add" onclick="addToCart(${product.id}, '${product.name.replace(/'/g, "\\'")}', ${product.price}); closeProductModal();">Add to Cart</button>
+                        <button class="modal-btn modal-btn-wishlist ${isFavorited ? 'favorited' : ''}" onclick="toggleFavorite(${product.id}, '${product.name.replace(/'/g, "\\'")}')">♡</button>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.remove('active');
+        }
+
+        function nextSlide() {
+            const slides = document.querySelectorAll('.slide');
+            slides[currentSlide].classList.remove('active');
+            document.querySelectorAll('.slider-dot')[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+            document.querySelectorAll('.slider-dot')[currentSlide].classList.add('active');
+        }
+
+        function prevSlide() {
+            const slides = document.querySelectorAll('.slide');
+            slides[currentSlide].classList.remove('active');
+            document.querySelectorAll('.slider-dot')[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            document.querySelectorAll('.slider-dot')[currentSlide].classList.add('active');
+        }
+
+        function goToSlide(n) {
+            const slides = document.querySelectorAll('.slide');
+            slides[currentSlide].classList.remove('active');
+            document.querySelectorAll('.slider-dot')[currentSlide].classList.remove('active');
+            currentSlide = n;
+            slides[currentSlide].classList.add('active');
+            document.querySelectorAll('.slider-dot')[currentSlide].classList.add('active');
+        }
+
+        setInterval(nextSlide, 5000);
+
+        function init() {
+            loadTheme();
+            displayProducts();
+            displayOffers();
+            createFilterButtons();
+        }
+
+        function loadTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            setTheme(savedTheme);
+        }
+
+        function setTheme(theme) {
+            document.body.classList.remove('dark-theme', 'modern-theme');
+            if (theme === 'dark') document.body.classList.add('dark-theme');
+            if (theme === 'modern') document.body.classList.add('modern-theme');
+            document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+            const buttons = document.querySelectorAll(`button[onclick="setTheme('${theme}')"]`);
+            if (buttons.length > 0) buttons[0].classList.add('active');
+            localStorage.setItem('theme', theme);
+        }
+
+        function createFilterButtons() {
+            const section = document.getElementById('filterSection');
+            section.innerHTML = '';
+            ['All', 'Jerseys', 'Shoes', 'Balls', 'Accessories', 'Equipment', 'Apparel', 'Exclusive'].forEach(cat => {
+                const btn = document.createElement('button');
+                btn.className = `filter-btn ${cat === 'All' ? 'active' : ''}`;
+                btn.textContent = cat;
+                btn.onclick = (e) => { filterProducts(cat); };
+                section.appendChild(btn);
+            });
+        }
+
+        function filterProducts(category) {
+            activeFilter = category;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            displayProducts();
+        }
+
+        function displayProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = '';
+            const all = [...soccerProducts.filter(p => !p.hidden), ...userProducts];
+            const filtered = activeFilter === 'All' ? all : all.filter(p => p.category === activeFilter);
+            
+            filtered.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    ${p.badge ? `<div class="product-badge">${p.badge}</div>` : ''}
+                    <div class="product-image"><img src="${p.image}" alt="${p.name}"></div>
+                    <div class="product-info">
+                        <div class="product-name">${p.name}</div>
+                        <div class="product-price">$${p.price.toFixed(2)}</div>
+                        <div class="product-description">${p.description}</div>
+                        <div class="product-rating">${p.rating}</div>
+                        <div class="product-actions">
+                            <button class="btn-view" onclick="openProductModal({id: ${p.id}, name: '${p.name.replace(/'/g, "\\'")}', price: ${p.price}, image: '${p.image}', rating: '${p.rating}', description: '${p.description.replace(/'/g, "\\'")}', category: '${p.category}', badge: '${p.badge || ''}'})">View</button>
+                            <button class="btn-add-cart" onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">Add</button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function displayOffers() {
+            const grid = document.getElementById('offersGrid');
+            grid.innerHTML = '';
+            offers.forEach(o => {
+                const card = document.createElement('div');
+                card.className = 'offer-card';
+                card.innerHTML = `
+                    <div class="offer-badge">${o.discount}</div>
+                    <div class="offer-image"><img src="${o.image}" alt="${o.title}"></div>
+                    <div class="offer-info">
+                        <div class="offer-title">${o.title}</div>
+                        <div class="offer-description">${o.description}</div>
+                        <div class="offer-dates">${o.dates}</div>
+                        <button class="btn-claim-offer" onclick="claimOffer('${o.title}')">Claim</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function handleSearch(e) {
+            const query = e.target.value.toLowerCase();
+            const results = document.getElementById('searchResults');
+            
+            if (query.length === 0) {
+                results.classList.remove('active');
+                return;
+            }
+
+            const all = [...soccerProducts, ...userProducts];
+            const items = all.filter(p => 
+                (p.name.toLowerCase().includes(query) || p.description.toLowerCase().includes(query) || (p.searchTags && p.searchTags.some(t => t.includes(query)))) &&
+                (!p.hidden || (p.searchTags && p.searchTags.some(t => t.includes(query))))
+            ).slice(0, 8);
+
+            results.innerHTML = items.map(p => `
+                <div class="search-result-item" onclick="selectSearchResult(${p.id})">
+                    <img src="${p.image}" alt="${p.name}">
+                    <div class="search-result-info">
+                        <div class="search-result-name">${p.name}</div>
+                        <div class="search-result-price">$${p.price.toFixed(2)}</div>
+                    </div>
+                </div>
+            `).join('');
+            results.classList.add('active');
+        }
+
+        function selectSearchResult(id) {
+            const p = [...soccerProducts, ...userProducts].find(x => x.id === id);
+            document.getElementById('searchInput').value = p.name;
+            document.getElementById('searchResults').classList.remove('active');
+            openProductModal(p);
+        }
+
+        function performSearch() {}
+
+        function addToCart(id, name, price) {
+            const item = cart.find(i => i.id === id);
+            if (item) item.quantity++;
+            else cart.push({id, name, price, quantity: 1});
+            updateCartCount();
+            alert(`"${name}" added to cart!`);
+        }
+
+        function updateCartCount() {
+            document.getElementById('cartCount').textContent = cart.reduce((s, i) => s + i.quantity, 0);
+        }
+
+        function toggleFavorite(id, name) {
+            const idx = favorites.findIndex(f => f.id === id);
+            if (idx >= 0) {
+                favorites.splice(idx, 1);
+            } else {
+                const p = [...soccerProducts, ...userProducts].find(x => x.id === id);
+                if (p) favorites.push(p);
+            }
+            document.getElementById('favoritesCount').textContent = favorites.length;
+            displayProducts();
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (id === 'cart') displayCart();
+            if (id === 'favorites') displayFavorites();
+            window.scrollTo(0, 0);
+        }
+
+        function displayCart() {
+            const content = document.getElementById('cartContent');
+            if (cart.length === 0) {
+                content.innerHTML = `<div class="cart-empty"><div style="font-size: 60px; margin-bottom: 20px;">🛒</div><h3>Empty Cart</h3></div>`;
+                return;
+            }
+            let html = '<div class="cart-items">';
+            let total = 0;
+            cart.forEach((i, idx) => {
+                const sum = i.price * i.quantity;
+                total += sum;
+                html += `<div class="cart-item"><div class="cart-item-info"><div class="cart-item-name">${i.name}</div><div class="cart-item-price">$${i.price.toFixed(2)}</div></div><div class="cart-item-quantity"><button class="qty-btn" onclick="updateQty(${idx}, -1)">−</button><span>${i.quantity}</span><button class="qty-btn" onclick="updateQty(${idx}, 1)">+</button></div><div class="cart-item-total">$${sum.toFixed(2)}</div><button class="btn-remove" onclick="removeCart(${idx})">Remove</button></div>`;
+            });
+            html += `</div><div class="cart-summary"><div class="summary-row"><span>Subtotal:</span><span>$${total.toFixed(2)}</span></div><div class="summary-row"><span>Shipping:</span><span>$9.99</span></div><div class="summary-row"><span>Tax:</span><span>$${(total * 0.08).toFixed(2)}</span></div><div class="summary-row total"><span>Total:</span><span>$${(total + 9.99 + total * 0.08).toFixed(2)}</span></div><button class="btn-checkout" onclick="checkout()">Checkout</button></div>`;
+            content.innerHTML = html;
+        }
+
+        function updateQty(idx, change) {
+            cart[idx].quantity += change;
+            if (cart[idx].quantity <= 0) removeCart(idx);
+            else { updateCartCount(); displayCart(); }
+        }
+
+        function removeCart(idx) {
+            cart.splice(idx, 1);
+            updateCartCount();
+            displayCart();
+        }
+
+        function displayFavorites() {
+            const content = document.getElementById('favoritesContent');
+            if (favorites.length === 0) {
+                content.innerHTML = `<div class="cart-empty"><div style="font-size: 60px; margin-bottom: 20px;">♡</div><h3>No Favorites</h3></div>`;
+                return;
+            }
+            const grid = document.createElement('div');
+            grid.className = 'products-grid';
+            favorites.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `<div class="product-image"><img src="${p.image}" alt="${p.name}"></div><div class="product-info"><div class="product-name">${p.name}</div><div class="product-price">$${p.price.toFixed(2)}</div><div class="product-description">${p.description}</div><div class="product-rating">${p.rating}</div><div class="product-actions"><button class="btn-view" onclick="openProductModal({id: ${p.id}, name: '${p.name.replace(/'/g, "\\'")}', price: ${p.price}, image: '${p.image}', rating: '${p.rating}', description: '${p.description.replace(/'/g, "\\'")}', category: '${p.category}', badge: '${p.badge || ''}'})">View</button><button class="btn-add-cart" onclick="addToCart(${p.id}, '${p.name.replace(/'/g, "\\'")}', ${p.price})">Add</button></div></div>`;
+                grid.appendChild(card);
+            });
+            content.innerHTML = '';
+            content.appendChild(grid);
+        }
+
+        function addItem(e) {
+            e.preventDefault();
+            userProducts.push({
+                id: Date.now(),
+                name: document.getElementById('itemName').value,
+                price: parseFloat(document.getElementById('itemPrice').value),
+                description: document.getElementById('itemDescription').value,
+                image: document.getElementById('itemImage').value,
+                rating: "★★★★☆",
+                category: document.getElementById('itemCategory').value,
+                searchTags: []
+            });
+            displayProducts();
+            document.getElementById('successMessage').classList.add('show');
+            setTimeout(() => document.getElementById('successMessage').classList.remove('show'), 3000);
+            e.target.reset();
+        }
+
+        function claimOffer(title) {
+            alert(`Offer claimed: "${title}"`);
+        }
+
+        function toggleSetting(el) {
+            el.classList.toggle('active');
+        }
+
+        function checkout() {
+            alert('Thank you for your purchase!');
+            cart = [];
+            updateCartCount();
+            showSection('home');
+        }
+
+        function logout() {
+            if (confirm('Logout?')) {
+                alert('Logged out!');
+                location.reload();
+            }
+        }
+
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'productModal') closeProductModal();
+            if (e.target.id !== 'searchInput') document.getElementById('searchResults').classList.remove('active');
+        });
+
+        window.addEventListener('load', () => {
+            document.getElementById('navbar').style.display = 'none';
+            document.getElementById('mainContainer').classList.remove('active');
+            document.getElementById('footer').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
