@@ -80,10 +80,6 @@
             }
         }
 
-        .stagger-delay-1 { animation-delay: 0.1s; }
-        .stagger-delay-2 { animation-delay: 0.2s; }
-        .stagger-delay-3 { animation-delay: 0.3s; }
-
         /* SECCIÓN HERO */
         .hero {
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -101,7 +97,6 @@
             font-size: 3.5rem;
             margin-bottom: 1.5rem;
             font-weight: 700;
-            letter-spacing: -1px;
             animation: fadeIn 1s ease;
         }
 
@@ -134,7 +129,6 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
             animation: fadeIn 1s ease 0.6s forwards;
             animation-fill-mode: both;
         }
@@ -158,13 +152,6 @@
             margin-bottom: 3rem;
             text-align: center;
             font-weight: 700;
-        }
-
-        section h3 {
-            font-size: 1.3rem;
-            color: var(--primary);
-            margin-bottom: 1rem;
-            font-weight: 600;
         }
 
         /* TARJETAS */
@@ -200,33 +187,9 @@
             margin-bottom: 1rem;
         }
 
-        .card p {
-            color: var(--gray-text);
-            font-size: 0.95rem;
-            line-height: 1.7;
-        }
-
-        /* SECCIÓN PROBLEMA ACTUAL */
+        /* SECCIÓN PROBLEMA */
         #problema {
             background: var(--light-bg);
-        }
-
-        .problema-card {
-            background: var(--white);
-        }
-
-        /* SECCIÓN TECNOLOGÍAS */
-        #tecnologias {
-            background: var(--white);
-        }
-
-        .tech-card {
-            background: linear-gradient(135deg, rgba(27,58,107,0.05) 0%, rgba(46,117,182,0.05) 100%);
-            border-left: 5px solid var(--secondary);
-        }
-
-        .tech-card:hover {
-            border-left-color: var(--accent);
         }
 
         /* DIAGRAMA FLUJO */
@@ -247,7 +210,6 @@
             align-items: center;
             gap: 1rem;
             justify-content: space-between;
-            min-width: 100%;
             flex-wrap: wrap;
         }
 
@@ -271,17 +233,6 @@
             color: var(--secondary);
             font-size: 2rem;
             font-weight: bold;
-            flex-shrink: 0;
-        }
-
-        @media (max-width: 1024px) {
-            .flow-container {
-                flex-direction: column;
-                gap: 2rem;
-            }
-            .flow-arrow {
-                transform: rotate(90deg);
-            }
         }
 
         /* SECCIÓN ROI */
@@ -308,20 +259,12 @@
 
         .metric-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 12px 30px rgba(27,58,107,0.3);
         }
 
         .metric-value {
             font-size: 2.8rem;
             font-weight: 700;
             margin: 1rem 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .metric-label {
-            font-size: 1rem;
-            opacity: 0.95;
-            font-weight: 500;
         }
 
         /* SECCIÓN IMPACTO */
@@ -341,26 +284,13 @@
             padding: 2.5rem;
             border-radius: 12px;
             border-top: 5px solid var(--secondary);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-        }
-
-        .impact-column h3 {
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .impact-icon {
-            font-size: 2rem;
         }
 
         .impact-stat {
             background: var(--light-bg);
             padding: 1.2rem;
             border-radius: 8px;
-            margin-bottom: 1rem;
+            margin: 1rem 0;
             border-left: 4px solid var(--accent);
         }
 
@@ -368,12 +298,6 @@
             font-size: 1.8rem;
             font-weight: 700;
             color: var(--secondary);
-        }
-
-        .impact-stat-label {
-            font-size: 0.85rem;
-            color: var(--gray-text);
-            margin-top: 0.3rem;
         }
 
         /* CRONOGRAMA */
@@ -413,7 +337,6 @@
             margin-left: auto;
             margin-right: 0;
             width: calc(50% - 2rem);
-            text-align: left;
         }
 
         .timeline-dot {
@@ -437,34 +360,6 @@
             border-left: 4px solid var(--secondary);
         }
 
-        .timeline-content h3 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .timeline-content p {
-            font-size: 0.95rem;
-            color: var(--gray-text);
-        }
-
-        @media (max-width: 768px) {
-            .timeline::before {
-                left: 0;
-            }
-
-            .timeline-item:nth-child(odd) .timeline-content,
-            .timeline-item:nth-child(even) .timeline-content {
-                width: calc(100% - 2.5rem);
-                margin-left: 2.5rem;
-                margin-right: 0;
-                text-align: left;
-            }
-
-            .timeline-dot {
-                left: 0;
-            }
-        }
-
         /* PIE DE PÁGINA */
         footer {
             background: var(--primary);
@@ -474,22 +369,11 @@
             border-top: 4px solid var(--secondary);
         }
 
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
         .footer-logo {
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 1rem;
             color: var(--accent);
-        }
-
-        .footer-date {
-            font-size: 0.9rem;
-            opacity: 0.9;
-            margin-bottom: 0.5rem;
         }
 
         .footer-disclaimer {
@@ -498,7 +382,6 @@
             margin-top: 1.5rem;
             padding-top: 1.5rem;
             border-top: 1px solid rgba(255,255,255,0.2);
-            font-style: italic;
         }
 
         /* RESPONSIVE */
@@ -507,38 +390,26 @@
                 font-size: 2rem;
             }
 
-            .hero .subtitle {
-                font-size: 1rem;
-            }
-
             section {
                 padding: 3rem 1.5rem;
             }
 
-            section h2 {
-                font-size: 1.8rem;
+            .timeline::before {
+                left: 0;
             }
 
-            nav ul {
-                gap: 1rem;
+            .timeline-item:nth-child(odd) .timeline-content,
+            .timeline-item:nth-child(even) .timeline-content {
+                width: calc(100% - 2.5rem);
+                margin-left: 2.5rem;
+                margin-right: 0;
             }
 
-            nav a {
-                font-size: 0.85rem;
-            }
-
-            .flow-container {
-                gap: 1.5rem;
-            }
-
-            .flow-box {
-                min-width: 120px;
-                font-size: 0.8rem;
-                padding: 1rem;
+            .timeline-dot {
+                left: 0;
             }
         }
 
-        /* SCROLL ANIMATIONS */
         .scroll-fade {
             opacity: 0;
             transform: translateY(30px);
@@ -553,110 +424,102 @@
 </head>
 <body>
 
-    <!-- NAVEGACIÓN STICKY -->
     <nav>
         <ul>
             <li><a href="#hero">Inici</a></li>
             <li><a href="#problema">Problemàtiques</a></li>
             <li><a href="#tecnologias">Tecnologies</a></li>
-            <li><a href="#flujo">Procés Digitalitzat</a></li>
+            <li><a href="#flujo">Procés</a></li>
             <li><a href="#roi">ROI</a></li>
             <li><a href="#impacto">Impacte</a></li>
-            <li><a href="#cronograma">Cronograma</a></li>
+            <li><a href="#cronograma">Timeline</a></li>
         </ul>
     </nav>
 
-    <!-- SECCIÓN HERO -->
     <section id="hero" class="hero">
         <h1 class="fade-in">Pla de Transformació Digital 4.0</h1>
-        <p class="subtitle fade-in">Tèxtils Montblanc, S.L. – Digitalización Integral de Procesos Productivos</p>
+        <p class="subtitle fade-in">Tèxtils Montblanc, S.L. – Digitalización Integral</p>
         <p class="company-info fade-in">
-            Empresa familiar fundada en 1985 | Igualada (Barcelona) | Especializada en ropa técnica para deportes de montaña<br>
-            23 trabajadores | 1,8M€ de facturación
+            Empresa familiar (1985) | Igualada, Barcelona | Ropa técnica deportiva<br>
+            23 trabajadores | 1,8M€ facturación
         </p>
-        <button class="cta-button" onclick="document.getElementById('problema').scrollIntoView();">Descubre el plan</button>
+        <button class="cta-button" onclick="document.getElementById('problema').scrollIntoView({behavior:'smooth'});">Descubre el plan</button>
     </section>
 
-    <!-- SECCIÓN PROBLEMÁTICAS -->
     <section id="problema">
-        <h2>El Problema Actual: 6 Desafíos del Sistema Clásico</h2>
+        <h2>El Problema: 6 Desafíos Actuales</h2>
         <div class="cards-grid">
-            <div class="card problema-card scroll-fade">
+            <div class="card scroll-fade">
                 <div class="card-icon">⚙️</div>
                 <h3>Procesos Manuales</h3>
-                <p>Dependencia de tareas repetitivas y gestión manual de datos. Alto consumo de tiempo y recursos.</p>
+                <p>Tareas repetitivas y gestión manual de datos.</p>
             </div>
-            <div class="card problema-card scroll-fade">
+            <div class="card scroll-fade">
                 <div class="card-icon">📊</div>
                 <h3>Falta de Datos</h3>
-                <p>Ausencia de sistemas de captura y análisis de datos. Decisiones sin fundamento analítico.</p>
+                <p>Sin captura ni análisis de información.</p>
             </div>
-            <div class="card problema-card scroll-fade">
+            <div class="card scroll-fade">
                 <div class="card-icon">❌</div>
                 <h3>Errores en Pedidos</h3>
-                <p>Errores frecuentes de comunicación, interpretación y ejecución entre departamentos.</p>
+                <p>Fallos frecuentes entre departamentos.</p>
             </div>
-            <div class="card problema-card scroll-fade">
+            <div class="card scroll-fade">
                 <div class="card-icon">🔗</div>
-                <h3>Desconexión Producción-Ventas</h3>
-                <p>Falta de integración entre sistemas. Información fragmentada y desactualizada.</p>
+                <h3>Desconexión P-V</h3>
+                <p>Falta integración producción-ventas.</p>
             </div>
-            <div class="card problema-card scroll-fade">
+            <div class="card scroll-fade">
                 <div class="card-icon">⚡</div>
-                <h3>Consumo Energético sin Control</h3>
-                <p>No hay monitorización en tiempo real. Ineficiencia operativa y costes energéticos elevados.</p>
+                <h3>Energía sin Control</h3>
+                <p>Sin monitorización de consumos.</p>
             </div>
-            <div class="card problema-card scroll-fade">
+            <div class="card scroll-fade">
                 <div class="card-icon">🌐</div>
                 <h3>Sin Presencia Digital</h3>
-                <p>Ausencia de plataforma online B2B. Acceso limitado a nuevos mercados y clientes.</p>
+                <p>Ausencia de plataforma online B2B.</p>
             </div>
         </div>
     </section>
 
-    <!-- SECCIÓN TECNOLOGÍAS -->
     <section id="tecnologias">
         <h2>6 Tecnologías 4.0 Implementadas</h2>
         <div class="cards-grid">
-            <div class="card tech-card scroll-fade">
+            <div class="card scroll-fade" style="border-left: 5px solid var(--secondary);">
                 <div class="card-icon">📡</div>
-                <h3>IoT – Internet of Things</h3>
-                <p>Sensores integrados en máquinas de producción. Monitorización en tiempo real de parámetros operativos: temperatura, vibraciones, consumo energético.</p>
+                <h3>IoT</h3>
+                <p>Sensores en máquinas. Monitorización en tiempo real.</p>
             </div>
-            <div class="card tech-card scroll-fade">
+            <div class="card scroll-fade" style="border-left: 5px solid var(--secondary);">
                 <div class="card-icon">📦</div>
                 <h3>ERP Odoo</h3>
-                <p>Gestión centralizada de recursos empresariales. Integración de módulos: ventas, compras, almacén, producción y finanzas en una única plataforma.</p>
+                <p>Gestión centralizada: ventas, compras, almacén, producción, finanzas.</p>
             </div>
-            <div class="card tech-card scroll-fade">
+            <div class="card scroll-fade" style="border-left: 5px solid var(--secondary);">
                 <div class="card-icon">🔐</div>
                 <h3>Blockchain</h3>
-                <p>Trazabilidad inmutable de materiales y productos. Garantía de autenticidad y transparencia en toda la cadena de suministro.</p>
+                <p>Trazabilidad inmutable de materiales y productos.</p>
             </div>
-            <div class="card tech-card scroll-fade">
+            <div class="card scroll-fade" style="border-left: 5px solid var(--secondary);">
                 <div class="card-icon">🏷️</div>
                 <h3>RFID</h3>
-                <p>Control automático de almacén. Etiquetado y localización en tiempo real de productos. Reducción de errores de inventario.</p>
+                <p>Control automático de almacén en tiempo real.</p>
             </div>
-            <div class="card tech-card scroll-fade">
+            <div class="card scroll-fade" style="border-left: 5px solid var(--secondary);">
                 <div class="card-icon">🤖</div>
                 <h3>Inteligencia Artificial</h3>
-                <p>Control de calidad automático mediante visión artificial. Predicción de defectos y optimización de parámetros de producción.</p>
+                <p>Control de calidad automático y predicción de defectos.</p>
             </div>
-            <div class="card tech-card scroll-fade">
+            <div class="card scroll-fade" style="border-left: 5px solid var(--secondary);">
                 <div class="card-icon">🛒</div>
-                <h3>Plataforma Web B2B + eCommerce</h3>
-                <p>Portal de vendas online. Catálogo digital, gestión de pedidos automatizada y comunicación directa con clientes.</p>
+                <h3>Web B2B + eCommerce</h3>
+                <p>Portal online, catálogo digital, automatización de pedidos.</p>
             </div>
         </div>
     </section>
 
-    <!-- SECCIÓN FLUJO DIGITALIZADO -->
     <section id="flujo">
         <h2>Diagrama de Flujo Digitalizado</h2>
-        <p style="text-align: center; margin-bottom: 2rem; color: var(--gray-text);">
-            Nuevo proceso integrado: desde el pedido web hasta la entrega del cliente
-        </p>
         <div class="flow-diagram">
             <div class="flow-container">
                 <div class="flow-box">🌐 Web B2B</div>
@@ -667,7 +530,7 @@
                 <div class="flow-arrow">→</div>
                 <div class="flow-box">✓ Calidad IA</div>
                 <div class="flow-arrow">→</div>
-                <div class="flow-box">🏷️ RFID Almacén</div>
+                <div class="flow-box">🏷️ RFID</div>
                 <div class="flow-arrow">→</div>
                 <div class="flow-box">📮 Logística</div>
                 <div class="flow-arrow">→</div>
@@ -676,228 +539,182 @@
         </div>
     </section>
 
-    <!-- SECCIÓN ROI -->
     <section id="roi">
         <h2>Viabilidad Económica: ROI Extraordinario</h2>
         <div class="metrics-grid">
             <div class="metric-card scroll-fade">
-                <div class="metric-label">Inversión Inicial (3 meses)</div>
+                <div style="font-size: 0.9rem; opacity: 0.95;">Inversión Inicial</div>
                 <div class="metric-value">29.600€</div>
-                <p style="font-size: 0.9rem;">Incluye hardware, software, integración</p>
+                <p style="font-size: 0.85rem;">3 meses de implementación</p>
             </div>
             <div class="metric-card scroll-fade">
-                <div class="metric-label">Beneficios Anuales</div>
+                <div style="font-size: 0.9rem; opacity: 0.95;">Beneficios Anuales</div>
                 <div class="metric-value">215.000€</div>
-                <p style="font-size: 0.9rem;">Mejora de eficiencia y reducción de costes</p>
+                <p style="font-size: 0.85rem;">Eficiencia y reducción de costes</p>
             </div>
             <div class="metric-card scroll-fade">
-                <div class="metric-label">ROI Primer Año</div>
+                <div style="font-size: 0.9rem; opacity: 0.95;">ROI Primer Año</div>
                 <div class="metric-value">503%</div>
-                <p style="font-size: 0.9rem;">Retorno excepcional de la inversión</p>
+                <p style="font-size: 0.85rem;">Retorno excepcional</p>
             </div>
             <div class="metric-card scroll-fade">
-                <div class="metric-label">Payback</div>
+                <div style="font-size: 0.9rem; opacity: 0.95;">Payback</div>
                 <div class="metric-value">~2 meses</div>
-                <p style="font-size: 0.9rem;">Recuperación rápida de la inversión</p>
+                <p style="font-size: 0.85rem;">Recuperación rápida</p>
             </div>
         </div>
 
         <div style="background: var(--light-bg); padding: 2rem; border-radius: 12px; margin-top: 3rem; border-left: 5px solid var(--accent);">
-            <h3 style="text-align: center; margin-bottom: 1.5rem;">Desglose de Inversión (29.600€)</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
-                <div><strong>Análisis i disseny:</strong> 3.000€</div>
-                <div><strong>ERP Odoo i IoT:</strong> 9.000€</div>
-                <div><strong>Web + eCommerce:</strong> 6.000€</div>
-                <div><strong>Formació i gestió del canvi:</strong> 3.600€</div>
-                <div><strong>Control i optimització:</strong> 6.000€</div>
-                <div><strong>Contingència:</strong> 2.000€</div>
+            <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--primary);">Desglose de Inversión (29.600€)</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; text-align: center;">
+                <div><strong>Análisis i disseny:</strong><br>3.000€</div>
+                <div><strong>ERP + IoT:</strong><br>9.000€</div>
+                <div><strong>Web + eCommerce:</strong><br>6.000€</div>
+                <div><strong>Formació:</strong><br>3.600€</div>
+                <div><strong>Control:</strong><br>6.000€</div>
+                <div><strong>Contingència:</strong><br>2.000€</div>
             </div>
         </div>
     </section>
 
-    <!-- SECCIÓN IMPACTO -->
     <section id="impacto">
-        <h2>Impacto en la Empresa: 3 Dimensiones Clave</h2>
+        <h2>Impacto en la Empresa</h2>
         <div class="impact-columns">
             <div class="impact-column scroll-fade">
-                <h3><span class="impact-icon">⚙️</span> Producción</h3>
+                <h3>⚙️ Producción</h3>
                 <div class="impact-stat">
                     <div class="impact-stat-value">52% → 75%</div>
-                    <div class="impact-stat-label">Mejora de OEE (Overall Equipment Effectiveness)</div>
+                    <p style="font-size: 0.85rem; color: var(--gray-text);">Mejora OEE</p>
                 </div>
-                <p style="margin-top: 1rem; color: var(--gray-text);">
-                    Aumento de disponibilidad de máquinas, reducción de paradas no planificadas, optimización de tiempos de ciclo.
-                </p>
+                <p>Disponibilidad de máquinas, reducción de paradas, optimización de ciclos.</p>
             </div>
             <div class="impact-column scroll-fade">
-                <h3><span class="impact-icon">🌱</span> Sostenibilidad</h3>
+                <h3>🌱 Sostenibilidad</h3>
                 <div class="impact-stat">
                     <div class="impact-stat-value">-25%</div>
-                    <div class="impact-stat-label">Consumo Energético</div>
+                    <p style="font-size: 0.85rem; color: var(--gray-text);">Energía</p>
                 </div>
                 <div class="impact-stat">
                     <div class="impact-stat-value">-15%</div>
-                    <div class="impact-stat-label">Residuos Industriales</div>
+                    <p style="font-size: 0.85rem; color: var(--gray-text);">Residuos</p>
                 </div>
-                <p style="margin-top: 1rem; color: var(--gray-text);">
-                    Monitorización en tiempo real permite optimizar consumos y reducir impacto ambiental.
-                </p>
+                <p>Monitorización y optimización ambiental.</p>
             </div>
             <div class="impact-column scroll-fade">
-                <h3><span class="impact-icon">👥</span> Recursos Humanos</h3>
+                <h3>👥 Recursos Humanos</h3>
                 <div class="impact-stat">
                     <div class="impact-stat-value">100%</div>
-                    <div class="impact-stat-label">Personal Capacitado</div>
+                    <p style="font-size: 0.85rem; color: var(--gray-text);">Personal capacitado</p>
                 </div>
-                <p style="margin-top: 1rem; color: var(--gray-text);">
-                    Formación integral en nuevas tecnologías. Emergencia de nuevos perfiles digitales. Mejor ambiente laboral y reducción de tareas repetitivas.
-                </p>
+                <p>Formación integral, nuevos perfiles digitales, mejor ambiente laboral.</p>
             </div>
         </div>
     </section>
 
-    <!-- SECCIÓN CRONOGRAMA -->
     <section id="cronograma">
-        <h2>Cronograma de Implementación: 8 Fases (8 marzo - 2 junio 2025)</h2>
+        <h2>Cronograma: 8 Fases (8 marzo - 2 junio 2025)</h2>
         <div class="timeline">
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 1: Diagnòstic Complet</h3>
-                    <p><strong>8-21 de marzo 2025</strong></p>
-                    <p>Mapeo de procesos actuales, análisis de puntos críticos y propuesta de mejoras.</p>
+                    <h3>Fase 1: Diagnòstic</h3>
+                    <p><strong>8-21 marzo</strong> | Mapeo de procesos y análisis crítico.</p>
                 </div>
             </div>
-
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 2: Disseny Final Aprovat</h3>
-                    <p><strong>7 de mayo 2025</strong></p>
-                    <p>Validación final de arquitectura, acuerdos de implementación y planificación técnica.</p>
+                    <h3>Fase 2: Disseny Final</h3>
+                    <p><strong>7 mayo</strong> | Validación y planificación técnica.</p>
                 </div>
             </div>
-
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 3: Instal·lació ERP i IoT</h3>
-                    <p><strong>14-24 de mayo 2025</strong></p>
-                    <p>Implementación de servidores, instalación de sensores IoT en máquinas, configuración inicial del ERP Odoo.</p>
+                    <h3>Fase 3: ERP + IoT</h3>
+                    <p><strong>14-24 mayo</strong> | Instalación servidores y sensores.</p>
                 </div>
             </div>
-
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 4: Plataforma Web + eCommerce</h3>
-                    <p><strong>28 de mayo 2025</strong></p>
-                    <p>Desarrollo y puesta en línea del portal B2B, catálogo digital, pasarela de pagos.</p>
+                    <h3>Fase 4: Web + eCommerce</h3>
+                    <p><strong>28 mayo</strong> | Portal B2B online.</p>
                 </div>
             </div>
-
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 5: Formació Personal</h3>
-                    <p><strong>28-31 de mayo 2025</strong></p>
-                    <p>Capacitación integral del equipo en todas las nuevas herramientas y procesos digitales.</p>
+                    <h3>Fase 5: Formació</h3>
+                    <p><strong>28-31 mayo</strong> | Capacitación del equipo.</p>
                 </div>
             </div>
-
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 6: Pilot i Validació</h3>
-                    <p><strong>2-3 de junio 2025</strong></p>
-                    <p>Pruebas exhaustivas de integración, validación de datos, ajustes y optimizaciones.</p>
+                    <h3>Fase 6: Pilot</h3>
+                    <p><strong>2-3 junio</strong> | Pruebas y validación.</p>
                 </div>
             </div>
-
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
                     <h3>Fase 7: Go Live</h3>
-                    <p><strong>2 de junio 2025</strong></p>
-                    <p>Puesta en producción de todos los sistemas. Monitorización en tiempo real.</p>
+                    <p><strong>2 junio</strong> | Producción en vivo.</p>
                 </div>
             </div>
-
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 8: Soport i Optimització</h3>
-                    <p><strong>Post lanzamiento</strong></p>
-                    <p>Soporte técnico contínuo, ajustes operativos y optimización de rendimiento.</p>
+                    <h3>Fase 8: Soport</h3>
+                    <p><strong>Post-lanzamiento</strong> | Optimización contínua.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- PIE DE PÁGINA -->
     <footer>
         <div class="footer-content">
             <div class="footer-logo">🚀 NexumTech Consulting S.L.</div>
-            <p class="footer-date">Consultoría Digital • Transformación Empresarial • Soluciones 4.0</p>
+            <p style="font-size: 0.9rem; opacity: 0.9;">Consultoría Digital • Transformación Empresarial • Soluciones 4.0</p>
             <p style="font-size: 0.95rem; margin-top: 1rem;">Documento preparado: Marzo 2025</p>
             <p class="footer-disclaimer">
                 📌 Document Intern – CONFIDENCIAL – PP13 RA5<br>
-                Propietat intelectual de NexumTech Consulting S.L. i Tèxtils Montblanc, S.L.<br>
-                ⚠️ Uso exclusivo para propósitos internos de la empresa.
+                Propietat intel·lectual de NexumTech Consulting S.L. i Tèxtils Montblanc, S.L.<br>
+                ⚠️ Uso exclusivo para propósitos internos.
             </p>
         </div>
     </footer>
 
     <script>
-        // SCROLL ANIMATIONS
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver(function(entries) {
+        const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
                 }
             });
-        }, observerOptions);
+        }, { threshold: 0.1 });
 
-        document.querySelectorAll('.scroll-fade').forEach(el => {
-            observer.observe(el);
-        });
+        document.querySelectorAll('.scroll-fade').forEach(el => observer.observe(el));
 
-        // SMOOTH SCROLL
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
+                document.querySelector(this.getAttribute('href')).scrollIntoView({behavior: 'smooth'});
             });
         });
 
-        // NAVBAR ACTIVE STATE
         window.addEventListener('scroll', () => {
             const sections = document.querySelectorAll('section');
             const navLinks = document.querySelectorAll('nav a');
-
             let current = '';
             sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
-                if (pageYOffset >= sectionTop - 200) {
+                if (pageYOffset >= section.offsetTop - 200) {
                     current = section.getAttribute('id');
                 }
             });
-
             navLinks.forEach(link => {
-                link.style.color = 'white';
-                if (link.getAttribute('href').slice(1) === current) {
-                    link.style.color = '#00A0E9';
-                }
+                link.style.color = link.getAttribute('href').slice(1) === current ? '#00A0E9' : 'white';
             });
         });
     </script>
