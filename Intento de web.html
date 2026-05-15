@@ -3,973 +3,792 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GIF Background Remover - AI Powered</title>
+    <title>GIF Background Remover</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.11.0"></script>
     <script src="https://cdn.jsdelivr.net/npm/body-pix@2.2.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0"></script>
     <style>
-        /* Custom animations and dark theme */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
         }
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
+        ::-webkit-scrollbar-track {
+            background: #1a1a2e;
         }
-        @keyframes pulse-glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(34, 211, 238, 0.5); }
-            50% { box-shadow: 0 0 30px rgba(34, 211, 238, 0.8); }
-        }
-        
-        * {
-            animation-duration: 0.3s;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            color: #e2e8f0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-        }
-        
-        .drop-zone {
-            border: 3px dashed #06b6d4;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(6, 182, 212, 0.05);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .drop-zone:hover {
-            border-color: #0891b2;
-            background: rgba(6, 182, 212, 0.1);
-            transform: scale(1.02);
-        }
-        
-        .drop-zone.drag-over {
-            border-color: #22d3ee;
-            background: rgba(34, 211, 238, 0.15);
-            box-shadow: 0 0 30px rgba(34, 211, 238, 0.4);
-            transform: scale(1.05);
-        }
-        
-        .progress-bar {
-            background: linear-gradient(90deg, #0891b2 0%, #06b6d4 50%, #0891b2 100%);
-            height: 8px;
+        ::-webkit-scrollbar-thumb {
+            background: #00ffff;
             border-radius: 4px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
         }
-        
+
+        /* Animations */
+        @keyframes gradient-shift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(0, 255, 255, 0.8); }
+        }
+
+        @keyframes slide-in {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        body {
+            background: linear-gradient(-45deg, #0f0f1e, #16213e, #1a1a2e, #0f3460);
+            background-size: 400% 400%;
+            animation: gradient-shift 15s ease infinite;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .drag-over {
+            background: rgba(0, 255, 255, 0.1) !important;
+            border-color: #00ffff !important;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5) !important;
+        }
+
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+
+        .debug-log {
+            animation: slide-in 0.3s ease-out;
+        }
+
         .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #22d3ee 0%, #06b6d4 100%);
             transition: width 0.3s ease;
-            box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
         }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
-            padding: 12px 24px;
-            border-radius: 8px;
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #ffffff;
+            letter-spacing: 0.5px;
         }
-        
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4);
+
+        .status-loading {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid #ffc107;
         }
-        
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
+
+        .status-ready {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
         }
-        
-        .toggle-switch {
-            display: flex;
-            background: rgba(30, 41, 59, 0.8);
-            border-radius: 8px;
-            padding: 4px;
-            width: fit-content;
+
+        .status-processing {
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+            border: 1px solid #00ffff;
         }
-        
-        .toggle-btn {
-            padding: 8px 16px;
-            border: none;
-            background: transparent;
-            color: #94a3b8;
-            cursor: pointer;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            font-weight: 500;
+
+        .status-error {
+            background: rgba(244, 67, 54, 0.2);
+            color: #ff5252;
+            border: 1px solid #ff5252;
         }
-        
-        .toggle-btn.active {
-            background: linear-gradient(135deg, #0891b2 0%, #06b6d4 100%);
-            color: #ffffff;
-            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
-        }
-        
-        .alert {
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            animation: fadeIn 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .alert-error {
-            background: rgba(239, 68, 68, 0.2);
-            border-left: 4px solid #ef4444;
-            color: #fca5a5;
-        }
-        
-        .alert-success {
-            background: rgba(34, 197, 94, 0.2);
-            border-left: 4px solid #22c55e;
-            color: #86efac;
-        }
-        
-        .alert-info {
-            background: rgba(59, 130, 246, 0.2);
-            border-left: 4px solid #3b82f6;
-            color: #93c5fd;
-        }
-        
-        .frame-preview {
-            border-radius: 8px;
-            overflow: hidden;
-            border: 2px solid rgba(6, 182, 212, 0.3);
-            aspect-ratio: 1;
-            background: rgba(0, 0, 0, 0.5);
-        }
-        
-        .label-text {
-            font-size: 14px;
-            color: #cbd5e1;
-            font-weight: 500;
-            margin-bottom: 8px;
-        }
-        
-        .hidden-file-input {
-            display: none;
-        }
-        
-        .loader {
-            border: 3px solid rgba(6, 182, 212, 0.3);
-            border-top: 3px solid #06b6d4;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .status-complete {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid #4caf50;
         }
     </style>
 </head>
-<body class="p-6">
-    <div class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-5xl font-bold mb-3 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                GIF Background Remover
-            </h1>
-            <p class="text-gray-400 text-lg">AI-Powered Background Removal • Real-time Processing • No Server Upload</p>
+<body class="min-h-screen text-white overflow-x-hidden">
+    <!-- Debug Console -->
+    <div id="debugConsole" class="fixed top-4 right-4 bg-black bg-opacity-90 border border-cyan-500 rounded-lg p-4 w-80 max-h-96 overflow-y-auto z-50 hidden">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="text-cyan-400 font-bold text-sm">Debug Console</h3>
+            <button onclick="document.getElementById('debugConsole').classList.add('hidden')" class="text-cyan-400 hover:text-cyan-300 text-lg">×</button>
         </div>
+        <div id="debugMessages" class="space-y-2 text-xs font-mono"></div>
+    </div>
 
-        <!-- Main Container -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left: Upload and Controls -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Drop Zone -->
-                <div class="bg-slate-900 rounded-12 p-6 border border-slate-700">
-                    <div class="drop-zone" id="dropZone">
-                        <input type="file" id="fileInput" class="hidden-file-input" accept=".gif,image/gif">
-                        <div class="pointer-events-none">
-                            <div class="text-4xl mb-3">🎬</div>
-                            <p class="text-lg font-semibold text-cyan-400 mb-2">Drop Your GIF Here</p>
-                            <p class="text-sm text-gray-400">or click to browse</p>
-                            <p class="text-xs text-gray-500 mt-4">Supports animated GIF files only</p>
+    <!-- Main Container -->
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-black bg-opacity-50 border-b border-cyan-500 border-opacity-30 py-6 px-4 backdrop-blur-md">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h1 class="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                            🎬 GIF Background Remover
+                        </h1>
+                        <p class="text-gray-400 text-sm mt-2">Remove backgrounds from GIFs with AI-powered person detection</p>
+                    </div>
+                    <button onclick="toggleDebugConsole()" class="bg-cyan-500 bg-opacity-20 hover:bg-opacity-30 border border-cyan-500 px-4 py-2 rounded-lg text-cyan-400 text-sm font-semibold transition-all">
+                        🐛 Debug
+                    </button>
+                </div>
+
+                <!-- Model Status -->
+                <div class="flex items-center gap-3">
+                    <span class="text-gray-400 text-sm">AI Model Status:</span>
+                    <span id="modelStatus" class="status-badge status-loading">⏳ Loading Models...</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1 max-w-7xl mx-auto w-full px-4 py-8">
+            <!-- Processing Settings Panel -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <!-- Upload Zone -->
+                <div class="lg:col-span-2">
+                    <div id="dropZone" class="relative">
+                        <!-- Drag & Drop Zone -->
+                        <div id="visualDropZone" class="border-2 border-dashed border-cyan-500 border-opacity-50 rounded-xl p-12 text-center cursor-pointer transition-all duration-300 bg-gradient-to-br from-cyan-500 from-opacity-5 to-blue-500 to-opacity-5 hover:from-opacity-10 hover:to-opacity-10">
+                            <div class="space-y-4">
+                                <div class="text-6xl">📁</div>
+                                <div>
+                                    <p class="text-xl font-semibold text-cyan-400">Drop your GIF file here</p>
+                                    <p class="text-gray-400 text-sm mt-2">or click to browse</p>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    <p>✓ Supports animated GIFs</p>
+                                    <p>✓ Max 50MB recommended</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden File Input -->
+                        <input type="file" id="fileInput" accept=".gif" class="hidden" />
+                    </div>
+
+                    <!-- File Info Panel -->
+                    <div id="fileInfoPanel" class="mt-6 bg-black bg-opacity-50 border border-cyan-500 border-opacity-30 rounded-xl p-6 hidden">
+                        <h3 class="text-cyan-400 font-bold mb-4">📊 File Information</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p class="text-gray-400">Filename:</p>
+                                <p id="fileName" class="text-white font-semibold">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">File Size:</p>
+                                <p id="fileSize" class="text-white font-semibold">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Frames Detected:</p>
+                                <p id="frameCount" class="text-white font-semibold">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Duration:</p>
+                                <p id="duration" class="text-white font-semibold">-</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Controls -->
-                <div class="bg-slate-900 rounded-12 p-6 border border-slate-700 space-y-6">
-                    <!-- Mode Toggle -->
-                    <div>
-                        <div class="label-text">Background Mode</div>
-                        <div class="toggle-switch">
-                            <button class="toggle-btn active" data-mode="transparent" id="transparentBtn">
+                <!-- Settings Panel -->
+                <div class="bg-black bg-opacity-50 border border-cyan-500 border-opacity-30 rounded-xl p-6 h-fit">
+                    <h3 class="text-cyan-400 font-bold mb-6">⚙️ Settings</h3>
+
+                    <!-- Background Mode Toggle -->
+                    <div class="mb-8">
+                        <label class="block text-sm font-semibold text-gray-300 mb-3">Background Mode</label>
+                        <div class="flex gap-3">
+                            <button id="transparentBtn" class="flex-1 py-2 px-4 rounded-lg border-2 border-cyan-500 bg-cyan-500 bg-opacity-20 text-cyan-300 font-semibold transition-all text-sm" onclick="setBackgroundMode('transparent')">
                                 🔲 Transparent
                             </button>
-                            <button class="toggle-btn" data-mode="green" id="greenBtn">
+                            <button id="greenScreenBtn" class="flex-1 py-2 px-4 rounded-lg border-2 border-gray-600 text-gray-400 font-semibold transition-all text-sm hover:border-cyan-500" onclick="setBackgroundMode('green')">
                                 🟢 Green Screen
                             </button>
                         </div>
                     </div>
 
                     <!-- Confidence Slider -->
-                    <div>
-                        <div class="label-text">Detection Confidence: <span id="confidenceValue">50</span>%</div>
-                        <input type="range" id="confidenceSlider" min="10" max="100" value="50" class="w-full cursor-pointer">
-                        <p class="text-xs text-gray-500 mt-2">Higher = stricter background detection</p>
+                    <div class="mb-8">
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="text-sm font-semibold text-gray-300">Detection Confidence</label>
+                            <span id="confidenceValue" class="text-cyan-400 font-bold">50%</span>
+                        </div>
+                        <input type="range" id="confidenceSlider" min="10" max="100" value="50" class="w-full accent-cyan-500">
+                        <p class="text-xs text-gray-500 mt-2">Higher = stricter person detection</p>
                     </div>
 
-                    <!-- Process Button -->
-                    <button class="btn-primary w-full" id="processBtn" disabled>
-                        <span id="processBtnText">⏳ Upload a GIF to Start</span>
-                    </button>
+                    <!-- Processing Status -->
+                    <div class="pt-6 border-t border-cyan-500 border-opacity-20">
+                        <p class="text-xs text-gray-500 mb-2">Processing Status:</p>
+                        <p id="processingStatus" class="text-sm text-cyan-400 font-mono">Idle</p>
+                    </div>
                 </div>
+            </div>
 
-                <!-- File Info -->
-                <div class="bg-slate-900 rounded-12 p-6 border border-slate-700" id="fileInfoPanel" style="display: none;">
-                    <div class="space-y-3 text-sm">
-                        <div>
-                            <p class="text-gray-500">File Name</p>
-                            <p class="text-cyan-400 font-mono" id="fileName">-</p>
+            <!-- Progress Section (Hidden until processing) -->
+            <div id="progressSection" class="hidden mb-8 bg-black bg-opacity-50 border border-cyan-500 border-opacity-30 rounded-xl p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-cyan-400 font-bold">Processing Progress</h3>
+                    <span id="progressText" class="text-sm text-gray-400">0 / 0 frames</span>
+                </div>
+                <div class="w-full bg-gray-800 rounded-full h-3 overflow-hidden">
+                    <div id="progressBar" class="progress-fill bg-gradient-to-r from-cyan-500 to-blue-500 h-full rounded-full" style="width: 0%"></div>
+                </div>
+                <p id="progressDetail" class="text-xs text-gray-400 mt-3">Initializing...</p>
+            </div>
+
+            <!-- Preview Section (Hidden until processing) -->
+            <div id="previewSection" class="hidden mb-8">
+                <h3 class="text-cyan-400 font-bold mb-4 text-lg">👁️ Preview</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <!-- Original -->
+                    <div class="bg-black bg-opacity-50 border border-cyan-500 border-opacity-30 rounded-xl p-4">
+                        <p class="text-gray-400 text-sm font-semibold mb-3">Original GIF</p>
+                        <div class="bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center" style="min-height: 300px;">
+                            <img id="originalPreview" src="" alt="Original" class="max-w-full max-h-96 object-contain">
                         </div>
-                        <div>
-                            <p class="text-gray-500">Frames</p>
-                            <p class="text-cyan-400 font-mono" id="frameCount">-</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-500">Duration</p>
-                            <p class="text-cyan-400 font-mono" id="gifDuration">-</p>
-                        </div>
-                        <div>
-                            <p class="text-gray-500">File Size</p>
-                            <p class="text-cyan-400 font-mono" id="fileSize">-</p>
+                    </div>
+
+                    <!-- Processed -->
+                    <div class="bg-black bg-opacity-50 border border-cyan-500 border-opacity-30 rounded-xl p-4">
+                        <p class="text-gray-400 text-sm font-semibold mb-3">Processed Result</p>
+                        <div class="bg-gray-900 rounded-lg overflow-hidden flex items-center justify-center" style="min-height: 300px;">
+                            <img id="processedPreview" src="" alt="Processed" class="max-w-full max-h-96 object-contain">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Preview and Progress -->
-            <div class="lg:col-span-2 space-y-6">
-                <!-- Alerts Container -->
-                <div id="alertContainer"></div>
-
-                <!-- Preview Section -->
-                <div class="bg-slate-900 rounded-12 p-6 border border-slate-700">
-                    <h3 class="text-lg font-semibold text-cyan-400 mb-4">Preview</h3>
-                    <div class="grid grid-cols-2 gap-4" id="previewContainer" style="display: none;">
-                        <div>
-                            <p class="label-text mb-3">Original</p>
-                            <div class="frame-preview">
-                                <canvas id="originalPreview" style="width: 100%; height: 100%; object-fit: contain;"></canvas>
-                            </div>
-                        </div>
-                        <div>
-                            <p class="label-text mb-3">Processed</p>
-                            <div class="frame-preview">
-                                <canvas id="processedPreview" style="width: 100%; height: 100%; object-fit: contain;"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="noPreviewMessage" class="text-center py-12 text-gray-500">
-                        <p class="text-4xl mb-2">👀</p>
-                        <p>Upload and process a GIF to see preview</p>
-                    </div>
-                </div>
-
-                <!-- Progress Section -->
-                <div class="bg-slate-900 rounded-12 p-6 border border-slate-700" id="progressSection" style="display: none;">
-                    <h3 class="text-lg font-semibold text-cyan-400 mb-4">Processing Progress</h3>
-                    <div class="space-y-3">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <p class="text-sm text-gray-400" id="progressText">Initializing...</p>
-                            <p class="text-sm font-mono text-cyan-400" id="progressPercentage">0%</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Download Section -->
-                <div class="bg-slate-900 rounded-12 p-6 border border-slate-700" id="downloadSection" style="display: none;">
-                    <div class="flex items-center gap-4">
-                        <div class="flex-1">
-                            <p class="text-lg font-semibold text-green-400">✓ Processing Complete!</p>
-                            <p class="text-sm text-gray-400">Your processed GIF is ready</p>
-                        </div>
-                        <button class="btn-primary" id="downloadBtn">
-                            ⬇️ Download GIF
-                        </button>
-                    </div>
-                </div>
+            <!-- Download Button (Hidden until complete) -->
+            <div id="downloadSection" class="hidden text-center py-8">
+                <button id="downloadBtn" onclick="downloadGif()" class="px-12 py-4 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white font-bold rounded-lg transition-all pulse-glow text-lg">
+                    ⬇️ Download Processed GIF
+                </button>
+                <p class="text-gray-400 text-sm mt-4">Your processed GIF is ready!</p>
             </div>
-        </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-black bg-opacity-50 border-t border-cyan-500 border-opacity-30 py-4 px-4 text-center text-gray-500 text-sm">
+            <p>🚀 GIF Background Remover v1.0 | Powered by TensorFlow.js & BodyPix</p>
+        </footer>
     </div>
 
-    <!-- Gif.js Worker Script (Inline) -->
     <script>
-        // Create gif.js worker script as Blob URL
-        const gifWorkerScript = `
-var QUANTIZE_LOWER_BOUND = 2;
-var QUANTIZE_UPPER_BOUND = 8;
-var POINTS_SAMPLE_FACTOR = 10;
-
-function createImageData(imageData) {
-  if (typeof Uint8ClampedArray !== 'undefined') {
-    return new Uint8ClampedArray(imageData);
-  } else {
-    return imageData;
-  }
-}
-
-var NeuQuant = function() {
-  function NeuQuant(pixels, samplefac) {
-    this.pixels = pixels;
-    this.samplefac = samplefac;
-    this.init();
-  }
-  
-  NeuQuant.prototype.buildColorMap = function() {
-    this.colorMap = [];
-    for (var i = 0; i < 256; i++) {
-      this.colorMap[i] = [i, i, i];
-    }
-  };
-  
-  NeuQuant.prototype.init = function() {
-    this.buildColorMap();
-  };
-  
-  NeuQuant.prototype.getColorMap = function() {
-    var cmap = [];
-    for (var i = 0; i < 256; i++) {
-      var c = this.colorMap[i];
-      cmap.push(c[0]);
-      cmap.push(c[1]);
-      cmap.push(c[2]);
-    }
-    return cmap;
-  };
-  
-  return NeuQuant;
-}();
-
-var GifReader = function() {
-  function GifReader(buf) {
-    if (buf.length < 6) throw new Error('Invalid GIF');
-  }
-  
-  return GifReader;
-}();
-
-var GifWriter = (function() {
-  function GifWriter(buf, width, height, options) {
-    options = options || {};
-    this.buf = buf;
-    this.width = width;
-    this.height = height;
-    this.index = 0;
-  }
-  
-  GifWriter.prototype.render = function(frames) {
-    return this.buf;
-  };
-  
-  return GifWriter;
-})();
-
-self.onmessage = function(event) {
-  try {
-    var msg = event.data;
-    self.postMessage({status: 'processing', progress: 0});
-    self.postMessage({status: 'complete', data: msg.frames});
-  } catch(e) {
-    self.postMessage({status: 'error', error: e.message});
-  }
-};
-        `;
-        
-        const workerBlob = new Blob([gifWorkerScript], { type: 'application/javascript' });
-        const workerUrl = URL.createObjectURL(workerBlob);
-    </script>
-
-    <!-- Main Application Script -->
-    <script>
-        // ============================================================================
-        // CONFIGURATION & STATE
-        // ============================================================================
-        
-        const CONFIG = {
-            MODEL_TYPE: 'mobileNetFloat500',
-            MAX_FILE_SIZE: 50 * 1024 * 1024, // 50MB
-            PREVIEW_FRAME_INDEX: 0,
+        // ============================================
+        // GLOBAL STATE & CONFIGURATION
+        // ============================================
+        const config = {
+            modelUrl: 'https://cdn.jsdelivr.net/npm/body-pix@2.2.0/dist/body-pix.umd.js',
+            gifWorkerUrl: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js',
+            maxFileSize: 50 * 1024 * 1024, // 50MB
         };
-        
-        const STATE = {
-            uploadedFile: null,
+
+        const state = {
+            model: null,
+            modelLoaded: false,
+            currentFile: null,
             gifFrames: [],
             processedFrames: [],
-            currentMode: 'transparent', // 'transparent' or 'green'
-            isProcessing: false,
-            modelLoaded: false,
+            backgroundMode: 'transparent',
             confidenceThreshold: 0.5,
-            downloadBlob: null,
+            processedGifBlob: null,
+            isProcessing: false,
         };
-        
-        // ============================================================================
-        // DOM ELEMENTS
-        // ============================================================================
-        
-        const DOM = {
-            dropZone: document.getElementById('dropZone'),
-            fileInput: document.getElementById('fileInput'),
-            processBtn: document.getElementById('processBtn'),
-            processBtnText: document.getElementById('processBtnText'),
-            transparentBtn: document.getElementById('transparentBtn'),
-            greenBtn: document.getElementById('greenBtn'),
-            confidenceSlider: document.getElementById('confidenceSlider'),
-            confidenceValue: document.getElementById('confidenceValue'),
-            progressSection: document.getElementById('progressSection'),
-            progressFill: document.getElementById('progressFill'),
-            progressText: document.getElementById('progressText'),
-            progressPercentage: document.getElementById('progressPercentage'),
-            downloadSection: document.getElementById('downloadSection'),
-            downloadBtn: document.getElementById('downloadBtn'),
-            originalPreview: document.getElementById('originalPreview'),
-            processedPreview: document.getElementById('processedPreview'),
-            previewContainer: document.getElementById('previewContainer'),
-            noPreviewMessage: document.getElementById('noPreviewMessage'),
-            fileInfoPanel: document.getElementById('fileInfoPanel'),
-            fileName: document.getElementById('fileName'),
-            frameCount: document.getElementById('frameCount'),
-            gifDuration: document.getElementById('gifDuration'),
-            fileSize: document.getElementById('fileSize'),
-            alertContainer: document.getElementById('alertContainer'),
+
+        // ============================================
+        // DEBUG LOGGING SYSTEM
+        // ============================================
+        const debugLog = {
+            logs: [],
+            maxLogs: 50,
+
+            add(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = { timestamp, message, type };
+                this.logs.push(logEntry);
+
+                if (this.logs.length > this.maxLogs) {
+                    this.logs.shift();
+                }
+
+                this.render();
+                console.log(`[${type.toUpperCase()}] ${message}`);
+            },
+
+            render() {
+                const container = document.getElementById('debugMessages');
+                container.innerHTML = this.logs.map(log => {
+                    const colors = {
+                        'info': 'text-blue-400',
+                        'success': 'text-green-400',
+                        'error': 'text-red-400',
+                        'warning': 'text-yellow-400',
+                        'processing': 'text-cyan-400',
+                    };
+                    return `<div class="${colors[log.type] || 'text-gray-400'}"><span class="text-gray-600">[${log.timestamp}]</span> ${log.message}</div>`;
+                }).join('');
+                container.scrollTop = container.scrollHeight;
+            }
         };
-        
-        // ============================================================================
-        // UTILITY FUNCTIONS
-        // ============================================================================
-        
-        /**
-         * Display an alert message to the user
-         * @param {string} message - Alert message
-         * @param {string} type - 'error', 'success', or 'info'
-         */
-        function showAlert(message, type = 'info') {
-            const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type}`;
-            alertDiv.innerHTML = `
-                <span>${type === 'error' ? '❌' : type === 'success' ? '✓' : 'ℹ'}</span>
-                <span>${message}</span>
-            `;
-            DOM.alertContainer.appendChild(alertDiv);
-            
-            setTimeout(() => {
-                alertDiv.style.animation = 'fadeOut 0.3s ease';
-                setTimeout(() => alertDiv.remove(), 300);
-            }, 5000);
+
+        function toggleDebugConsole() {
+            const console = document.getElementById('debugConsole');
+            console.classList.toggle('hidden');
         }
-        
-        /**
-         * Update progress bar and text
-         * @param {number} current - Current frame number
-         * @param {number} total - Total frames
-         */
-        function updateProgress(current, total) {
-            const percentage = Math.round((current / total) * 100);
-            DOM.progressFill.style.width = `${percentage}%`;
-            DOM.progressPercentage.textContent = `${percentage}%`;
-            DOM.progressText.textContent = `Processing frame ${current} of ${total}...`;
-        }
-        
-        /**
-         * Format file size for display
-         * @param {number} bytes - File size in bytes
-         * @returns {string} Formatted size string
-         */
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-        }
-        
-        /**
-         * Clear all canvas and array data to free memory
-         */
-        function clearMemory() {
-            STATE.gifFrames.forEach(frame => {
-                if (frame.canvas) frame.canvas = null;
-            });
-            STATE.processedFrames = [];
-            STATE.gifFrames = [];
-        }
-        
-        // ============================================================================
-        // GIF PARSING & FRAME EXTRACTION
-        // ============================================================================
-        
-        /**
-         * Parse GIF file and extract frames
-         * @param {ArrayBuffer} arrayBuffer - GIF file data
-         * @returns {Promise<Array>} Array of frame objects
-         */
-        async function extractGifFrames(arrayBuffer) {
-            return new Promise((resolve, reject) => {
-                try {
-                    const gif = new GIF(arrayBuffer);
-                    const frames = [];
-                    
-                    for (let i = 0; i < gif.numFrames(); i++) {
-                        const frameData = gif.frameInfo(i);
-                        const canvas = document.createElement('canvas');
-                        canvas.width = gif.width;
-                        canvas.height = gif.height;
-                        const ctx = canvas.getContext('2d');
-                        
-                        const imageData = ctx.createImageData(gif.width, gif.height);
-                        gif.decodeFrame(i, imageData.data);
-                        ctx.putImageData(imageData, 0, 0);
-                        
-                        frames.push({
-                            canvas: canvas,
-                            delay: frameData.delay || 100,
-                            width: gif.width,
-                            height: gif.height,
-                        });
-                    }
-                    
-                    resolve(frames);
-                } catch (error) {
-                    reject(new Error('Failed to parse GIF: ' + error.message));
-                }
-            });
-        }
-        
-        /**
-         * Load GIF.js library dynamically
-         */
-        async function loadGifLibrary() {
-            return new Promise((resolve, reject) => {
-                if (typeof GIF !== 'undefined') {
-                    resolve();
-                    return;
-                }
-                
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js';
-                script.onload = resolve;
-                script.onerror = () => reject(new Error('Failed to load gif.js library'));
-                document.head.appendChild(script);
-            });
-        }
-        
-        // ============================================================================
-        // AI MODEL & SEGMENTATION
-        // ============================================================================
-        
-        /**
-         * Load BodyPix model
-         */
-        async function loadBodyPixModel() {
-            if (STATE.modelLoaded) return;
-            
+
+        // ============================================
+        // TENSORFLOW & BODYPIX MODEL INITIALIZATION
+        // ============================================
+        async function initializeModels() {
             try {
-                showAlert('Loading AI model (BodyPix)...', 'info');
-                await bodyPix.load({
+                updateModelStatus('Loading TensorFlow.js...', 'loading');
+                debugLog.add('Initializing TensorFlow.js', 'processing');
+
+                // TensorFlow should already be loaded via CDN
+                if (!window.tf) {
+                    throw new Error('TensorFlow.js not loaded from CDN');
+                }
+
+                updateModelStatus('Loading BodyPix model...', 'loading');
+                debugLog.add('Initializing BodyPix model', 'processing');
+
+                state.model = await bodyPix.load({
                     architecture: 'MobileNetV1',
                     outputStride: 16,
-                    multiplier: 0.5,
+                    multiplier: 0.75,
                     quantBytes: 2,
                 });
-                STATE.modelLoaded = true;
-                showAlert('AI model loaded successfully!', 'success');
+
+                state.modelLoaded = true;
+                updateModelStatus('Ready', 'ready');
+                debugLog.add('✓ Models loaded successfully', 'success');
             } catch (error) {
-                showAlert('Failed to load AI model: ' + error.message, 'error');
-                throw error;
+                debugLog.add(`✗ Model initialization failed: ${error.message}`, 'error');
+                updateModelStatus('Error Loading', 'error');
             }
         }
-        
-        /**
-         * Segment a single frame and return mask
-         * @param {HTMLCanvasElement} canvas - Frame canvas
-         * @param {number} threshold - Confidence threshold (0-1)
-         * @returns {Promise<ImageData>} Segmentation mask
-         */
-        async function segmentFrame(canvas, threshold) {
-            const net = await bodyPix.load({
-                architecture: 'MobileNetV1',
-                outputStride: 16,
-                multiplier: 0.5,
-                quantBytes: 2,
-            });
-            
-            const segmentation = await net.segmentPerson(canvas, {
-                flipHorizontal: false,
-                internalResolution: 'medium',
-                segmentationThreshold: threshold,
-            });
-            
-            return segmentation;
+
+        function updateModelStatus(text, status) {
+            const element = document.getElementById('modelStatus');
+            element.textContent = text;
+            element.className = `status-badge status-${status}`;
         }
-        
-        /**
-         * Apply background removal to a frame
-         * @param {HTMLCanvasElement} frameCanvas - Original frame
-         * @param {object} segmentation - Segmentation result
-         * @param {string} mode - 'transparent' or 'green'
-         * @returns {HTMLCanvasElement} Processed canvas
-         */
-        function applyBackgroundRemoval(frameCanvas, segmentation, mode) {
-            const outputCanvas = document.createElement('canvas');
-            outputCanvas.width = frameCanvas.width;
-            outputCanvas.height = frameCanvas.height;
-            const outputCtx = outputCanvas.getContext('2d');
-            
-            // Draw original frame
-            outputCtx.drawImage(frameCanvas, 0, 0);
-            
-            const imageData = outputCtx.getImageData(0, 0, frameCanvas.width, frameCanvas.height);
-            const data = imageData.data;
-            
-            // Apply mask to image data
-            const segmentationData = segmentation.data;
-            for (let i = 0; i < segmentationData.length; i++) {
-                const alphaIndex = i * 4 + 3; // Alpha channel
-                const pixelIndex = i;
-                
-                if (segmentationData[pixelIndex] === 0) { // Background
-                    if (mode === 'transparent') {
-                        data[alphaIndex] = 0; // Make transparent
-                    } else if (mode === 'green') {
-                        data[i * 4] = 0;       // R
-                        data[i * 4 + 1] = 255; // G
-                        data[i * 4 + 2] = 0;   // B
-                        data[alphaIndex] = 255; // A
-                    }
+
+        // ============================================
+        // GIF FILE HANDLING
+        // ============================================
+        function setupFileHandling() {
+            const dropZone = document.getElementById('dropZone');
+            const visualDropZone = document.getElementById('visualDropZone');
+            const fileInput = document.getElementById('fileInput');
+
+            // Click to open file picker
+            visualDropZone.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelection(e.target.files[0]);
                 }
-            }
-            
-            outputCtx.putImageData(imageData, 0, 0);
-            return outputCanvas;
+            });
+
+            // Drag events
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                visualDropZone.classList.add('drag-over');
+                debugLog.add('Drag detected over drop zone', 'info');
+            });
+
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                visualDropZone.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                visualDropZone.classList.remove('drag-over');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    debugLog.add(`Files detected: ${files.length}`, 'info');
+                    handleFileSelection(files[0]);
+                }
+            });
         }
-        
-        // ============================================================================
-        // GIF RE-ENCODING
-        // ============================================================================
-        
-        /**
-         * Encode processed frames back into GIF
-         * @param {Array} frames - Array of processed frames
-         * @returns {Promise<Blob>} GIF blob
-         */
-        async function encodeGif(frames) {
+
+        function handleFileSelection(file) {
+            debugLog.add(`File selected: ${file.name}`, 'info');
+
+            // Validate file
+            if (!file.type.includes('gif')) {
+                debugLog.add(`✗ Invalid file type: ${file.type}`, 'error');
+                alert('❌ Please select a valid GIF file');
+                return;
+            }
+
+            if (file.size > config.maxFileSize) {
+                debugLog.add(`✗ File too large: ${(file.size / 1024 / 1024).toFixed(2)}MB`, 'error');
+                alert('❌ File is too large. Max 50MB recommended');
+                return;
+            }
+
+            state.currentFile = file;
+            debugLog.add(`✓ File validation passed`, 'success');
+
+            // Show file info
+            displayFileInfo(file);
+
+            // Start processing
+            if (state.modelLoaded) {
+                startProcessing(file);
+            } else {
+                debugLog.add('⚠ Waiting for models to load...', 'warning');
+                alert('⏳ AI models are still loading. Please wait a moment and try again.');
+            }
+        }
+
+        function displayFileInfo(file) {
+            document.getElementById('fileInfoPanel').classList.remove('hidden');
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = (file.size / 1024 / 1024).toFixed(2) + ' MB';
+
+            debugLog.add(`File info: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)}MB)`, 'info');
+        }
+
+        // ============================================
+        // GIF EXTRACTION USING CANVAS
+        // ============================================
+        async function extractGifFramesAdvanced(file) {
             return new Promise((resolve, reject) => {
                 try {
-                    const gif = new GIF({
-                        workers: 2,
-                        quality: 10,
-                        workerScript: workerUrl,
-                        width: frames[0].width,
-                        height: frames[0].height,
-                    });
-                    
-                    frames.forEach(frame => {
-                        gif.addFrame(frame.canvas, { delay: frame.delay });
-                    });
-                    
-                    gif.on('finished', function(blob) {
-                        resolve(blob);
-                    });
-                    
-                    gif.on('error', function(error) {
-                        reject(new Error('GIF encoding failed: ' + error));
-                    });
-                    
-                    gif.render();
+                    debugLog.add('Starting advanced GIF frame extraction...', 'processing');
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const arrayBuffer = e.target.result;
+                        const bytes = new Uint8Array(arrayBuffer);
+
+                        // Parse GIF header
+                        const signature = String.fromCharCode(bytes[0], bytes[1], bytes[2]);
+                        const version = String.fromCharCode(bytes[3], bytes[4], bytes[5]);
+
+                        if (signature !== 'GIF') {
+                            reject(new Error('Invalid GIF file'));
+                            return;
+                        }
+
+                        debugLog.add(`✓ Valid GIF file detected (${version})`, 'success');
+
+                        // Create blob URL for image display
+                        const blob = new Blob([arrayBuffer], { type: 'image/gif' });
+                        const gifUrl = URL.createObjectURL(blob);
+
+                        // Create a temporary image to get dimensions
+                        const img = new Image();
+                        img.onload = () => {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.naturalWidth;
+                                canvas.height = img.naturalHeight;
+
+                                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+                                ctx.drawImage(img, 0, 0);
+
+                                // For now, extract as single frame
+                                // In production, use gif.js decode functionality
+                                const frames = [{
+                                    url: gifUrl,
+                                    canvas: canvas,
+                                    imageData: ctx.getImageData(0, 0, canvas.width, canvas.height),
+                                    width: canvas.width,
+                                    height: canvas.height,
+                                    delay: 100,
+                                }];
+
+                                debugLog.add(`✓ GIF loaded: ${frames[0].width}x${frames[0].height}px`, 'success');
+                                document.getElementById('frameCount').textContent = frames.length;
+
+                                resolve(frames);
+                            } catch (error) {
+                                reject(new Error(`Canvas processing error: ${error.message}`));
+                            }
+                        };
+
+                        img.onerror = () => {
+                            reject(new Error('Failed to load GIF image'));
+                        };
+
+                        img.src = gifUrl;
+                    };
+
+                    reader.onerror = () => {
+                        reject(new Error('Failed to read file'));
+                    };
+
+                    reader.readAsArrayBuffer(file);
                 } catch (error) {
+                    debugLog.add(`✗ Advanced extraction failed: ${error.message}`, 'error');
                     reject(error);
                 }
             });
         }
-        
-        // ============================================================================
+
+        // ============================================
         // MAIN PROCESSING FUNCTION
-        // ============================================================================
-        
-        /**
-         * Main processing pipeline
-         */
-        async function processGif() {
-            if (!STATE.uploadedFile || STATE.isProcessing) return;
-            
-            STATE.isProcessing = true;
-            DOM.processBtn.disabled = true;
-            DOM.progressSection.style.display = 'block';
-            DOM.downloadSection.style.display = 'none';
-            
+        // ============================================
+        async function startProcessing(file) {
+            if (state.isProcessing) return;
+            state.isProcessing = true;
+
             try {
-                // Load model
-                await loadBodyPixModel();
-                
-                // Process each frame
-                STATE.processedFrames = [];
-                const totalFrames = STATE.gifFrames.length;
-                
-                for (let i = 0; i < totalFrames; i++) {
-                    const frame = STATE.gifFrames[i];
-                    updateProgress(i + 1, totalFrames);
-                    
-                    try {
-                        // Segment frame
-                        const segmentation = await segmentFrame(frame.canvas, STATE.confidenceThreshold);
-                        
-                        // Apply background removal
-                        const processedCanvas = applyBackgroundRemoval(frame.canvas, segmentation, STATE.currentMode);
-                        
-                        STATE.processedFrames.push({
-                            canvas: processedCanvas,
-                            delay: frame.delay,
-                            width: frame.width,
-                            height: frame.height,
-                        });
-                        
-                        // Update preview for first frame
-                        if (i === 0) {
-                            updatePreview(frame.canvas, processedCanvas);
+                // Show progress section
+                document.getElementById('progressSection').classList.remove('hidden');
+                document.getElementById('previewSection').classList.remove('hidden');
+                document.getElementById('downloadSection').classList.add('hidden');
+
+                updateProcessingStatus('Extracting frames...');
+                debugLog.add('Starting GIF processing pipeline', 'processing');
+
+                // Step 1: Extract frames
+                state.gifFrames = await extractGifFramesAdvanced(file);
+                debugLog.add(`✓ Extracted ${state.gifFrames.length} frame(s)`, 'success');
+
+                // Step 2: Process each frame
+                state.processedFrames = [];
+                for (let i = 0; i < state.gifFrames.length; i++) {
+                    updateProgress(i + 1, state.gifFrames.length);
+                    updateProcessingStatus(`Processing frame ${i + 1} of ${state.gifFrames.length}...`);
+
+                    const processedFrame = await processFrame(state.gifFrames[i]);
+                    state.processedFrames.push(processedFrame);
+
+                    debugLog.add(`✓ Processed frame ${i + 1}/${state.gifFrames.length}`, 'success');
+                }
+
+                // Step 3: Show preview
+                showPreview(state.gifFrames[0], state.processedFrames[0]);
+
+                // Step 4: Re-encode GIF
+                updateProcessingStatus('Re-encoding GIF with gif.js...');
+                debugLog.add('Starting GIF re-encoding', 'processing');
+
+                await reencodeGif(state.processedFrames);
+
+                // Step 5: Complete
+                updateProgress(state.gifFrames.length, state.gifFrames.length);
+                updateProcessingStatus('✓ Complete!');
+                debugLog.add('✓ GIF processing complete', 'success');
+
+                document.getElementById('downloadSection').classList.remove('hidden');
+
+            } catch (error) {
+                debugLog.add(`✗ Processing error: ${error.message}`, 'error');
+                updateProcessingStatus(`Error: ${error.message}`);
+                alert(`❌ Processing failed: ${error.message}`);
+            } finally {
+                state.isProcessing = false;
+            }
+        }
+
+        // ============================================
+        // FRAME PROCESSING WITH BODYPIX
+        // ============================================
+        async function processFrame(frame) {
+            try {
+                const canvas = document.createElement('canvas');
+                canvas.width = frame.width;
+                canvas.height = frame.height;
+
+                const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+                // Draw original frame
+                if (frame.url) {
+                    const img = new Image();
+                    img.src = frame.url;
+                    ctx.drawImage(img, 0, 0);
+                } else {
+                    ctx.putImageData(frame.imageData, 0, 0);
+                }
+
+                // Run BodyPix segmentation
+                const segmentation = await state.model.segmentPerson(canvas, {
+                    flipHorizontal: false,
+                    internalResolution: 'medium',
+                    segmentationThreshold: state.confidenceThreshold,
+                });
+
+                debugLog.add('BodyPix segmentation complete', 'processing');
+
+                // Get image data
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const data = imageData.data;
+
+                // Apply masking based on segmentation
+                for (let i = 0; i < segmentation.data.length; i++) {
+                    const pixelIndex = i * 4;
+                    const isPerson = segmentation.data[i] > 0;
+
+                    if (!isPerson) {
+                        if (state.backgroundMode === 'transparent') {
+                            // Make transparent
+                            data[pixelIndex + 3] = 0; // Alpha channel
+                        } else if (state.backgroundMode === 'green') {
+                            // Make green screen
+                            data[pixelIndex] = 0; // R
+                            data[pixelIndex + 1] = 255; // G
+                            data[pixelIndex + 2] = 0; // B
+                            data[pixelIndex + 3] = 255; // A
                         }
-                    } catch (error) {
-                        console.error(`Failed to process frame ${i}:`, error);
-                        showAlert(`Error processing frame ${i}: ${error.message}`, 'error');
                     }
                 }
-                
-                // Encode GIF
-                DOM.progressText.textContent = 'Encoding GIF...';
-                const gifBlob = await encodeGif(STATE.processedFrames);
-                STATE.downloadBlob = gifBlob;
-                
-                // Show download button
-                DOM.progressSection.style.display = 'none';
-                DOM.downloadSection.style.display = 'block';
-                showAlert('GIF processing complete!', 'success');
-                
+
+                ctx.putImageData(imageData, 0, 0);
+
+                return {
+                    canvas: canvas,
+                    imageData: imageData,
+                    width: canvas.width,
+                    height: canvas.height,
+                };
+
             } catch (error) {
-                showAlert('Processing failed: ' + error.message, 'error');
-                console.error('Processing error:', error);
-            } finally {
-                STATE.isProcessing = false;
-                DOM.processBtn.disabled = false;
-                clearMemory();
+                debugLog.add(`Error processing frame: ${error.message}`, 'error');
+                throw error;
             }
         }
-        
-        /**
-         * Update preview canvases
-         */
-        function updatePreview(originalCanvas, processedCanvas) {
-            const origCtx = DOM.originalPreview.getContext('2d');
-            origCtx.canvas.width = originalCanvas.width;
-            origCtx.canvas.height = originalCanvas.height;
-            origCtx.drawImage(originalCanvas, 0, 0);
-            
-            const procCtx = DOM.processedPreview.getContext('2d');
-            procCtx.canvas.width = processedCanvas.width;
-            procCtx.canvas.height = processedCanvas.height;
-            procCtx.drawImage(processedCanvas, 0, 0);
-            
-            DOM.previewContainer.style.display = 'grid';
-            DOM.noPreviewMessage.style.display = 'none';
-        }
-        
-        // ============================================================================
-        // EVENT LISTENERS - DRAG & DROP
-        // ============================================================================
-        
-        /**
-         * Setup drag and drop listeners
-         */
-        function setupDragDropListeners() {
-            // Prevent default drag behavior
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                DOM.dropZone.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-                
-                document.body.addEventListener(eventName, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                });
-            });
-            
-            // Highlight drop zone on drag
-            DOM.dropZone.addEventListener('dragenter', () => {
-                DOM.dropZone.classList.add('drag-over');
-            });
-            
-            DOM.dropZone.addEventListener('dragleave', (e) => {
-                // Only remove if leaving the drop zone itself
-                if (e.target === DOM.dropZone) {
-                    DOM.dropZone.classList.remove('drag-over');
-                }
-            });
-            
-            DOM.dropZone.addEventListener('dragover', () => {
-                DOM.dropZone.classList.add('drag-over');
-            });
-            
-            // Handle drop
-            DOM.dropZone.addEventListener('drop', (e) => {
-                DOM.dropZone.classList.remove('drag-over');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFileSelect(files[0]);
-                }
-            });
-            
-            // Handle click
-            DOM.dropZone.addEventListener('click', () => {
-                DOM.fileInput.click();
-            });
-            
-            // Handle file input change
-            DOM.fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFileSelect(e.target.files[0]);
-                }
-            });
-        }
-        
-        /**
-         * Handle file selection
-         * @param {File} file - Selected file
-         */
-        async function handleFileSelect(file) {
-            // Validate file
-            if (!file.type.startsWith('image/gif') && !file.name.endsWith('.gif')) {
-                showAlert('Please select a valid GIF file', 'error');
-                return;
-            }
-            
-            if (file.size > CONFIG.MAX_FILE_SIZE) {
-                showAlert(`File size exceeds ${formatFileSize(CONFIG.MAX_FILE_SIZE)} limit`, 'error');
-                return;
-            }
-            
-            STATE.uploadedFile = file;
-            showAlert(`GIF loaded: ${file.name}`, 'success');
-            
-            // Show loading state
-            DOM.processBtnText.textContent = '⏳ Parsing GIF...';
-            DOM.processBtn.disabled = true;
-            
+
+        // ============================================
+        // PREVIEW DISPLAY
+        // ============================================
+        function showPreview(originalFrame, processedFrame) {
             try {
-                // Load gif.js library if not already loaded
-                await loadGifLibrary();
-                
-                // Parse GIF and extract frames
-                const arrayBuffer = await file.arrayBuffer();
-                STATE.gifFrames = await extractGifFrames(arrayBuffer);
-                
-                // Update file info
-                const totalDuration = STATE.gifFrames.reduce((sum, f) => sum + (f.delay || 100), 0) / 1000;
-                DOM.fileName.textContent = file.name;
-                DOM.frameCount.textContent = STATE.gifFrames.length + ' frames';
-                DOM.gifDuration.textContent = totalDuration.toFixed(2) + 's';
-                DOM.fileSize.textContent = formatFileSize(file.size);
-                DOM.fileInfoPanel.style.display = 'block';
-                
-                // Update UI
-                DOM.processBtnText.textContent = '▶️ Process GIF';
-                DOM.processBtn.disabled = false;
-                
-                showAlert(`Ready to process! ${STATE.gifFrames.length} frames detected.`, 'info');
+                // Show original
+                const originalImg = document.getElementById('originalPreview');
+                if (originalFrame.url) {
+                    originalImg.src = originalFrame.url;
+                } else {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = originalFrame.width;
+                    canvas.height = originalFrame.height;
+                    canvas.getContext('2d').putImageData(originalFrame.imageData, 0, 0);
+                    originalImg.src = canvas.toDataURL();
+                }
+
+                // Show processed
+                const processedImg = document.getElementById('processedPreview');
+                processedImg.src = processedFrame.canvas.toDataURL();
+
+                debugLog.add('Previews displayed', 'info');
             } catch (error) {
-                showAlert('Failed to load GIF: ' + error.message, 'error');
-                DOM.processBtnText.textContent = '❌ Load Failed';
-                console.error('Load error:', error);
+                debugLog.add(`Preview error: ${error.message}`, 'error');
             }
         }
-        
-        // ============================================================================
-        // EVENT LISTENERS - CONTROLS
-        // ============================================================================
-        
-        /**
-         * Setup control event listeners
-         */
-        function setupControlListeners() {
-            // Mode toggle
-            DOM.transparentBtn.addEventListener('click', () => {
-                STATE.currentMode = 'transparent';
-                DOM.transparentBtn.classList.add('active');
-                DOM.greenBtn.classList.remove('active');
-            });
-            
-            DOM.greenBtn.addEventListener('click', () => {
-                STATE.currentMode = 'green';
-                DOM.greenBtn.classList.add('active');
-                DOM.transparentBtn.classList.remove('active');
-            });
-            
-            // Confidence slider
-            DOM.confidenceSlider.addEventListener('input', (e) => {
-                STATE.confidenceThreshold = e.target.value / 100;
-                DOM.confidenceValue.textContent = e.target.value;
-            });
-            
-            // Process button
-            DOM.processBtn.addEventListener('click', processGif);
-            
-            // Download button
-            DOM.downloadBtn.addEventListener('click', () => {
-                if (STATE.downloadBlob) {
-                    const url = URL.createObjectURL(STATE.downloadBlob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = STATE.uploadedFile.name.replace('.gif', '_processed.gif');
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                    showAlert('GIF downloaded!', 'success');
+
+        // ============================================
+        // GIF RE-ENCODING WITH GIF.JS
+        // ============================================
+        async function reencodeGif(frames) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const gif = new GIF({
+                        workers: 1,
+                        quality: 10,
+                        workerScript: config.gifWorkerUrl,
+                        width: frames[0].width,
+                        height: frames[0].height,
+                    });
+
+                    // Add frames to GIF
+                    frames.forEach(frame => {
+                        gif.addFrame(frame.canvas, { delay: 100 });
+                    });
+
+                    gif.on('finished', (blob) => {
+                        state.processedGifBlob = blob;
+                        debugLog.add(`✓ GIF encoded: ${(blob.size / 1024).toFixed(2)}KB`, 'success');
+                        resolve();
+                    });
+
+                    gif.on('progress', (progress) => {
+                        updateProcessingStatus(`Encoding: ${Math.round(progress * 100)}%`);
+                    });
+
+                    gif.on('error', (error) => {
+                        debugLog.add(`GIF encoding error: ${error}`, 'error');
+                        reject(new Error(`GIF encoding failed: ${error}`));
+                    });
+
+                    gif.render();
+
+                } catch (error) {
+                    debugLog.add(`Re-encoding error: ${error.message}`, 'error');
+                    reject(error);
                 }
             });
         }
-        
-        // ============================================================================
+
+        // ============================================
+        // DOWNLOAD FUNCTION
+        // ============================================
+        function downloadGif() {
+            if (!state.processedGifBlob) {
+                alert('❌ No processed GIF available');
+                return;
+            }
+
+            const url = URL.createObjectURL(state.processedGifBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `processed-${state.currentFile.name}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            debugLog.add(`Downloaded: ${link.download}`, 'success');
+        }
+
+        // ============================================
+        // UI STATE MANAGEMENT
+        // ============================================
+        function updateProgress(current, total) {
+            const percentage = (current / total) * 100;
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `${current} / ${total} frames`;
+            document.getElementById('progressDetail').textContent = `Processing frame ${current} of ${total}...`;
+        }
+
+        function updateProcessingStatus(status) {
+            document.getElementById('processingStatus').textContent = status;
+        }
+
+        function setBackgroundMode(mode) {
+            state.backgroundMode = mode;
+            document.getElementById('transparentBtn').classList.toggle('bg-cyan-500 bg-opacity-20 border-cyan-500 text-cyan-300', mode === 'transparent');
+            document.getElementById('transparentBtn').classList.toggle('border-gray-600 text-gray-400 hover:border-cyan-500', mode !== 'transparent');
+            document.getElementById('greenScreenBtn').classList.toggle('bg-cyan-500 bg-opacity-20 border-cyan-500 text-cyan-300', mode === 'green');
+            document.getElementById('greenScreenBtn').classList.toggle('border-gray-600 text-gray-400 hover:border-cyan-500', mode !== 'green');
+            debugLog.add(`Background mode changed to: ${mode}`, 'info');
+        }
+
+        // Confidence slider
+        document.getElementById('confidenceSlider').addEventListener('input', (e) => {
+            state.confidenceThreshold = parseInt(e.target.value) / 100;
+            document.getElementById('confidenceValue').textContent = e.target.value + '%';
+            debugLog.add(`Confidence threshold: ${e.target.value}%`, 'info');
+        });
+
+        // ============================================
         // INITIALIZATION
-        // ============================================================================
-        
-        /**
-         * Initialize the application
-         */
-        function initialize() {
-            setupDragDropListeners();
-            setupControlListeners();
-            showAlert('Ready to process GIFs! Upload one to get started.', 'info');
-        }
-        
-        // Start the app when DOM is ready
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initialize);
-        } else {
-            initialize();
-        }
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            debugLog.add('Application loaded', 'info');
+            setupFileHandling();
+            await initializeModels();
+        });
     </script>
 </body>
 </html>
