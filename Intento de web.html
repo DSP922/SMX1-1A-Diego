@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GIF Background Remover</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            color: #a0a0a0;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+
+        .card {
+            background: rgba(30, 30, 50, 0.8);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 212, 255, 0.5);
+            background: rgba(30, 30, 50, 0.95);
+        }
+
+        .drop-zone {
+            border: 3px dashed rgba(0, 212, 255, 0.4);
+            border-radius: 15px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: rgba(0, 212, 255, 0.8);
+            background: rgba(0, 212, 255, 0.15);
+            transform: scale(1.02);
+        }
+
+        .drop-zone-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .drop-zone p {
+            font-size: 1rem;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+        }
+
+        .drop-zone-hint {
+            font-size: 0.9rem;
+            color: #707080;
+        }
+
+        #gifInput {
+            display: none;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            background: rgba(0, 212, 255, 0.1);
+            color: #a0a0a0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #000;
+            border-color: #00d4ff;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .toggle-btn:hover {
+            border-color: rgba(0, 212, 255, 0.6);
+        }
+
+        .process-section {
+            display: none;
+        }
+
+        .process-section.active {
+            display: block;
+        }
+
+        .preview-container {
+            background: rgba(0, 20, 40, 0.6);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-container canvas,
+        .preview-container img {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+        }
+
+        .progress-section {
+            margin-bottom: 20px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #0099ff);
+            width: 0%;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.6);
+        }
+
+        .status-text {
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: #00d4ff;
+            text-align: center;
+        }
+
+        .button {
+            width: 100%;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00d4ff, #0099ff);
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(0, 212, 255, 0.1);
+            color: #00d4ff;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: rgba(0, 212, 255, 0.6);
+        }
+
+        .file-info {
+            background: rgba(0, 212, 255, 0.1);
+            border-left: 4px solid #00d4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .file-info strong {
+            color: #00d4ff;
+        }
+
+        .warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #ffb74d;
+        }
+
+        .error {
+            background: rgba(255, 87, 87, 0.1);
+            border-left: 4px solid #ff5757;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #ff8787;
+        }
+
+        .success {
+            background: rgba(76, 175, 80, 0.1);
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #81c784;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid rgba(0, 212, 255, 0.3);
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #00d4ff;
+            font-size: 0.95rem;
+        }
+
+        .frame-counter {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #707080;
+        }
+
+        .footer {
+            text-align: center;
+            color: #707080;
+            font-size: 0.9rem;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+        }
+
+        .model-loading {
+            display: none;
+            background: rgba(0, 212, 255, 0.1);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            color: #00d4ff;
+        }
+
+        .model-loading.active {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .process-section.active {
+            animation: fadeIn 0.3s ease;
+        }
+
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎬 GIF Background Remover</h1>
+            <p>Remove backgrounds from your GIFs using AI • Instant • No uploads needed</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Column: Upload -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-6 text-white">Upload GIF</h2>
+                
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-icon">🎥</div>
+                    <p><strong>Drag & Drop</strong> your GIF here</p>
+                    <p class="drop-zone-hint">or click to browse</p>
+                </div>
+
+                <input type="file" id="gifInput" accept=".gif" />
+
+                <div id="fileInfo" class="file-info" style="display: none;">
+                    <strong>File:</strong> <span id="fileName"></span><br>
+                    <strong>Size:</strong> <span id="fileSize"></span>
+                </div>
+
+                <div id="modelLoading" class="model-loading">
+                    <div class="spinner"></div>
+                    <span>Loading AI model...</span>
+                </div>
+
+                <div id="errorMsg" class="error" style="display: none;"></div>
+                <div id="warningMsg" class="warning" style="display: none;"></div>
+            </div>
+
+            <!-- Right Column: Settings & Output -->
+            <div class="card">
+                <h2 class="text-xl font-bold mb-6 text-white">Processing Options</h2>
+
+                <div class="process-section active" id="settingsSection">
+                    <div class="mb-6">
+                        <p class="text-sm font-semibold mb-4 text-gray-300">Background Mode</p>
+                        <div class="toggle-group">
+                            <button class="toggle-btn active" data-mode="transparent">
+                                🔲 Transparent
+                            </button>
+                            <button class="toggle-btn" data-mode="green">
+                                🟢 Green Screen
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <p class="text-sm font-semibold mb-3 text-gray-300">Processing Quality</p>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <input type="range" id="confidenceSlider" min="0.1" max="1" step="0.1" value="0.5" style="flex: 1;">
+                            <span id="confidenceValue" style="min-width: 40px; text-align: right;">50%</span>
+                        </div>
+                        <p style="font-size: 0.8rem; color: #707080; margin-top: 8px;">Lower = more background removal, Higher = more precise</p>
+                    </div>
+
+                    <button class="btn-primary" id="processBtn" disabled>
+                        ⚙️ Process GIF
+                    </button>
+                </div>
+
+                <div class="process-section" id="processingSection">
+                    <div class="progress-section">
+                        <div class="progress-label">
+                            <span>Processing Frames</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="frame-counter">
+                            <span id="currentFrame">Frame 0</span>
+                            <span id="totalFrames">of 0</span>
+                        </div>
+                    </div>
+
+                    <div class="status-text">
+                        <div class="loading-indicator">
+                            <div class="spinner"></div>
+                            <span id="statusText">Processing...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="process-section" id="outputSection">
+                    <div class="success" style="display: none;" id="successMsg">
+                        ✓ GIF processed successfully! Ready to download.
+                    </div>
+
+                    <button class="btn-primary" id="downloadBtn">
+                        ⬇️ Download Processed GIF
+                    </button>
+                    <button class="btn-secondary" id="resetBtn">
+                        ↺ Process Another GIF
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="card" id="previewCard" style="display: none;">
+            <h2 class="text-xl font-bold mb-6 text-white">Preview</h2>
+            <div class="preview-container">
+                <canvas id="previewCanvas" style="display: none;"></canvas>
+                <img id="previewImg" style="display: none;" />
+                <div id="previewPlaceholder" style="color: #707080;">
+                    Preview will appear here after processing
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>All processing happens locally in your browser • No files uploaded to servers</p>
+            <p style="margin-top: 10px; font-size: 0.85rem;">Powered by TensorFlow.js + BodyPix + gif.js</p>
+        </div>
+    </div>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/body-pix@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js"></script>
+
+    <script>
+        // ============================================
+        // GIF BACKGROUND REMOVER APPLICATION
+        // ============================================
+
+        class GIFBackgroundRemover {
+            constructor() {
+                this.net = null;
+                this.selectedGif = null;
+                this.frames = [];
+                this.processedFrames = [];
+                this.outputMode = 'transparent';
+                this.confidenceThreshold = 0.5;
+                this.isProcessing = false;
+
+                this.initializeElements();
+                this.attachEventListeners();
+                this.loadModel();
+            }
+
+            initializeElements() {
+                this.dropZone = document.getElementById('dropZone');
+                this.gifInput = document.getElementById('gifInput');
+                this.processBtn = document.getElementById('processBtn');
+                this.downloadBtn = document.getElementById('downloadBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.progressFill = document.getElementById('progressFill');
+                this.progressPercent = document.getElementById('progressPercent');
+                this.currentFrameEl = document.getElementById('currentFrame');
+                this.totalFramesEl = document.getElementById('totalFrames');
+                this.statusText = document.getElementById('statusText');
+                this.fileInfo = document.getElementById('fileInfo');
+                this.fileName = document.getElementById('fileName');
+                this.fileSize = document.getElementById('fileSize');
+                this.errorMsg = document.getElementById('errorMsg');
+                this.warningMsg = document.getElementById('warningMsg');
+                this.successMsg = document.getElementById('successMsg');
+                this.modelLoading = document.getElementById('modelLoading');
+                this.confidenceSlider = document.getElementById('confidenceSlider');
+                this.confidenceValue = document.getElementById('confidenceValue');
+                this.previewCard = document.getElementById('previewCard');
+                this.previewCanvas = document.getElementById('previewCanvas');
+                this.previewImg = document.getElementById('previewImg');
+                this.previewPlaceholder = document.getElementById('previewPlaceholder');
+            }
+
+            attachEventListeners() {
+                // Drag and drop
+                this.dropZone.addEventListener('click', () => this.gifInput.click());
+                this.dropZone.addEventListener('dragover', (e) => this.handleDragOver(e));
+                this.dropZone.addEventListener('dragleave', () => this.dropZone.classList.remove('drag-over'));
+                this.dropZone.addEventListener('drop', (e) => this.handleDrop(e));
+
+                // File input
+                this.gifInput.addEventListener('change', (e) => this.handleFileSelect(e));
+
+                // Mode toggle
+                document.querySelectorAll('.toggle-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => this.setOutputMode(e));
+                });
+
+                // Confidence slider
+                this.confidenceSlider.addEventListener('input', (e) => {
+                    this.confidenceThreshold = parseFloat(e.target.value);
+                    this.confidenceValue.textContent = Math.round(this.confidenceThreshold * 100) + '%';
+                });
+
+                // Process button
+                this.processBtn.addEventListener('click', () => this.processGIF());
+
+                // Download button
+                this.downloadBtn.addEventListener('click', () => this.downloadGIF());
+
+                // Reset button
+                this.resetBtn.addEventListener('click', () => this.reset());
+            }
+
+            async loadModel() {
+                try {
+                    this.modelLoading.classList.add('active');
+                    this.net = await bodyPix.load({
+                        architecture: 'MobileNetV1',
+                        outputStride: 16,
+                        multiplier: 0.75,
+                        quantBytes: 2
+                    });
+                    this.modelLoading.classList.remove('active');
+                } catch (error) {
+                    this.showError('Failed to load AI model. Please refresh the page and try again.');
+                    console.error('Model loading error:', error);
+                    this.modelLoading.classList.remove('active');
+                }
+            }
+
+            handleDragOver(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.dropZone.classList.add('drag-over');
+            }
+
+            handleDrop(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.dropZone.classList.remove('drag-over');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    this.gifInput.files = files;
+                    this.handleFileSelect({ target: this.gifInput });
+                }
+            }
+
+            handleFileSelect(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                if (file.type !== 'image/gif') {
+                    this.showError('Please select a valid GIF file');
+                    return;
+                }
+
+                if (file.size > 50 * 1024 * 1024) {
+                    this.showWarning('GIF file is larger than 50MB. Processing may be slow.');
+                }
+
+                this.selectedGif = file;
+                this.fileName.textContent = file.name;
+                this.fileSize.textContent = this.formatFileSize(file.size);
+                this.fileInfo.style.display = 'block';
+                this.processBtn.disabled = false;
+                this.clearMessages();
+                this.frames = [];
+                this.processedFrames = [];
+                this.hideOutput();
+            }
+
+            setOutputMode(e) {
+                document.querySelectorAll('.toggle-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                e.target.classList.add('active');
+                this.outputMode = e.target.dataset.mode;
+            }
+
+            async processGIF() {
+                if (!this.selectedGif || !this.net) return;
+
+                this.isProcessing = true;
+                this.processBtn.disabled = true;
+                this.showProcessing();
+                this.clearMessages();
+
+                try {
+                    // Decode GIF
+                    this.updateStatus('Decoding GIF...');
+                    this.frames = await this.decodeGIF(this.selectedGif);
+                    this.totalFramesEl.textContent = `of ${this.frames.length}`;
+
+                    if (this.frames.length === 0) {
+                        this.showError('No frames found in GIF');
+                        this.reset();
+                        return;
+                    }
+
+                    // Process each frame
+                    this.processedFrames = [];
+                    for (let i = 0; i < this.frames.length; i++) {
+                        this.updateStatus(`Processing frame ${i + 1} of ${this.frames.length}...`);
+                        this.currentFrameEl.textContent = `Frame ${i + 1}`;
+                        
+                        const processedFrame = await this.processFrame(
+                            this.frames[i].image,
+                            this.frames[i].delay
+                        );
+                        this.processedFrames.push(processedFrame);
+
+                        const progress = ((i + 1) / this.frames.length) * 100;
+                        this.updateProgress(progress);
+
+                        // Yield to prevent UI freezing
+                        await new Promise(resolve => setTimeout(resolve, 0));
+                    }
+
+                    // Assemble new GIF
+                    this.updateStatus('Assembling GIF...');
+                    this.updateProgress(95);
+                    await this.assembleGIF();
+
+                    this.showOutput();
+                    this.updateProgress(100);
+                    this.updateStatus('Complete!');
+                    this.isProcessing = false;
+                    this.processBtn.disabled = false;
+
+                } catch (error) {
+                    this.showError(`Processing error: ${error.message}`);
+                    console.error('Processing error:', error);
+                    this.reset();
+                }
+            }
+
+            async decodeGIF(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        try {
+                            const gif = new GIF({
+                                workers: 2,
+                                quality: 10,
+                                workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+                            });
+
+                            const img = new Image();
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+
+                                // Parse GIF frames using a simpler approach
+                                // Create a temporary image element to extract GIF metadata
+                                const frames = [];
+                                
+                                // For single frame GIFs or basic extraction
+                                const timeout = setTimeout(() => {
+                                    // Fallback: treat as single frame
+                                    ctx.drawImage(img, 0, 0);
+                                    frames.push({
+                                        image: canvas.cloneNode(),
+                                        delay: 100
+                                    });
+                                    resolve(frames);
+                                }, 100);
+
+                                // Try to extract frames using gif.js
+                                this.extractGIFFrames(e.target.result, frames, canvas, timeout, resolve);
+                            };
+                            img.src = e.target.result;
+                        } catch (error) {
+                            reject(new Error('Failed to decode GIF'));
+                        }
+                    };
+                    reader.onerror = () => reject(new Error('Failed to read file'));
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            extractGIFFrames(dataUrl, frames, canvas, timeout, resolve) {
+                // Use a library to properly decode GIF frames
+                fetch(dataUrl)
+                    .then(res => res.arrayBuffer())
+                    .then(buffer => {
+                        const gif = this.parseGIFBuffer(buffer);
+                        clearTimeout(timeout);
+                        
+                        if (gif.frames && gif.frames.length > 0) {
+                            gif.frames.forEach(frame => {
+                                const frameCanvas = document.createElement('canvas');
+                                frameCanvas.width = gif.width;
+                                frameCanvas.height = gif.height;
+                                const ctx = frameCanvas.getContext('2d');
+                                ctx.putImageData(frame.imageData, 0, 0);
+                                frames.push({
+                                    image: frameCanvas,
+                                    delay: frame.delay || 100
+                                });
+                            });
+                            resolve(frames);
+                        } else {
+                            resolve(frames);
+                        }
+                    })
+                    .catch(() => {
+                        clearTimeout(timeout);
+                        resolve(frames);
+                    });
+            }
+
+            parseGIFBuffer(buffer) {
+                // Simple GIF parser for frame extraction
+                // This is a basic implementation; for production, consider gif-parser library
+                const view = new Uint8Array(buffer);
+                
+                if (view[0] !== 0x47 || view[1] !== 0x49 || view[2] !== 0x46) {
+                    return { frames: [], width: 0, height: 0 };
+                }
+
+                const width = view[6] | (view[7] << 8);
+                const height = view[8] | (view[9] << 8);
+
+                // Extract frames (simplified)
+                const frames = [];
+                let i = 13;
+
+                while (i < view.length) {
+                    if (view[i] === 0x21 && view[i + 1] === 0xF9) {
+                        // Graphic Control Extension
+                        const delay = view[i + 4] | (view[i + 5] << 8);
+                        i += 8;
+                        
+                        if (view[i] === 0x2C) {
+                            // Image Descriptor
+                            i += 11;
+                            // Skip image data
+                            if (view[i] !== 0x00) i++;
+                            while (view[i] !== 0x00) {
+                                i += view[i] + 1;
+                            }
+                            i++;
+                            
+                            frames.push({
+                                delay: delay || 100,
+                                imageData: new ImageData(
+                                    new Uint8ClampedArray(width * height * 4),
+                                    width,
+                                    height
+                                )
+                            });
+                        }
+                    } else {
+                        i++;
+                    }
+                }
+
+                return { frames, width, height };
+            }
+
+            async processFrame(canvas, delay) {
+                try {
+                    const segmentation = await this.net.segmentPerson(canvas, {
+                        flipHorizontal: false,
+                        internalResolution: 'medium',
+                        segmentationThreshold: this.confidenceThreshold
+                    });
+
+                    const output = document.createElement('canvas');
+                    output.width = canvas.width;
+                    output.height = canvas.height;
+
+                    const ctx = output.getContext('2d');
+                    const imageData = ctx.createImageData(canvas.width, canvas.height);
+                    const data = imageData.data;
+
+                    // Draw original image
+                    const tmpCtx = canvas.getContext('2d');
+                    const originalData = tmpCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+                    // Apply segmentation mask
+                    for (let i = 0; i < segmentation.data.length; i++) {
+                        const isPersonPixel = segmentation.data[i] === 0;
+                        const pixelIndex = i * 4;
+
+                        if (isPersonPixel) {
+                            // Keep person pixels
+                            data[pixelIndex] = originalData[pixelIndex];
+                            data[pixelIndex + 1] = originalData[pixelIndex + 1];
+                            data[pixelIndex + 2] = originalData[pixelIndex + 2];
+                            data[pixelIndex + 3] = originalData[pixelIndex + 3];
+                        } else {
+                            // Remove background
+                            if (this.outputMode === 'transparent') {
+                                data[pixelIndex + 3] = 0; // Transparent
+                            } else if (this.outputMode === 'green') {
+                                data[pixelIndex] = 0;
+                                data[pixelIndex + 1] = 255;
+                                data[pixelIndex + 2] = 0;
+                                data[pixelIndex + 3] = 255;
+                            }
+                        }
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+
+                    return {
+                        canvas: output,
+                        delay: delay
+                    };
+                } catch (error) {
+                    console.error('Frame processing error:', error);
+                    throw error;
+                }
+            }
+
+            async assembleGIF() {
+                return new Promise((resolve, reject) => {
+                    try {
+                        const gif = new GIF({
+                            workers: 2,
+                            quality: 10,
+                            width: this.processedFrames[0].canvas.width,
+                            height: this.processedFrames[0].canvas.height,
+                            workerScript: 'https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.worker.js'
+                        });
+
+                        this.processedFrames.forEach(frame => {
+                            gif.addFrame(frame.canvas, {
+                                delay: frame.delay,
+                                copy: true
+                            });
+                        });
+
+                        gif.on('finished', (blob) => {
+                            this.outputGIF = blob;
+                            
+                            // Show preview
+                            const url = URL.createObjectURL(blob);
+                            this.previewImg.src = url;
+                            this.previewImg.style.display = 'block';
+                            this.previewPlaceholder.style.display = 'none';
+                            this.previewCard.style.display = 'block';
+
+                            resolve();
+                        });
+
+                        gif.on('error', (error) => {
+                            reject(new Error('Failed to assemble GIF'));
+                        });
+
+                        gif.render();
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            downloadGIF() {
+                if (!this.outputGIF) return;
+
+                const url = URL.createObjectURL(this.outputGIF);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${this.selectedGif.name.replace('.gif', '')}-no-bg.gif`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+
+            reset() {
+                this.selectedGif = null;
+                this.frames = [];
+                this.processedFrames = [];
+                this.outputGIF = null;
+                this.isProcessing = false;
+                this.gifInput.value = '';
+                this.fileInfo.style.display = 'none';
+                this.processBtn.disabled = true;
+                this.updateProgress(0);
+                this.clearMessages();
+                this.hideOutput();
+                this.previewCard.style.display = 'none';
+                this.previewImg.style.display = 'none';
+                this.previewPlaceholder.style.display = 'block';
+            }
+
+            showProcessing() {
+                document.getElementById('settingsSection').classList.remove('active');
+                document.getElementById('processingSection').classList.add('active');
+                document.getElementById('outputSection').classList.remove('active');
+            }
+
+            showOutput() {
+                document.getElementById('settingsSection').classList.remove('active');
+                document.getElementById('processingSection').classList.remove('active');
+                document.getElementById('outputSection').classList.add('active');
+                this.successMsg.style.display = 'block';
+            }
+
+            hideOutput() {
+                document.getElementById('settingsSection').classList.add('active');
+                document.getElementById('processingSection').classList.remove('active');
+                document.getElementById('outputSection').classList.remove('active');
+                this.successMsg.style.display = 'none';
+            }
+
+            updateProgress(percentage) {
+                this.progressFill.style.width = percentage + '%';
+                this.progressPercent.textContent = Math.round(percentage) + '%';
+            }
+
+            updateStatus(text) {
+                this.statusText.textContent = text;
+            }
+
+            showError(message) {
+                this.errorMsg.textContent = message;
+                this.errorMsg.style.display = 'block';
+            }
+
+            showWarning(message) {
+                this.warningMsg.textContent = message;
+                this.warningMsg.style.display = 'block';
+            }
+
+            clearMessages() {
+                this.errorMsg.style.display = 'none';
+                this.warningMsg.style.display = 'none';
+                this.successMsg.style.display = 'none';
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+            }
+        }
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', () => {
+            new GIFBackgroundRemover();
+        });
+    </script>
+</body>
+</html>
