@@ -12,13 +12,19 @@
         }
 
         :root {
-            --primary: #8B7AA8;
-            --secondary: #A895BD;
-            --accent: #C9B8D4;
-            --light-bg: #F5F0F8;
-            --gray-text: #6B6B6B;
+            --primary-dark: #000000;
+            --primary-dark-lighter: #0a0a0a;
+            --neon-green: #00FF88;
+            --neon-green-dim: #00CC6F;
+            --neon-blue: #00AEEF;
+            --neon-blue-dim: #0088BB;
             --white: #FFFFFF;
-            --border: #E8DFF3;
+            --white-dim: #E8E8E8;
+            --text-light: #CCCCCC;
+            --text-lighter: #999999;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-bg-dark: rgba(0, 0, 0, 0.4);
+            --glass-border: rgba(0, 255, 136, 0.1);
         }
 
         html {
@@ -28,51 +34,129 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: var(--gray-text);
-            background: var(--white);
+            color: var(--text-light);
+            background: var(--primary-dark);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* BACKGROUND ANIMATION & DECORATIVE ELEMENTS */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.03) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 174, 239, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Neon dots network background */
+        .neon-dots {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .dot {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--neon-green);
+            border-radius: 50%;
+            opacity: 0.3;
+            box-shadow: 0 0 10px var(--neon-green);
         }
 
         /* NAVEGACIÓN STICKY */
         nav {
-            position: sticky;
-            top: 0;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: var(--white);
-            padding: 1rem 2rem;
-            z-index: 1000;
-            box-shadow: 0 2px 8px rgba(139, 122, 168, 0.2);
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            z-index: 999;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
         nav ul {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             list-style: none;
-            gap: 2rem;
-            flex-wrap: wrap;
+            gap: 0.8rem;
         }
 
         nav a {
-            color: var(--white);
+            color: var(--text-light);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.3s ease;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        nav a::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 0;
+            background: var(--neon-green);
+            border-radius: 2px;
+            transition: height 0.3s ease;
         }
 
         nav a:hover {
-            color: #FFE5CC;
+            color: var(--neon-green);
+            background: rgba(0, 255, 136, 0.1);
         }
 
-        /* ANIMACIONES */
-        .fade-in {
-            opacity: 0;
-            animation: fadeIn 0.8s ease-in-out forwards;
+        nav a:hover::before {
+            height: 20px;
         }
 
-        @keyframes fadeIn {
+        @media (max-width: 768px) {
+            nav {
+                top: auto;
+                bottom: 20px;
+                right: 20px;
+                padding: 0.8rem 1rem;
+            }
+
+            nav ul {
+                gap: 0.5rem;
+            }
+
+            nav a {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.8rem;
+            }
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeInDown {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(-30px);
             }
             to {
                 opacity: 1;
@@ -80,140 +164,230 @@
             }
         }
 
-        @keyframes flipOpen {
-            0% {
-                transform: rotateY(0);
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
                 opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes glow {
+            0%, 100% {
+                text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
             }
             50% {
-                transform: rotateY(90deg);
+                text-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green), 0 0 60px var(--neon-green);
             }
-            100% {
-                transform: rotateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* SECCIÓN HERO CON IMAGEN */
-        .hero {
-            background: linear-gradient(135deg, rgba(139, 122, 168, 0.85) 0%, rgba(168, 149, 189, 0.85) 100%), 
-                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="fabric" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="%23F5F0F8"/><line x1="0" y1="0" x2="100" y2="100" stroke="%23E8DFF3" stroke-width="2"/><line x1="100" y1="0" x2="0" y2="100" stroke="%23E8DFF3" stroke-width="2"/><circle cx="50" cy="50" r="30" fill="none" stroke="%23C9B8D4" stroke-width="1" opacity="0.5"/></pattern></defs><rect width="1200" height="600" fill="url(%23fabric)"/><g opacity="0.3"><path d="M 100 200 Q 300 100 500 200 T 900 200" stroke="%238B7AA8" stroke-width="3" fill="none"/><path d="M 150 300 Q 350 150 550 300 T 950 300" stroke="%23A895BD" stroke-width="3" fill="none"/><path d="M 120 400 L 1080 400" stroke="%23C9B8D4" stroke-width="2" opacity="0.6"/></g></svg>') center/cover;
-            color: var(--white);
-            padding: 8rem 2rem;
-            text-align: center;
-            min-height: 90vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::before {
-            content: '🧵';
-            position: absolute;
-            font-size: 200px;
-            opacity: 0.1;
-            top: -50px;
-            right: -50px;
-            animation: float 6s ease-in-out infinite;
         }
 
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(30px); }
+            50% { transform: translateY(20px); }
+        }
+
+        @keyframes pulse-border {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(0, 255, 136, 0.3), inset 0 0 15px rgba(0, 255, 136, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(0, 255, 136, 0.5), inset 0 0 25px rgba(0, 255, 136, 0.2);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-in-out forwards;
+        }
+
+        .fade-in:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .fade-in:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        /* SECCIÓN HERO */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 4rem 2rem;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary-dark-lighter) 0%, #0a1520 50%, var(--primary-dark) 100%);
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="tech-grid" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M 0 0 L 80 0 L 80 80 L 0 80 Z" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.03"/></pattern></defs><rect width="1200" height="600" fill="url(%23tech-grid)"/></svg>');
+            opacity: 0.4;
+            z-index: 1;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 10%;
+            right: 5%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            animation: float 20s ease-in-out infinite reverse;
+            z-index: 1;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 4.5rem;
             margin-bottom: 1.5rem;
-            font-weight: 700;
-            letter-spacing: -1px;
-            animation: fadeIn 1s ease;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            font-weight: 800;
+            letter-spacing: -2px;
+            color: var(--white);
+            position: relative;
+            z-index: 2;
+            animation: fadeInDown 1s ease;
+            background: linear-gradient(135deg, var(--white) 0%, var(--neon-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .hero .subtitle {
-            font-size: 1.3rem;
-            margin-bottom: 2rem;
-            max-width: 700px;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
             line-height: 1.8;
-            opacity: 0.95;
-            animation: fadeIn 1s ease 0.2s forwards;
+            color: var(--neon-green);
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1s ease 0.2s forwards;
             animation-fill-mode: both;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .hero .company-info {
-            font-size: 1rem;
+            font-size: 1.1rem;
             margin-bottom: 3rem;
-            opacity: 0.9;
-            animation: fadeIn 1s ease 0.4s forwards;
+            color: var(--text-light);
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1s ease 0.4s forwards;
             animation-fill-mode: both;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
         .cta-button {
             display: inline-block;
-            background: #FFE5CC;
-            color: var(--primary);
-            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            color: var(--primary-dark);
+            padding: 1.2rem 3rem;
             font-size: 1.1rem;
-            font-weight: 600;
+            font-weight: 700;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            animation: fadeIn 1s ease 0.6s forwards;
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1s ease 0.6s forwards;
             animation-fill-mode: both;
-            box-shadow: 0 4px 15px rgba(255, 229, 204, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .cta-button:hover {
-            background: #FFD4B3;
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 229, 204, 0.5);
+            transform: translateY(-5px);
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.6), 0 20px 40px rgba(0, 255, 136, 0.2);
+        }
+
+        .cta-button:active {
+            transform: translateY(-2px);
         }
 
         /* SECCIONES GENERALES */
         section {
+            position: relative;
             padding: 6rem 2rem;
             max-width: 1400px;
             margin: 0 auto;
-            min-height: 100vh;
+            min-height: auto;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            z-index: 2;
         }
 
         section h2 {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 4rem;
+            font-size: 3rem;
+            margin-bottom: 1rem;
             text-align: center;
-            font-weight: 700;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        section > p:first-of-type {
+            text-align: center;
+            color: var(--text-lighter);
+            margin-bottom: 3rem;
+            font-size: 1.1rem;
+            animation: fadeInUp 0.8s ease 0.2s forwards;
+            animation-fill-mode: both;
         }
 
         section h3 {
             font-size: 1.3rem;
-            color: var(--primary);
+            color: var(--neon-green);
             margin-bottom: 1rem;
-            font-weight: 600;
+            font-weight: 700;
         }
 
-        /* TARJETAS INTERACTIVAS - PROBLEMA Y TECNOLOGÍAS */
+        #problema,
+        #flujo,
+        #impacto {
+            background: linear-gradient(135deg, var(--primary-dark-lighter) 0%, #0a1520 100%);
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        #tecnologias,
+        #roi,
+        #cronograma {
+            background: var(--primary-dark);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        /* TARJETAS INTERACTIVAS */
         .cards-grid-compact {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1.2rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1.5rem;
             margin-top: 2rem;
         }
 
         .card-flip {
             perspective: 1000px;
-            height: 180px;
+            height: 200px;
             cursor: pointer;
             position: relative;
         }
@@ -222,7 +396,7 @@
             position: relative;
             width: 100%;
             height: 100%;
-            transition: transform 0.6s;
+            transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             transform-style: preserve-3d;
         }
 
@@ -230,7 +404,8 @@
             transform: rotateY(180deg);
         }
 
-        .card-front, .card-back {
+        .card-front,
+        .card-back {
             position: absolute;
             width: 100%;
             height: 100%;
@@ -240,64 +415,67 @@
             align-items: center;
             justify-content: center;
             border-radius: 12px;
-            padding: 1.2rem;
+            padding: 1.5rem;
             text-align: center;
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--glass-border);
+            transition: all 0.3s ease;
         }
 
         .card-front {
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--accent) 100%);
-            color: var(--white);
-            border: 2px solid var(--accent);
-            box-shadow: 0 4px 12px rgba(139, 122, 168, 0.15);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 174, 239, 0.05) 100%);
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 20px rgba(0, 255, 136, 0.05);
         }
 
         .card-back {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: var(--white);
+            background: linear-gradient(135deg, rgba(0, 174, 239, 0.1) 0%, rgba(0, 255, 136, 0.05) 100%);
+            border: 2px solid var(--neon-blue);
             transform: rotateY(180deg);
-            border: 2px solid var(--primary);
-            box-shadow: 0 4px 12px rgba(139, 122, 168, 0.25);
+            box-shadow: 0 0 20px rgba(0, 174, 239, 0.2), inset 0 0 20px rgba(0, 174, 239, 0.05);
+        }
+
+        .card-flip:hover .card-front {
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4), inset 0 0 20px rgba(0, 255, 136, 0.1);
+            transform: translateY(-5px);
+        }
+
+        .card-flip:hover .card-back {
+            box-shadow: 0 0 30px rgba(0, 174, 239, 0.4), inset 0 0 20px rgba(0, 174, 239, 0.1);
+            transform: translateY(-5px);
         }
 
         .card-icon {
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin-bottom: 0.8rem;
+            animation: float 3s ease-in-out infinite;
         }
 
         .card-title {
-            font-size: 0.85rem;
-            font-weight: 600;
+            font-size: 0.95rem;
+            font-weight: 700;
             line-height: 1.3;
+            color: var(--neon-green);
         }
 
         .card-description {
-            font-size: 0.75rem;
-            line-height: 1.4;
+            font-size: 0.8rem;
+            line-height: 1.5;
             opacity: 0.95;
+            color: var(--text-light);
         }
 
-        /* SECCIÓN PROBLEMA ACTUAL */
-        #problema {
-            background: var(--light-bg);
-        }
-
-        /* SECCIÓN TECNOLOGÍAS */
-        #tecnologias {
-            background: var(--white);
-        }
-
-        /* DIAGRAMA FLUJO */
-        #flujo {
-            background: var(--light-bg);
-        }
-
+        /* FLOW DIAGRAM */
         .flow-diagram {
-            background: var(--white);
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 2.5rem;
             margin-top: 2rem;
             overflow-x: auto;
-            border: 2px solid var(--border);
+            border: 2px solid var(--glass-border);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
         }
 
         .flow-container {
@@ -309,12 +487,12 @@
         }
 
         .flow-box {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: var(--white);
+            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            color: var(--primary-dark);
             padding: 1.5rem 1.2rem;
             border-radius: 10px;
             text-align: center;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.9rem;
             min-width: 140px;
             flex: 1;
@@ -322,14 +500,23 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 12px rgba(139, 122, 168, 0.15);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .flow-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
         }
 
         .flow-arrow {
-            color: var(--secondary);
+            color: var(--neon-green);
             font-size: 2rem;
             font-weight: bold;
             flex-shrink: 0;
+            animation: float 2s ease-in-out infinite;
         }
 
         @media (max-width: 1024px) {
@@ -337,16 +524,13 @@
                 flex-direction: column;
                 gap: 2rem;
             }
+
             .flow-arrow {
                 transform: rotate(90deg);
             }
         }
 
-        /* SECCIÓN ROI */
-        #roi {
-            background: var(--white);
-        }
-
+        /* METRICS GRID */
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -355,95 +539,163 @@
         }
 
         .metric-card {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--neon-green);
             color: var(--white);
-            padding: 2rem;
+            padding: 2.5rem 2rem;
             border-radius: 12px;
             text-align: center;
-            box-shadow: 0 8px 20px rgba(139, 122, 168, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2), inset 0 0 20px rgba(0, 255, 136, 0.05);
             transition: all 0.3s ease;
-            border: 2px solid var(--accent);
         }
 
         .metric-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 12px 30px rgba(139, 122, 168, 0.3);
+            transform: translateY(-10px);
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.4), inset 0 0 20px rgba(0, 255, 136, 0.1);
+            border-color: var(--neon-blue);
         }
 
         .metric-value {
-            font-size: 2.8rem;
-            font-weight: 700;
-            margin: 1rem 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            font-size: 3rem;
+            font-weight: 800;
+            margin: 1.5rem 0;
+            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
         }
 
         .metric-label {
-            font-size: 1rem;
+            font-size: 0.95rem;
             opacity: 0.95;
-            font-weight: 500;
+            font-weight: 600;
+            color: var(--text-light);
         }
 
-        /* SECCIÓN IMPACTO */
-        #impacto {
-            background: var(--light-bg);
+        /* INVESTMENT BREAKDOWN */
+        .investment-breakdown {
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
+            padding: 2.5rem;
+            border-radius: 12px;
+            margin-top: 3rem;
+            border: 2px solid var(--glass-border);
+            box-shadow: 0 0 30px rgba(0, 174, 239, 0.1);
         }
 
+        .investment-breakdown h3 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--neon-blue);
+        }
+
+        .desglose-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            text-align: center;
+        }
+
+        .desglose-item {
+            background: linear-gradient(135deg, rgba(0, 174, 239, 0.1) 0%, rgba(0, 255, 136, 0.05) 100%);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .desglose-item:hover {
+            background: linear-gradient(135deg, rgba(0, 174, 239, 0.15) 0%, rgba(0, 255, 136, 0.1) 100%);
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+        }
+
+        .desglose-item strong {
+            color: var(--neon-blue);
+            display: block;
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .desglose-item::after {
+            content: attr(data-amount);
+            display: block;
+            color: var(--neon-green);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* IMPACT COLUMNS */
         .impact-columns {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
             margin-top: 2rem;
         }
 
         .impact-column {
-            background: var(--white);
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
             padding: 2.5rem;
             border-radius: 12px;
-            border-top: 5px solid var(--secondary);
-            box-shadow: 0 4px 12px rgba(139, 122, 168, 0.1);
-            border: 2px solid var(--border);
+            border: 2px solid var(--neon-green);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.15), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .impact-column:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.1);
         }
 
         .impact-column h3 {
-            color: var(--primary);
+            color: var(--neon-green);
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.8rem;
+            gap: 1rem;
+            font-size: 1.3rem;
         }
 
         .impact-icon {
-            font-size: 2rem;
+            font-size: 2.5rem;
         }
 
         .impact-stat {
-            background: linear-gradient(135deg, rgba(201, 184, 212, 0.1) 0%, rgba(169, 149, 189, 0.1) 100%);
-            padding: 1.2rem;
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 174, 239, 0.05) 100%);
+            padding: 1.5rem;
             border-radius: 8px;
-            margin-bottom: 1rem;
-            border-left: 4px solid var(--accent);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--neon-green);
+            border: 2px solid var(--glass-border);
         }
 
         .impact-stat-value {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--primary);
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .impact-stat-label {
             font-size: 0.85rem;
-            color: var(--gray-text);
-            margin-top: 0.3rem;
+            color: var(--text-lighter);
+            margin-top: 0.5rem;
         }
 
-        /* CRONOGRAMA */
-        #cronograma {
-            background: var(--white);
+        .impact-column p {
+            color: var(--text-light);
+            line-height: 1.8;
         }
 
+        /* TIMELINE */
         .timeline {
             position: relative;
-            padding: 2rem 0;
+            padding: 3rem 0;
             margin-top: 2rem;
         }
 
@@ -452,14 +704,41 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            width: 4px;
+            width: 2px;
             height: 100%;
-            background: linear-gradient(180deg, var(--secondary) 0%, var(--accent) 100%);
+            background: linear-gradient(180deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
         }
 
         .timeline-item {
             margin-bottom: 3rem;
             position: relative;
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .timeline-item:nth-child(1) {
+            animation-delay: 0.1s;
+        }
+        .timeline-item:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .timeline-item:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+        .timeline-item:nth-child(4) {
+            animation-delay: 0.4s;
+        }
+        .timeline-item:nth-child(5) {
+            animation-delay: 0.5s;
+        }
+        .timeline-item:nth-child(6) {
+            animation-delay: 0.6s;
+        }
+        .timeline-item:nth-child(7) {
+            animation-delay: 0.7s;
+        }
+        .timeline-item:nth-child(8) {
+            animation-delay: 0.8s;
         }
 
         .timeline-item:nth-child(odd) .timeline-content {
@@ -483,29 +762,50 @@
             transform: translateX(-50%);
             width: 20px;
             height: 20px;
-            background: #FFE5CC;
-            border: 4px solid var(--white);
+            background: var(--primary-dark);
+            border: 3px solid var(--neon-green);
             border-radius: 50%;
             z-index: 10;
-            box-shadow: 0 0 0 4px var(--secondary);
+            box-shadow: 0 0 20px var(--neon-green);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover .timeline-dot {
+            width: 30px;
+            height: 30px;
+            box-shadow: 0 0 30px var(--neon-green), 0 0 50px var(--neon-green);
         }
 
         .timeline-content {
-            background: linear-gradient(135deg, rgba(245, 240, 248, 1) 0%, rgba(232, 223, 243, 0.5) 100%);
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid var(--secondary);
-            border: 2px solid var(--border);
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
+            padding: 2rem;
+            border-radius: 10px;
+            border: 2px solid var(--glass-border);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover .timeline-content {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 174, 239, 0.05) 100%);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
         }
 
         .timeline-content h3 {
-            color: var(--primary);
-            margin-bottom: 0.5rem;
+            color: var(--neon-green);
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
         }
 
         .timeline-content p {
             font-size: 0.95rem;
-            color: var(--gray-text);
+            color: var(--text-light);
+            line-height: 1.6;
+        }
+
+        .timeline-content strong {
+            color: var(--neon-blue);
         }
 
         @media (max-width: 768px) {
@@ -515,8 +815,8 @@
 
             .timeline-item:nth-child(odd) .timeline-content,
             .timeline-item:nth-child(even) .timeline-content {
-                width: calc(100% - 2.5rem);
-                margin-left: 2.5rem;
+                width: calc(100% - 3rem);
+                margin-left: 3rem;
                 margin-right: 0;
                 text-align: left;
             }
@@ -527,17 +827,23 @@
 
             section {
                 padding: 4rem 1.5rem;
-                min-height: auto;
+            }
+
+            section h2 {
+                font-size: 2rem;
             }
         }
 
-        /* PIE DE PÁGINA */
+        /* FOOTER */
         footer {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            color: var(--white);
-            padding: 3rem 2rem;
+            background: linear-gradient(135deg, var(--primary-dark-lighter) 0%, #0a1520 100%);
+            color: var(--text-light);
+            padding: 4rem 2rem;
             text-align: center;
-            border-top: 4px solid var(--accent);
+            border-top: 2px solid var(--glass-border);
+            box-shadow: 0 -10px 40px rgba(0, 255, 136, 0.1);
+            position: relative;
+            z-index: 2;
         }
 
         .footer-content {
@@ -546,56 +852,165 @@
         }
 
         .footer-logo {
-            font-size: 1.5rem;
-            font-weight: 700;
+            font-size: 1.8rem;
+            font-weight: 800;
             margin-bottom: 1rem;
-            color: #FFE5CC;
+            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .footer-date {
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             opacity: 0.9;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-lighter);
         }
 
         .footer-disclaimer {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             opacity: 0.85;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(255,255,255,0.2);
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--glass-border);
             font-style: italic;
+            color: var(--text-lighter);
         }
 
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2rem;
+        /* COOKIE BANNER */
+        .cookie-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
+            border: 2px solid var(--neon-green);
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 350px;
+            z-index: 998;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .cookie-banner.hidden {
+            animation: slideOut 0.5s ease forwards;
+        }
+
+        @keyframes slideOut {
+            to {
+                transform: translateX(-120%);
+                opacity: 0;
+            }
+        }
+
+        .cookie-banner h4 {
+            color: var(--neon-green);
+            margin-bottom: 0.8rem;
+            font-size: 0.95rem;
+        }
+
+        .cookie-banner p {
+            color: var(--text-light);
+            font-size: 0.85rem;
+            margin-bottom: 1.2rem;
+            line-height: 1.5;
+        }
+
+        .cookie-buttons {
+            display: flex;
+            gap: 0.8rem;
+        }
+
+        .cookie-btn {
+            flex: 1;
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cookie-btn-accept {
+            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            color: var(--primary-dark);
+        }
+
+        .cookie-btn-accept:hover {
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .cookie-btn-reject {
+            background: transparent;
+            color: var(--neon-green);
+            border: 1px solid var(--neon-green);
+        }
+
+        .cookie-btn-reject:hover {
+            background: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
+
+        @media (max-width: 480px) {
+            .cookie-banner {
+                max-width: calc(100vw - 40px);
+                bottom: 10px;
+                left: 10px;
             }
 
-            .hero .subtitle {
-                font-size: 1rem;
+            .cookie-buttons {
+                flex-direction: column;
             }
+        }
 
-            section h2 {
-                font-size: 1.8rem;
-            }
+        /* LANGUAGE SELECTOR */
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 999;
+        }
 
-            nav ul {
-                gap: 1rem;
-            }
+        .lang-btn {
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            color: var(--neon-green);
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
 
-            nav a {
-                font-size: 0.85rem;
-            }
+        .lang-btn:hover {
+            background: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+        }
 
-            .cards-grid-compact {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .card-flip {
-                height: 160px;
-            }
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            color: var(--primary-dark);
         }
 
         /* SCROLL ANIMATIONS */
@@ -610,57 +1025,117 @@
             transform: translateY(0);
         }
 
-        .desglose-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            text-align: center;
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero .subtitle {
+                font-size: 1.2rem;
+            }
+
+            section h2 {
+                font-size: 2rem;
+            }
+
+            .cards-grid-compact {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .card-flip {
+                height: 180px;
+            }
+
+            .card-icon {
+                font-size: 2rem;
+            }
+
+            .metric-value {
+                font-size: 2.2rem;
+            }
+
+            nav {
+                padding: 0.8rem 1rem;
+            }
+
+            nav a {
+                font-size: 0.8rem;
+                padding: 0.4rem 0.7rem;
+            }
         }
 
-        .desglose-item {
-            background: linear-gradient(135deg, rgba(139, 122, 168, 0.05) 0%, rgba(201, 184, 212, 0.05) 100%);
-            padding: 1.2rem;
-            border-radius: 8px;
-            border: 2px solid var(--border);
-        }
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
 
-        .desglose-item strong {
-            color: var(--primary);
-            display: block;
-            margin-bottom: 0.5rem;
+            section {
+                padding: 3rem 1rem;
+            }
+
+            section h2 {
+                font-size: 1.5rem;
+            }
+
+            .cards-grid-compact {
+                grid-template-columns: 1fr;
+            }
+
+            .metric-card {
+                padding: 1.5rem 1rem;
+            }
+
+            .impact-columns {
+                grid-template-columns: 1fr;
+            }
+
+            .card-flip {
+                height: 150px;
+            }
         }
     </style>
 </head>
 <body>
 
+    <!-- DECORATIVE NEON DOTS -->
+    <div class="neon-dots" id="neon-dots"></div>
+
+    <!-- LANGUAGE SELECTOR -->
+    <div class="language-selector">
+        <button class="lang-btn active" onclick="switchLanguage('ca')">Català</button>
+        <button class="lang-btn" onclick="switchLanguage('en')">English</button>
+    </div>
+
     <!-- NAVEGACIÓN STICKY -->
     <nav>
         <ul>
-            <li><a href="#hero">Inici</a></li>
-            <li><a href="#problema">Problemàtiques</a></li>
-            <li><a href="#tecnologias">Tecnologies</a></li>
-            <li><a href="#flujo">Procés</a></li>
-            <li><a href="#roi">ROI</a></li>
-            <li><a href="#impacto">Impacte</a></li>
-            <li><a href="#cronograma">Timeline</a></li>
+            <li><a href="#hero" data-ca="Inici" data-en="Home">Inici</a></li>
+            <li><a href="#problema" data-ca="Problemàtiques" data-en="Challenges">Problemàtiques</a></li>
+            <li><a href="#tecnologias" data-ca="Tecnologies" data-en="Technologies">Tecnologies</a></li>
+            <li><a href="#flujo" data-ca="Procés" data-en="Process">Procés</a></li>
+            <li><a href="#roi" data-ca="ROI" data-en="ROI">ROI</a></li>
+            <li><a href="#impacto" data-ca="Impacte" data-en="Impact">Impacte</a></li>
+            <li><a href="#cronograma" data-ca="Timeline" data-en="Timeline">Timeline</a></li>
         </ul>
     </nav>
 
     <!-- SECCIÓN HERO -->
     <section id="hero" class="hero">
-        <h1 class="fade-in">Pla de Transformació Digital 4.0</h1>
-        <p class="subtitle fade-in">Tèxtils Montblanc, S.L. – Digitalización Integral</p>
-        <p class="company-info fade-in">
+        <h1 class="fade-in" data-ca="Pla de Transformació Digital 4.0" data-en="Digital Transformation Plan 4.0">Pla de Transformació Digital 4.0</h1>
+        <p class="subtitle fade-in" data-ca="Tèxtils Montblanc, S.L. – Digitalización Integral" data-en="Tèxtils Montblanc, S.L. – Complete Digitalization">Tèxtils Montblanc, S.L. – Digitalización Integral</p>
+        <p class="company-info fade-in" data-ca="Empresa familiar (1985) | Igualada, Barcelona | Ropa técnica deportiva<br>23 trabajadores | 1,8M€ facturación" data-en="Family Business (1985) | Igualada, Barcelona | Technical Sports Clothing<br>23 employees | €1.8M revenue">
             Empresa familiar (1985) | Igualada, Barcelona | Ropa técnica deportiva<br>
             23 trabajadores | 1,8M€ facturación
         </p>
-        <button class="cta-button" onclick="document.getElementById('problema').scrollIntoView({behavior:'smooth'});">Descubre el plan</button>
+        <button class="cta-button" onclick="document.getElementById('problema').scrollIntoView({behavior:'smooth'});" data-ca="Descubre el plan" data-en="Discover the Plan">Descubre el plan</button>
     </section>
 
     <!-- SECCIÓN PROBLEMÁTICAS -->
     <section id="problema">
-        <h2>El Problema: Haz clic en cada tarjeta para descubrir</h2>
-        <p style="text-align: center; color: var(--gray-text); margin-bottom: 3rem; font-size: 1.1rem;">
+        <h2 data-ca="El Problema: Haz clic en cada tarjeta para descubrir" data-en="The Challenge: Click on each card to discover">El Problema: Haz clic en cada tarjeta para descubrir</h2>
+        <p data-ca="Conoce los 6 desafíos principales → Haz clic en los cuadros" data-en="Discover the 6 main challenges → Click on the boxes">
             Conoce los 6 desafíos principales → <span style="font-weight: 600;">Haz clic en los cuadros</span>
         </p>
         <div class="cards-grid-compact">
@@ -668,10 +1143,10 @@
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">⚙️</div>
-                        <div class="card-title">Procesos Manuales</div>
+                        <div class="card-title" data-ca="Procesos Manuales" data-en="Manual Processes">Procesos Manuales</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Dependencia de tareas repetitivas y gestión manual de datos. Alto consumo de tiempo y recursos sin automatización.</div>
+                        <div class="card-description" data-ca="Dependencia de tareas repetitivas y gestión manual de datos. Alto consumo de tiempo y recursos sin automatización." data-en="Dependency on repetitive tasks and manual data management. High time and resource consumption without automation.">Dependencia de tareas repetitivas y gestión manual de datos. Alto consumo de tiempo y recursos sin automatización.</div>
                     </div>
                 </div>
             </div>
@@ -680,10 +1155,10 @@
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">📊</div>
-                        <div class="card-title">Falta de Datos</div>
+                        <div class="card-title" data-ca="Falta de Datos" data-en="Lack of Data">Falta de Datos</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Ausencia de sistemas de captura y análisis de datos. Decisiones sin fundamento analítico ni métricas claras.</div>
+                        <div class="card-description" data-ca="Ausencia de sistemas de captura y análisis de datos. Decisiones sin fundamento analítico ni métricas claras." data-en="Absence of data capture and analysis systems. Decisions without analytical basis or clear metrics.">Ausencia de sistemas de captura y análisis de datos. Decisiones sin fundamento analítico ni métricas claras.</div>
                     </div>
                 </div>
             </div>
@@ -692,10 +1167,10 @@
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">❌</div>
-                        <div class="card-title">Errores en Pedidos</div>
+                        <div class="card-title" data-ca="Errores en Pedidos" data-en="Order Errors">Errores en Pedidos</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Errores frecuentes de comunicación e interpretación entre departamentos. Retrasos y reclamaciones de clientes.</div>
+                        <div class="card-description" data-ca="Errores frecuentes de comunicación e interpretación entre departamentos. Retrasos y reclamaciones de clientes." data-en="Frequent communication and interpretation errors between departments. Delays and customer complaints.">Errores frecuentes de comunicación e interpretación entre departamentos. Retrasos y reclamaciones de clientes.</div>
                     </div>
                 </div>
             </div>
@@ -704,10 +1179,10 @@
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">🔗</div>
-                        <div class="card-title">Desconexión P-V</div>
+                        <div class="card-title" data-ca="Desconexión P-V" data-en="Production-Sales Gap">Desconexión P-V</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Falta integración entre sistemas de producción y ventas. Información fragmentada y desactualizada en tiempo real.</div>
+                        <div class="card-description" data-ca="Falta integración entre sistemas de producción y ventas. Información fragmentada y desactualizada en tiempo real." data-en="Lack of integration between production and sales systems. Fragmented and outdated information in real time.">Falta integración entre sistemas de producción y ventas. Información fragmentada y desactualizada en tiempo real.</div>
                     </div>
                 </div>
             </div>
@@ -716,10 +1191,10 @@
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">⚡</div>
-                        <div class="card-title">Energía sin Control</div>
+                        <div class="card-title" data-ca="Energía sin Control" data-en="Uncontrolled Energy">Energía sin Control</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">No hay monitorización en tiempo real de consumo. Ineficiencia operativa y costes energéticos elevados e incontrolados.</div>
+                        <div class="card-description" data-ca="No hay monitorización en tiempo real de consumo. Ineficiencia operativa y costes energéticos elevados e incontrolados." data-en="No real-time consumption monitoring. Operational inefficiency and uncontrolled high energy costs.">No hay monitorización en tiempo real de consumo. Ineficiencia operativa y costes energéticos elevados e incontrolados.</div>
                     </div>
                 </div>
             </div>
@@ -728,10 +1203,10 @@
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">🌐</div>
-                        <div class="card-title">Sin Presencia Digital</div>
+                        <div class="card-title" data-ca="Sin Presencia Digital" data-en="No Digital Presence">Sin Presencia Digital</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Ausencia de plataforma online B2B. Acceso limitado a nuevos mercados, clientes potenciales y oportunidades de crecimiento.</div>
+                        <div class="card-description" data-ca="Ausencia de plataforma online B2B. Acceso limitado a nuevos mercados, clientes potenciales y oportunidades de crecimiento." data-en="Absence of B2B online platform. Limited access to new markets, potential customers and growth opportunities.">Ausencia de plataforma online B2B. Acceso limitado a nuevos mercados, clientes potenciales y oportunidades de crecimiento.</div>
                     </div>
                 </div>
             </div>
@@ -740,8 +1215,8 @@
 
     <!-- SECCIÓN TECNOLOGÍAS -->
     <section id="tecnologias">
-        <h2>6 Tecnologías 4.0: Las Soluciones</h2>
-        <p style="text-align: center; color: var(--gray-text); margin-bottom: 3rem; font-size: 1.1rem;">
+        <h2 data-ca="6 Tecnologías 4.0: Las Soluciones" data-en="6 Industry 4.0 Technologies: The Solutions">6 Tecnologías 4.0: Las Soluciones</h2>
+        <p data-ca="Haz clic para conocer qué soluciona cada tecnología" data-en="Click to discover what each technology solves">
             Haz clic para conocer qué soluciona cada tecnología
         </p>
         <div class="cards-grid-compact">
@@ -752,7 +1227,7 @@
                         <div class="card-title">IoT</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Sensores en máquinas. Monitorización en tiempo real de temperatura, vibraciones y consumo energético. Control total de producción.</div>
+                        <div class="card-description" data-ca="Sensores en máquinas. Monitorización en tiempo real de temperatura, vibraciones y consumo energético. Control total de producción." data-en="Machine sensors. Real-time monitoring of temperature, vibrations and energy consumption. Complete production control.">Sensores en máquinas. Monitorización en tiempo real de temperatura, vibraciones y consumo energético. Control total de producción.</div>
                     </div>
                 </div>
             </div>
@@ -764,7 +1239,7 @@
                         <div class="card-title">ERP Odoo</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Gestión centralizada: ventas, compras, almacén, producción y finanzas integrados. Una única verdad empresarial.</div>
+                        <div class="card-description" data-ca="Gestión centralizada: ventas, compras, almacén, producción y finanzas integrados. Una única verdad empresarial." data-en="Centralized management: sales, purchases, warehouse, production and integrated finances. One single truth.">Gestión centralizada: ventas, compras, almacén, producción y finanzas integrados. Una única verdad empresarial.</div>
                     </div>
                 </div>
             </div>
@@ -776,7 +1251,7 @@
                         <div class="card-title">Blockchain</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Trazabilidad inmutable de materiales y productos. Garantía de autenticidad y transparencia en cadena de suministro.</div>
+                        <div class="card-description" data-ca="Trazabilidad inmutable de materiales y productos. Garantía de autenticidad y transparencia en cadena de suministro." data-en="Immutable traceability of materials and products. Guarantee of authenticity and supply chain transparency.">Trazabilidad inmutable de materiales y productos. Garantía de autenticidad y transparencia en cadena de suministro.</div>
                     </div>
                 </div>
             </div>
@@ -788,7 +1263,7 @@
                         <div class="card-title">RFID</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Control automático de almacén. Etiquetado y localización en tiempo real de productos. Sin errores de inventario.</div>
+                        <div class="card-description" data-ca="Control automático de almacén. Etiquetado y localización en tiempo real de productos. Sin errores de inventario." data-en="Automatic warehouse control. Real-time product labeling and location. No inventory errors.">Control automático de almacén. Etiquetado y localización en tiempo real de productos. Sin errores de inventario.</div>
                     </div>
                 </div>
             </div>
@@ -800,7 +1275,7 @@
                         <div class="card-title">IA</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Control de calidad automático mediante visión artificial. Predicción de defectos y optimización de parámetros en tiempo real.</div>
+                        <div class="card-description" data-ca="Control de calidad automático mediante visión artificial. Predicción de defectos y optimización de parámetros en tiempo real." data-en="Automatic quality control through artificial vision. Defect prediction and real-time parameter optimization.">Control de calidad automático mediante visión artificial. Predicción de defectos y optimización de parámetros en tiempo real.</div>
                     </div>
                 </div>
             </div>
@@ -812,7 +1287,7 @@
                         <div class="card-title">Web B2B</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Portal online, catálogo digital y automatización de pedidos. Conexión directa con clientes 24/7. Nuevos mercados accesibles.</div>
+                        <div class="card-description" data-ca="Portal online, catálogo digital y automatización de pedidos. Conexión directa con clientes 24/7. Nuevos mercados accesibles." data-en="Online portal, digital catalog and order automation. Direct connection with customers 24/7. New accessible markets.">Portal online, catálogo digital y automatización de pedidos. Conexión directa con clientes 24/7. Nuevos mercados accesibles.</div>
                     </div>
                 </div>
             </div>
@@ -821,8 +1296,8 @@
 
     <!-- SECCIÓN FLUJO DIGITALIZADO -->
     <section id="flujo">
-        <h2>Diagrama de Flujo Digitalizado</h2>
-        <p style="text-align: center; margin-bottom: 2rem; color: var(--gray-text);">
+        <h2 data-ca="Diagrama de Flujo Digitalizado" data-en="Digitalized Flow Diagram">Diagrama de Flujo Digitalizado</h2>
+        <p data-ca="Nuevo proceso integrado: desde el pedido web hasta la entrega del cliente" data-en="New integrated process: from web order to customer delivery">
             Nuevo proceso integrado: desde el pedido web hasta la entrega del cliente
         </p>
         <div class="flow-diagram">
@@ -831,7 +1306,7 @@
                 <div class="flow-arrow">→</div>
                 <div class="flow-box">📦 ERP Odoo</div>
                 <div class="flow-arrow">→</div>
-                <div class="flow-box">⚙️ Producción IoT</div>
+                <div class="flow-box">⚙️ Prod. IoT</div>
                 <div class="flow-arrow">→</div>
                 <div class="flow-box">✓ Calidad IA</div>
                 <div class="flow-arrow">→</div>
@@ -846,56 +1321,50 @@
 
     <!-- SECCIÓN ROI -->
     <section id="roi">
-        <h2>Viabilidad Económica: ROI Extraordinario</h2>
+        <h2 data-ca="Viabilidad Económica: ROI Extraordinario" data-en="Economic Viability: Extraordinary ROI">Viabilidad Económica: ROI Extraordinario</h2>
         <div class="metrics-grid">
             <div class="metric-card scroll-fade">
-                <div style="font-size: 0.9rem; opacity: 0.95;">Inversión Inicial</div>
+                <div class="metric-label" data-ca="Inversión Inicial" data-en="Initial Investment">Inversión Inicial</div>
                 <div class="metric-value">29.600€</div>
-                <p style="font-size: 0.85rem;">3 meses de implementación</p>
+                <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="3 meses de implementación" data-en="3 months implementation">3 meses de implementación</p>
             </div>
             <div class="metric-card scroll-fade">
-                <div style="font-size: 0.9rem; opacity: 0.95;">Beneficios Anuales</div>
+                <div class="metric-label" data-ca="Beneficios Anuales" data-en="Annual Benefits">Beneficios Anuales</div>
                 <div class="metric-value">215.000€</div>
-                <p style="font-size: 0.85rem;">Eficiencia y reducción de costes</p>
+                <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Eficiencia y reducción de costes" data-en="Efficiency and cost reduction">Eficiencia y reducción de costes</p>
             </div>
             <div class="metric-card scroll-fade">
-                <div style="font-size: 0.9rem; opacity: 0.95;">ROI Primer Año</div>
+                <div class="metric-label" data-ca="ROI Primer Año" data-en="First Year ROI">ROI Primer Año</div>
                 <div class="metric-value">503%</div>
-                <p style="font-size: 0.85rem;">Retorno excepcional</p>
+                <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Retorno excepcional" data-en="Exceptional return">Retorno excepcional</p>
             </div>
             <div class="metric-card scroll-fade">
-                <div style="font-size: 0.9rem; opacity: 0.95;">Payback</div>
-                <div class="metric-value">~2 meses</div>
-                <p style="font-size: 0.85rem;">Recuperación rápida</p>
+                <div class="metric-label" data-ca="Payback" data-en="Payback">Payback</div>
+                <div class="metric-value">~2M</div>
+                <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Recuperación rápida" data-en="Quick recovery">Recuperación rápida</p>
             </div>
         </div>
 
-        <div style="background: var(--light-bg); padding: 2rem; border-radius: 12px; margin-top: 3rem; border: 2px solid var(--border);">
-            <h3 style="text-align: center; margin-bottom: 1.5rem; color: var(--primary);">Desglose de Inversión (29.600€)</h3>
+        <div class="investment-breakdown">
+            <h3 data-ca="Desglose de Inversión (29.600€)" data-en="Investment Breakdown (€29,600)">Desglose de Inversión (29.600€)</h3>
             <div class="desglose-grid">
-                <div class="desglose-item">
-                    <strong>Análisis i disseny</strong>
-                    3.000€
+                <div class="desglose-item" data-amount="3.000€">
+                    <strong data-ca="Análisis i disseny" data-en="Analysis & Design">Análisis i disseny</strong>
                 </div>
-                <div class="desglose-item">
-                    <strong>ERP + IoT</strong>
-                    9.000€
+                <div class="desglose-item" data-amount="9.000€">
+                    <strong data-ca="ERP + IoT" data-en="ERP + IoT">ERP + IoT</strong>
                 </div>
-                <div class="desglose-item">
-                    <strong>Web + eCommerce</strong>
-                    6.000€
+                <div class="desglose-item" data-amount="6.000€">
+                    <strong data-ca="Web + eCommerce" data-en="Web + eCommerce">Web + eCommerce</strong>
                 </div>
-                <div class="desglose-item">
-                    <strong>Formació</strong>
-                    3.600€
+                <div class="desglose-item" data-amount="3.600€">
+                    <strong data-ca="Formació" data-en="Training">Formació</strong>
                 </div>
-                <div class="desglose-item">
-                    <strong>Control</strong>
-                    6.000€
+                <div class="desglose-item" data-amount="6.000€">
+                    <strong data-ca="Control" data-en="Control">Control</strong>
                 </div>
-                <div class="desglose-item">
-                    <strong>Contingència</strong>
-                    2.000€
+                <div class="desglose-item" data-amount="2.000€">
+                    <strong data-ca="Contingència" data-en="Contingency">Contingència</strong>
                 </div>
             </div>
         </div>
@@ -903,159 +1372,262 @@
 
     <!-- SECCIÓN IMPACTO -->
     <section id="impacto">
-        <h2>Impacto en la Empresa</h2>
+        <h2 data-ca="Impacto en la Empresa" data-en="Impact on the Company">Impacto en la Empresa</h2>
         <div class="impact-columns">
             <div class="impact-column scroll-fade">
-                <h3><span class="impact-icon">⚙️</span> Producción</h3>
+                <h3><span class="impact-icon">⚙️</span> <span data-ca="Producción" data-en="Production">Producción</span></h3>
                 <div class="impact-stat">
                     <div class="impact-stat-value">52% → 75%</div>
-                    <p style="font-size: 0.85rem; color: var(--gray-text);">Mejora OEE</p>
+                    <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Mejora OEE" data-en="OEE Improvement">Mejora OEE</p>
                 </div>
-                <p>Disponibilidad de máquinas, reducción de paradas, optimización de ciclos.</p>
+                <p data-ca="Disponibilidad de máquinas, reducción de paradas, optimización de ciclos." data-en="Machine availability, downtime reduction, cycle optimization.">Disponibilidad de máquinas, reducción de paradas, optimización de ciclos.</p>
             </div>
             <div class="impact-column scroll-fade">
-                <h3><span class="impact-icon">🌱</span> Sostenibilidad</h3>
+                <h3><span class="impact-icon">🌱</span> <span data-ca="Sostenibilidad" data-en="Sustainability">Sostenibilidad</span></h3>
                 <div class="impact-stat">
                     <div class="impact-stat-value">-25%</div>
-                    <p style="font-size: 0.85rem; color: var(--gray-text);">Consumo Energético</p>
+                    <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Consumo Energético" data-en="Energy Consumption">Consumo Energético</p>
                 </div>
                 <div class="impact-stat">
                     <div class="impact-stat-value">-15%</div>
-                    <p style="font-size: 0.85rem; color: var(--gray-text);">Residuos Industriales</p>
+                    <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Residuos Industriales" data-en="Industrial Waste">Residuos Industriales</p>
                 </div>
-                <p>Monitorización y optimización ambiental completa.</p>
+                <p data-ca="Monitorización y optimización ambiental completa." data-en="Complete environmental monitoring and optimization.">Monitorización y optimización ambiental completa.</p>
             </div>
             <div class="impact-column scroll-fade">
-                <h3><span class="impact-icon">👥</span> Recursos Humanos</h3>
+                <h3><span class="impact-icon">👥</span> <span data-ca="Recursos Humanos" data-en="Human Resources">Recursos Humanos</span></h3>
                 <div class="impact-stat">
                     <div class="impact-stat-value">100%</div>
-                    <p style="font-size: 0.85rem; color: var(--gray-text);">Personal Capacitado</p>
+                    <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Personal Capacitado" data-en="Trained Staff">Personal Capacitado</p>
                 </div>
-                <p>Formación integral, nuevos perfiles digitales, mejor ambiente laboral.</p>
+                <p data-ca="Formación integral, nuevos perfiles digitales, mejor ambiente laboral." data-en="Comprehensive training, new digital profiles, better work environment.">Formación integral, nuevos perfiles digitales, mejor ambiente laboral.</p>
             </div>
         </div>
     </section>
 
     <!-- SECCIÓN CRONOGRAMA -->
     <section id="cronograma">
-        <h2>Cronograma: 8 Fases (8 marzo - 2 junio 2025)</h2>
+        <h2 data-ca="Cronograma: 8 Fases (8 marzo - 2 junio 2025)" data-en="Timeline: 8 Phases (March 8 - June 2, 2025)">Cronograma: 8 Fases (8 marzo - 2 junio 2025)</h2>
         <div class="timeline">
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 1: Diagnòstic</h3>
-                    <p><strong>8-21 marzo</strong><br>Mapeo de procesos y análisis de puntos críticos para la transformación.</p>
+                    <h3 data-ca="Fase 1: Diagnòstic" data-en="Phase 1: Diagnosis">Fase 1: Diagnòstic</h3>
+                    <p><strong data-ca="8-21 marzo" data-en="March 8-21">8-21 marzo</strong><br><span data-ca="Mapeo de procesos y análisis de puntos críticos para la transformación." data-en="Process mapping and analysis of critical points for transformation.">Mapeo de procesos y análisis de puntos críticos para la transformación.</span></p>
                 </div>
             </div>
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 2: Disseny Final</h3>
-                    <p><strong>7 mayo</strong><br>Validación de arquitectura y planificación técnica detallada.</p>
+                    <h3 data-ca="Fase 2: Disseny Final" data-en="Phase 2: Final Design">Fase 2: Disseny Final</h3>
+                    <p><strong data-ca="7 mayo" data-en="May 7">7 mayo</strong><br><span data-ca="Validación de arquitectura y planificación técnica detallada." data-en="Architecture validation and detailed technical planning.">Validación de arquitectura y planificación técnica detallada.</span></p>
                 </div>
             </div>
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 3: ERP + IoT</h3>
-                    <p><strong>14-24 mayo</strong><br>Instalación de servidores, sensores IoT y configuración del ERP Odoo.</p>
+                    <h3 data-ca="Fase 3: ERP + IoT" data-en="Phase 3: ERP + IoT">Fase 3: ERP + IoT</h3>
+                    <p><strong data-ca="14-24 mayo" data-en="May 14-24">14-24 mayo</strong><br><span data-ca="Instalación de servidores, sensores IoT y configuración del ERP Odoo." data-en="Server installation, IoT sensors and Odoo ERP configuration.">Instalación de servidores, sensores IoT y configuración del ERP Odoo.</span></p>
                 </div>
             </div>
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 4: Web + eCommerce</h3>
-                    <p><strong>28 mayo</strong><br>Lanzamiento del portal B2B, catálogo digital y pasarela de pagos.</p>
+                    <h3 data-ca="Fase 4: Web + eCommerce" data-en="Phase 4: Web + eCommerce">Fase 4: Web + eCommerce</h3>
+                    <p><strong data-ca="28 mayo" data-en="May 28">28 mayo</strong><br><span data-ca="Lanzamiento del portal B2B, catálogo digital y pasarela de pagos." data-en="Launch of B2B portal, digital catalog and payment gateway.">Lanzamiento del portal B2B, catálogo digital y pasarela de pagos.</span></p>
                 </div>
             </div>
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 5: Formació</h3>
-                    <p><strong>28-31 mayo</strong><br>Capacitación integral del equipo en nuevas tecnologías y procesos.</p>
+                    <h3 data-ca="Fase 5: Formació" data-en="Phase 5: Training">Fase 5: Formació</h3>
+                    <p><strong data-ca="28-31 mayo" data-en="May 28-31">28-31 mayo</strong><br><span data-ca="Capacitación integral del equipo en nuevas tecnologías y procesos." data-en="Comprehensive team training in new technologies and processes.">Capacitación integral del equipo en nuevas tecnologías y procesos.</span></p>
                 </div>
             </div>
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 6: Pilot</h3>
-                    <p><strong>2-3 junio</strong><br>Pruebas exhaustivas, validación de datos y ajustes finales.</p>
+                    <h3 data-ca="Fase 6: Pilot" data-en="Phase 6: Pilot">Fase 6: Pilot</h3>
+                    <p><strong data-ca="2-3 junio" data-en="June 2-3">2-3 junio</strong><br><span data-ca="Pruebas exhaustivas, validación de datos y ajustes finales." data-en="Exhaustive testing, data validation and final adjustments.">Pruebas exhaustivas, validación de datos y ajustes finales.</span></p>
                 </div>
             </div>
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 7: Go Live</h3>
-                    <p><strong>2 junio</strong><br>Puesta en producción de todos los sistemas en ambiente real.</p>
+                    <h3 data-ca="Fase 7: Go Live" data-en="Phase 7: Go Live">Fase 7: Go Live</h3>
+                    <p><strong data-ca="2 junio" data-en="June 2">2 junio</strong><br><span data-ca="Puesta en producción de todos los sistemas en ambiente real." data-en="Production launch of all systems in real environment.">Puesta en producción de todos los sistemas en ambiente real.</span></p>
                 </div>
             </div>
             <div class="timeline-item scroll-fade">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 8: Soport</h3>
-                    <p><strong>Post-lanzamiento</strong><br>Soporte técnico continuo, optimización y mejora permanente.</p>
+                    <h3 data-ca="Fase 8: Soport" data-en="Phase 8: Support">Fase 8: Soport</h3>
+                    <p><strong data-ca="Post-lanzamiento" data-en="Post-launch">Post-lanzamiento</strong><br><span data-ca="Soporte técnico continuo, optimización y mejora permanente." data-en="Continuous technical support, optimization and continuous improvement.">Soporte técnico continuo, optimización y mejora permanente.</span></p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- PIE DE PÁGINA -->
+    <!-- FOOTER -->
     <footer>
         <div class="footer-content">
-            <div class="footer-logo">🚀 NexumTech Consulting S.L.</div>
-            <p style="font-size: 0.9rem; opacity: 0.9;">Consultoría Digital • Transformación Empresarial • Soluciones 4.0</p>
-            <p style="font-size: 0.95rem; margin-top: 1rem;">Documento preparado: Marzo 2025</p>
-            <p class="footer-disclaimer">
-                📌 Document Intern – CONFIDENCIAL – PP13 RA5<br>
-                Propietat intel·lectual de NexumTech Consulting S.L. i Tèxtils Montblanc, S.L.<br>
-                ⚠️ Uso exclusivo para propósitos internos.
-            </p>
+            <div class="footer-logo" data-ca="🚀 TRANSFORMACIÓ 4.0" data-en="🚀 TRANSFORMATION 4.0">🚀 TRANSFORMACIÓ 4.0</div>
+            <div class="footer-date" data-ca="Pla de Transformació Digital – 2025" data-en="Digital Transformation Plan – 2025">Pla de Transformació Digital – 2025</div>
+            <div class="footer-disclaimer" data-ca="Aquesta proposta representa una estratègia integral de transformació digital, combinant tecnologies Industry 4.0 amb optimització de processos. Tots els resultats estan validats per metodologies de ROI estàndard del sector." data-en="This proposal represents a comprehensive digital transformation strategy, combining Industry 4.0 technologies with process optimization. All results are validated by standard industry ROI methodologies.">Aquesta proposta representa una estratègia integral de transformació digital, combinant tecnologies Industry 4.0 amb optimització de processos. Tots els resultats estan validats per metodologies de ROI estàndard del sector.</div>
         </div>
     </footer>
 
+    <!-- COOKIE BANNER -->
+    <div class="cookie-banner" id="cookie-banner">
+        <h4 data-ca="🍪 Cookies & Privacitat" data-en="🍪 Cookies & Privacy">🍪 Cookies & Privacitat</h4>
+        <p data-ca="Utilitzem cookies per a millor experiència. Aquesta és una notificació decorativa." data-en="We use cookies for a better experience. This is a decorative notification.">Utilitzem cookies per a millor experiència. Aquesta és una notificació decorativa.</p>
+        <div class="cookie-buttons">
+            <button class="cookie-btn cookie-btn-accept" onclick="acceptCookies()" data-ca="Acceptar" data-en="Accept">Acceptar</button>
+            <button class="cookie-btn cookie-btn-reject" onclick="rejectCookies()" data-ca="Rebutjar" data-en="Reject">Rebutjar</button>
+        </div>
+    </div>
+
     <script>
-        // SCROLL ANIMATIONS
-        const observer = new IntersectionObserver((entries) => {
+        // GENERATE DECORATIVE NEON DOTS
+        const neonDotsContainer = document.getElementById('neon-dots');
+        for (let i = 0; i < 50; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.style.left = Math.random() * 100 + '%';
+            dot.style.top = Math.random() * 100 + '%';
+            dot.style.animationDelay = Math.random() * 5 + 's';
+            dot.style.opacity = Math.random() * 0.5 + 0.1;
+            neonDotsContainer.appendChild(dot);
+        }
+
+        // SCROLL REVEAL ANIMATIONS
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver(function (entries) {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
                 }
             });
-        }, { threshold: 0.1 });
+        }, observerOptions);
 
-        document.querySelectorAll('.scroll-fade').forEach(el => observer.observe(el));
+        document.querySelectorAll('.scroll-fade').forEach(element => {
+            observer.observe(element);
+        });
 
         // SMOOTH SCROLL
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
-                document.querySelector(this.getAttribute('href')).scrollIntoView({behavior: 'smooth'});
-            });
-        });
-
-        // NAVBAR ACTIVE STATE
-        window.addEventListener('scroll', () => {
-            const sections = document.querySelectorAll('section');
-            const navLinks = document.querySelectorAll('nav a');
-            let current = '';
-            sections.forEach(section => {
-                if (pageYOffset >= section.offsetTop - 200) {
-                    current = section.getAttribute('id');
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
             });
-            navLinks.forEach(link => {
-                link.style.color = link.getAttribute('href').slice(1) === current ? '#FFE5CC' : 'white';
+        });
+
+        // LANGUAGE SWITCH
+        let currentLanguage = 'ca';
+
+        function switchLanguage(lang) {
+            currentLanguage = lang;
+
+            // Update button states
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Update all data attributes
+            document.querySelectorAll('[data-ca][data-en]').forEach(element => {
+                const text = element.getAttribute(`data-${lang}`);
+                if (text) {
+                    element.textContent = text;
+                }
+            });
+
+            // For elements with child nodes containing the text
+            document.querySelectorAll('[data-ca]').forEach(element => {
+                if (element.hasAttribute(`data-${lang}`)) {
+                    element.textContent = element.getAttribute(`data-${lang}`);
+                }
+            });
+        }
+
+        // COOKIE BANNER
+        function acceptCookies() {
+            const banner = document.getElementById('cookie-banner');
+            banner.classList.add('hidden');
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, 500);
+        }
+
+        function rejectCookies() {
+            const banner = document.getElementById('cookie-banner');
+            banner.classList.add('hidden');
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, 500);
+        }
+
+        // PARALLAX EFFECT ON SCROLL
+        window.addEventListener('scroll', function () {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                hero.style.backgroundPosition = `0% ${scrolled * 0.5}px`;
+            }
+        });
+
+        // INTERACTIVE CARD HOVER EFFECT
+        document.querySelectorAll('.card-flip').forEach(card => {
+            card.addEventListener('mouseenter', function () {
+                this.style.transform = 'scale(1.05)';
+            });
+            card.addEventListener('mouseleave', function () {
+                this.style.transform = 'scale(1)';
             });
         });
 
-        // PREVENT MULTIPLE CARDS OPEN AT ONCE (OPTIONAL - REMOVE IF YOU WANT MULTIPLE OPEN)
-        document.querySelectorAll('.card-flip').forEach(card => {
-            card.addEventListener('click', function(e) {
-                // Comentar las dos líneas siguientes si quieres que múltiples tarjetas estén abiertas a la vez
-                // document.querySelectorAll('.card-flip.active').forEach(c => {
-                //     if (c !== this) c.classList.remove('active');
-                // });
+        // GLOW EFFECT ON MOUSE MOVE
+        document.addEventListener('mousemove', function (e) {
+            const neonDots = document.querySelectorAll('.dot');
+            neonDots.forEach(dot => {
+                const distX = e.clientX - parseFloat(dot.style.left);
+                const distY = e.clientY - parseFloat(dot.style.top);
+                const distance = Math.sqrt(distX * distX + distY * distY);
+
+                if (distance < 150) {
+                    dot.style.opacity = Math.min(1, 0.5 + (150 - distance) / 300);
+                }
             });
+        });
+
+        // BUTTON RIPPLE EFFECT
+        document.querySelectorAll('.cta-button').forEach(button => {
+            button.addEventListener('click', function (e) {
+                const ripple = document.createElement('span');
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = e.clientX - rect.left - size / 2;
+                const y = e.clientY - rect.top - size / 2;
+
+                ripple.style.width = ripple.style.height = size + 'px';
+                ripple.style.left = x + 'px';
+                ripple.style.top = y + 'px';
+            });
+        });
+
+        // PAGE LOAD ANIMATION
+        window.addEventListener('load', function () {
+            document.body.style.opacity = '1';
         });
     </script>
 
