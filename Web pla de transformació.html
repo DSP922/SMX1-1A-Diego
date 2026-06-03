@@ -83,6 +83,19 @@
             opacity: 0.1;
         }
 
+        @keyframes float-dot {
+            0%, 100% { opacity: 0.15; }
+            50% { opacity: 0.35; }
+        }
+
+        .dot {
+            animation: float-dot 4s ease-in-out infinite;
+        }
+
+        .dot:nth-child(1) { animation-delay: 0s; }
+        .dot:nth-child(3n) { animation-delay: 1s; }
+        .dot:nth-child(5n) { animation-delay: 2s; }
+
         /* NAVIGATION STICKY */
         nav {
             position: fixed;
@@ -222,7 +235,7 @@
             bottom: 0;
             background: 
                 linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.5) 100%),
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="tech-grid" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="80" height="80" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.05"/><circle cx="40" cy="40" r="2" fill="%2300FF88" opacity="0.15"/></pattern></defs><rect width="1200" height="600" fill="url(%23tech-grid)"/></svg>');
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="tech-grid" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse"><circle cx="40" cy="40" r="1" fill="rgba(0,255,136,0.1)"/><line x1="40" y1="0" x2="40" y2="80" stroke="rgba(0,255,136,0.05)" stroke-width="0.5"/><line x1="0" y1="40" x2="80" y2="40" stroke="rgba(0,255,136,0.05)" stroke-width="0.5"/></pattern></defs><rect width="1200" height="600" fill="url(%23tech-grid)"/></svg>');
             opacity: 0.8;
             z-index: 1;
         }
@@ -843,6 +856,8 @@
             top: 20px;
             left: 20px;
             z-index: 999;
+            display: flex;
+            gap: 0.5rem;
         }
 
         .lang-btn {
@@ -972,54 +987,63 @@
                 flex-direction: column;
             }
         }
+
+        /* HIDDEN LANGUAGE CONTENT */
+        .lang-content {
+            display: none;
+        }
+
+        .lang-content.active {
+            display: block;
+        }
     </style>
 </head>
 <body>
     <!-- Animated background network decoration -->
-    <div class="neon-dots"></div>
+    <div class="neon-dots" id="networkDots"></div>
 
     <!-- Language Selector -->
     <div class="language-selector">
-        <button class="lang-btn active" onclick="selectLanguage('ca')">CA</button>
-        <button class="lang-btn" onclick="selectLanguage('es')">ES</button>
-        <button class="lang-btn" onclick="selectLanguage('en')">EN</button>
+        <button class="lang-btn active" onclick="setLanguage('ca')">CA</button>
+        <button class="lang-btn" onclick="setLanguage('es')">ES</button>
+        <button class="lang-btn" onclick="setLanguage('en')">EN</button>
     </div>
 
     <!-- Navigation -->
     <nav>
         <ul>
-            <li><a href="#problema">El Problema</a></li>
-            <li><a href="#flujo">Flujo de Trabajo</a></li>
-            <li><a href="#tecnologias">Tecnologías</a></li>
-            <li><a href="#roi">ROI & Impacto</a></li>
-            <li><a href="#cronograma">Cronograma</a></li>
+            <li><a href="#problema" data-ca="El Problema" data-es="El Problema" data-en="The Problem">El Problema</a></li>
+            <li><a href="#flujo" data-ca="Flujo de Trabajo" data-es="Flujo de Trabajo" data-en="Workflow">Flujo de Trabajo</a></li>
+            <li><a href="#tecnologias" data-ca="Tecnologías" data-es="Tecnologías" data-en="Technologies">Tecnologías</a></li>
+            <li><a href="#roi" data-ca="ROI & Impacto" data-es="ROI & Impacto" data-en="ROI & Impact">ROI & Impacto</a></li>
+            <li><a href="#cronograma" data-ca="Cronograma" data-es="Cronograma" data-en="Timeline">Cronograma</a></li>
         </ul>
     </nav>
 
     <!-- HERO SECTION -->
     <section class="hero" id="inicio">
         <div class="hero-content">
-            <h1>Pla de Transformació Digital 4.0</h1>
-            <p class="subtitle">Optimizando la producción textil con tecnología de vanguardia</p>
-            <p class="company-info">Tèxtils Montblanc – Transformación Digital Integral</p>
-            <a href="#problema" class="cta-button">Explorar Plan</a>
+            <h1 data-ca="Transformació Digital 4.0" data-es="Transformación Digital 4.0" data-en="Digital Transformation 4.0">Transformació Digital 4.0</h1>
+            <p class="subtitle" data-ca="Modernitzar els processos tèxtils amb IA i automatització" data-es="Modernizar los procesos textiles con IA y automatización" data-en="Modernize textile processes with AI and automation">Modernitzar els processos tèxtils amb IA i automatització</p>
+            <p class="company-info" data-ca="Tèxtils Montblanc – 2025" data-es="Tèxtils Montblanc – 2025" data-en="Tèxtils Montblanc – 2025">Tèxtils Montblanc – 2025</p>
+            <button class="cta-button" onclick="document.getElementById('problema').scrollIntoView({behavior: 'smooth'})" data-ca="Explorar Pla" data-es="Explorar Plan" data-en="Explore Plan">Explorar Pla</button>
         </div>
     </section>
 
     <!-- SECCIÓN: EL PROBLEMA -->
     <section id="problema">
-        <h2>El Desafío</h2>
-        <p>Identificar y superar los obstáculos en la modernización de procesos textiles</p>
+        <h2 data-ca="El Problema Actual" data-es="El Problema Actual" data-en="The Current Problem">El Problema Actual</h2>
+        <p data-ca="Els reptes que enfronta la industria tèxtil" data-es="Los retos que enfrenta la industria textil" data-en="The challenges facing the textile industry">Els reptes que enfronta la industria tèxtil</p>
         
-        <div class="cards-grid-compact fade-in">
+        <div class="cards-grid-compact">
             <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">⚙️</div>
-                        <div class="card-title">Automatización</div>
+                        <div class="card-title" data-ca="Processos Manuals" data-es="Procesos Manuales" data-en="Manual Processes">Processos Manuals</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Integración de sistemas automatizados para aumentar la eficiencia operativa y reducir costos de producción.</div>
+                        <div class="card-description" data-ca="El 70% dels processos son manuals i lents" data-es="El 70% de los procesos son manuales y lentos" data-en="70% of processes are manual and slow">El 70% dels processos son manuals i lents</div>
                     </div>
                 </div>
             </div>
@@ -1028,10 +1052,10 @@
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">📊</div>
-                        <div class="card-title">Análisis de Datos</div>
+                        <div class="card-title" data-ca="Falta de Dades" data-es="Falta de Datos" data-en="Data Shortage">Falta de Dades</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Implementación de herramientas de análisis para optimizar la toma de decisiones y mejorar la calidad.</div>
+                        <div class="card-description" data-ca="No existeix seguiment en temps real" data-es="No existe seguimiento en tiempo real" data-en="No real-time tracking exists">No existeix seguiment en temps real</div>
                     </div>
                 </div>
             </div>
@@ -1039,23 +1063,11 @@
             <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
-                        <div class="card-icon">🔗</div>
-                        <div class="card-title">Integración</div>
+                        <div class="card-icon">💰</div>
+                        <div class="card-title" data-ca="Costos Altos" data-es="Costos Altos" data-en="High Costs">Costos Altos</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Conectar sistemas legados con plataformas modernas para crear un ecosistema digital cohesivo.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-flip" onclick="this.classList.toggle('active')">
-                <div class="card-flip-inner">
-                    <div class="card-front">
-                        <div class="card-icon">👥</div>
-                        <div class="card-title">Capital Humano</div>
-                    </div>
-                    <div class="card-back">
-                        <div class="card-description">Formación y desarrollo de competencias digitales en el equipo de trabajo para asegurar adopción exitosa.</div>
+                        <div class="card-description" data-ca="Els residus representen el 15% de la producció" data-es="Los residuos representan el 15% de la producción" data-en="Waste represents 15% of production">Els residus representen el 15% de la producció</div>
                     </div>
                 </div>
             </div>
@@ -1064,22 +1076,10 @@
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">🌍</div>
-                        <div class="card-title">Sostenibilidad</div>
+                        <div class="card-title" data-ca="Impacte Ambiental" data-es="Impacto Ambiental" data-en="Environmental Impact">Impacte Ambiental</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Implementar prácticas digitales que reduzcan el impacto ambiental y mejoren la eficiencia energética.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-flip" onclick="this.classList.toggle('active')">
-                <div class="card-flip-inner">
-                    <div class="card-front">
-                        <div class="card-icon">🔐</div>
-                        <div class="card-title">Ciberseguridad</div>
-                    </div>
-                    <div class="card-back">
-                        <div class="card-description">Proteger infraestructura digital con medidas avanzadas de seguridad y cumplimiento normativo.</div>
+                        <div class="card-description" data-ca="Emissions de CO₂ i consum excessiu d'aigua" data-es="Emisiones de CO₂ y consumo excesivo de agua" data-en="CO₂ emissions and excessive water use">Emissions de CO₂ i consum excessiu d'aigua</div>
                     </div>
                 </div>
             </div>
@@ -1088,36 +1088,36 @@
 
     <!-- SECCIÓN: FLUJO DE TRABAJO -->
     <section id="flujo">
-        <h2>Flujo de Transformación</h2>
-        <p>Proceso estructurado de implementación de la transformación digital</p>
+        <h2 data-ca="Flujo de Transformació" data-es="Flujo de Transformación" data-en="Transformation Flow">Flujo de Transformació</h2>
+        <p data-ca="Fases clau de la implementació" data-es="Fases clave de la implementación" data-en="Key implementation phases">Fases clau de la implementació</p>
         
         <div class="flow-diagram">
             <div class="flow-container">
-                <div class="flow-box">Análisis</div>
+                <div class="flow-box" data-ca="Avaluació" data-es="Evaluación" data-en="Assessment">Avaluació</div>
                 <div class="flow-arrow">→</div>
-                <div class="flow-box">Planificación</div>
+                <div class="flow-box" data-ca="Disseny" data-es="Diseño" data-en="Design">Disseny</div>
                 <div class="flow-arrow">→</div>
-                <div class="flow-box">Implementación</div>
+                <div class="flow-box" data-ca="Implementació" data-es="Implementación" data-en="Implementation">Implementació</div>
                 <div class="flow-arrow">→</div>
-                <div class="flow-box">Optimización</div>
+                <div class="flow-box" data-ca="Optimització" data-es="Optimización" data-en="Optimization">Optimització</div>
             </div>
         </div>
     </section>
 
     <!-- SECCIÓN: TECNOLOGÍAS -->
     <section id="tecnologias">
-        <h2>Stack Tecnológico</h2>
-        <p>Herramientas y plataformas clave para la transformación</p>
+        <h2 data-ca="Tecnologies Clau" data-es="Tecnologías Clave" data-en="Key Technologies">Tecnologies Clau</h2>
+        <p data-ca="Solucions d'última generació per a la transformació" data-es="Soluciones de última generación para la transformación" data-en="Next-generation solutions for transformation">Solucions d'última generació per a la transformació</p>
         
-        <div class="cards-grid-compact fade-in">
+        <div class="cards-grid-compact">
             <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
-                        <div class="card-icon">☁️</div>
-                        <div class="card-title">Cloud Computing</div>
+                        <div class="card-icon">🤖</div>
+                        <div class="card-title" data-ca="IA & ML" data-es="IA y ML" data-en="AI & ML">IA & ML</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Infraestructura escalable y segura con proveedores líderes de cloud.</div>
+                        <div class="card-description" data-ca="Predicció i control de qualitat automàtic" data-es="Predicción y control de calidad automático" data-en="Prediction and automatic quality control">Predicció i control de qualitat automàtic</div>
                     </div>
                 </div>
             </div>
@@ -1125,11 +1125,11 @@
             <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
-                        <div class="card-icon">🤖</div>
-                        <div class="card-title">Inteligencia Artificial</div>
+                        <div class="card-icon">☁️</div>
+                        <div class="card-title" data-ca="Cloud" data-es="Cloud" data-en="Cloud">Cloud</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Machine learning para optimización de procesos y predicción de demanda.</div>
+                        <div class="card-description" data-ca="Infraestructura escalable i segura" data-es="Infraestructura escalable y segura" data-en="Scalable and secure infrastructure">Infraestructura escalable i segura</div>
                     </div>
                 </div>
             </div>
@@ -1138,10 +1138,10 @@
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">📡</div>
-                        <div class="card-title">IoT</div>
+                        <div class="card-title" data-ca="IoT" data-es="IoT" data-en="IoT">IoT</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Sensores y dispositivos conectados para monitoreo en tiempo real.</div>
+                        <div class="card-description" data-ca="Sensors i monitorització en temps real" data-es="Sensores y monitorización en tiempo real" data-en="Sensors and real-time monitoring">Sensors i monitorització en temps real</div>
                     </div>
                 </div>
             </div>
@@ -1149,180 +1149,150 @@
             <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
-                        <div class="card-icon">📈</div>
-                        <div class="card-title">Big Data</div>
+                        <div class="card-icon">🔗</div>
+                        <div class="card-title" data-ca="Blockchain" data-es="Blockchain" data-en="Blockchain">Blockchain</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description">Análisis de grandes volúmenes de datos para insights empresariales.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-flip" onclick="this.classList.toggle('active')">
-                <div class="card-flip-inner">
-                    <div class="card-front">
-                        <div class="card-icon">🔄</div>
-                        <div class="card-title">Blockchain</div>
-                    </div>
-                    <div class="card-back">
-                        <div class="card-description">Trazabilidad transparente de la cadena de suministro textil.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-flip" onclick="this.classList.toggle('active')">
-                <div class="card-flip-inner">
-                    <div class="card-front">
-                        <div class="card-icon">⚡</div>
-                        <div class="card-title">API Integration</div>
-                    </div>
-                    <div class="card-back">
-                        <div class="card-description">Integración de sistemas mediante APIs modernas y estándares abiertos.</div>
+                        <div class="card-description" data-ca="Transparència en la cadena de subministrament" data-es="Transparencia en la cadena de suministro" data-en="Supply chain transparency">Transparència en la cadena de subministrament</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- SECCIÓN: ROI E IMPACTO -->
+    <!-- SECCIÓN: ROI & IMPACTO -->
     <section id="roi">
-        <h2>Retorno de Inversión & Impacto</h2>
-        <p>Beneficios cuantificables y resultados esperados</p>
-
+        <h2 data-ca="ROI & Impacto Esperado" data-es="ROI e Impacto Esperado" data-en="Expected ROI & Impact">ROI & Impacto Esperado</h2>
+        <p data-ca="Resultats mensurables en el primer any" data-es="Resultados medibles en el primer año" data-en="Measurable results in the first year">Resultats mensurables en el primer any</p>
+        
         <div class="metrics-grid">
             <div class="metric-card">
-                <div class="metric-label">Aumento de Eficiencia</div>
-                <div class="metric-value">45%</div>
+                <div class="metric-value">35%</div>
+                <div class="metric-label" data-ca="Reducció de Costos" data-es="Reducción de Costos" data-en="Cost Reduction">Reducció de Costos</div>
             </div>
             <div class="metric-card">
-                <div class="metric-label">Reducción de Costos</div>
-                <div class="metric-value">32%</div>
+                <div class="metric-value">50%</div>
+                <div class="metric-label" data-ca="Menor Temps" data-es="Menor Tiempo" data-en="Less Time">Menor Temps</div>
             </div>
             <div class="metric-card">
-                <div class="metric-label">Mejora de Calidad</div>
-                <div class="metric-value">58%</div>
+                <div class="metric-value">28%</div>
+                <div class="metric-label" data-ca="Menos Residus" data-es="Menos Residuos" data-en="Less Waste">Menos Residus</div>
             </div>
             <div class="metric-card">
-                <div class="metric-label">ROI Esperado</div>
-                <div class="metric-value">280%</div>
+                <div class="metric-value">3.2x</div>
+                <div class="metric-label" data-ca="ROI esperado" data-es="ROI esperado" data-en="Expected ROI">ROI esperado</div>
             </div>
         </div>
 
         <div class="investment-breakdown">
-            <h3>Desglose de Inversión</h3>
+            <h3 data-ca="Desglose d'Inversió" data-es="Desglose de Inversión" data-en="Investment Breakdown">Desglose d'Inversió</h3>
             <div class="desglose-grid">
-                <div class="desglose-item" data-amount="€450,000">
-                    <strong>Infraestructura</strong>
-                </div>
-                <div class="desglose-item" data-amount="€320,000">
-                    <strong>Software</strong>
+                <div class="desglose-item" data-amount="€250,000">
+                    <strong data-ca="Hardware & IoT" data-es="Hardware e IoT" data-en="Hardware & IoT">Hardware & IoT</strong>
                 </div>
                 <div class="desglose-item" data-amount="€180,000">
-                    <strong>Formación</strong>
+                    <strong data-ca="Software & IA" data-es="Software e IA" data-en="Software & AI">Software & IA</strong>
+                </div>
+                <div class="desglose-item" data-amount="€120,000">
+                    <strong data-ca="Formació" data-es="Capacitación" data-en="Training">Formació</strong>
+                </div>
+                <div class="desglose-item" data-amount="€100,000">
+                    <strong data-ca="Implementació" data-es="Implementación" data-en="Implementation">Implementació</strong>
                 </div>
                 <div class="desglose-item" data-amount="€150,000">
-                    <strong>Consultoría</strong>
+                    <strong data-ca="Consultoria" data-es="Consultoría" data-en="Consulting">Consultoria</strong>
+                </div>
+                <div class="desglose-item" data-amount="€80,000">
+                    <strong data-ca="Contingència" data-es="Contingencia" data-en="Contingency">Contingència</strong>
                 </div>
             </div>
         </div>
 
         <div class="impact-columns">
             <div class="impact-column">
-                <h3><span class="impact-icon">📊</span>Productividad</h3>
+                <h3><span class="impact-icon">💼</span><span data-ca="Impacte Operacional" data-es="Impacto Operacional" data-en="Operational Impact">Impacte Operacional</span></h3>
                 <div class="impact-stat">
-                    <div class="impact-stat-value">+45%</div>
-                    <div class="impact-stat-label">Incremento en volumen de producción</div>
+                    <div class="impact-stat-value" data-ca="70% Automatització" data-es="70% Automatización" data-en="70% Automation">70% Automatització</div>
+                    <div class="impact-stat-label" data-ca="dels processos crítics" data-es="de los procesos críticos" data-en="of critical processes">dels processos crítics</div>
                 </div>
-                <p>La automatización y optimización de procesos permitirá aumentar significativamente la capacidad de producción sin incrementar proporcionalemente los costos operativos.</p>
+                <div class="impact-stat">
+                    <div class="impact-stat-value" data-ca="8h/dia" data-es="8h/día" data-en="8h/day">8h/dia</div>
+                    <div class="impact-stat-label" data-ca="estalvis de temps operatiu" data-es="ahorros de tiempo operativo" data-en="operational time savings">estalvis de temps operatiu</div>
+                </div>
+                <p data-ca="Els sistemes automatitzats augmentaran la velocitat de producció i reduiran els errors." data-es="Los sistemas automatizados aumentarán la velocidad de producción y reducirán los errores." data-en="Automated systems will increase production speed and reduce errors.">Els sistemes automatitzats augmentaran la velocitat de producció i reduiran els errors.</p>
             </div>
 
             <div class="impact-column">
-                <h3><span class="impact-icon">💰</span>Financiero</h3>
+                <h3><span class="impact-icon">🌱</span><span data-ca="Impacte Ambiental" data-es="Impacto Ambiental" data-en="Environmental Impact">Impacte Ambiental</span></h3>
                 <div class="impact-stat">
-                    <div class="impact-stat-value">€1.2M</div>
-                    <div class="impact-stat-label">Ahorro anual proyectado</div>
+                    <div class="impact-stat-value" data-ca="45% Menys CO₂" data-es="45% Menos CO₂" data-en="45% Less CO₂">45% Menys CO₂</div>
+                    <div class="impact-stat-label" data-ca="en operacions" data-es="en operaciones" data-en="in operations">en operacions</div>
                 </div>
-                <p>Reducción de costos operativos, mejora de márgenes de ganancia y posibilidad de nuevas líneas de negocio digital.</p>
+                <div class="impact-stat">
+                    <div class="impact-stat-value" data-ca="60% Menys Aigua" data-es="60% Menos Agua" data-en="60% Less Water">60% Menys Aigua</div>
+                    <div class="impact-stat-label" data-ca="en els processos de tintura" data-es="en los procesos de tintura" data-en="in dyeing processes">en els processos de tintura</div>
+                </div>
+                <p data-ca="L'eficiència energètica és crucial per a la sostenibilitat." data-es="La eficiencia energética es crucial para la sostenibilidad." data-en="Energy efficiency is crucial for sustainability.">L'eficiència energètica és crucial per a la sostenibilitat.</p>
             </div>
 
             <div class="impact-column">
-                <h3><span class="impact-icon">🌱</span>Sostenibilidad</h3>
+                <h3><span class="impact-icon">📈</span><span data-ca="Impacte Financier" data-es="Impacto Financiero" data-en="Financial Impact">Impacte Financier</span></h3>
                 <div class="impact-stat">
-                    <div class="impact-stat-value">-40%</div>
-                    <div class="impact-stat-label">Reducción de residuos</div>
+                    <div class="impact-stat-value" data-ca="€1.68M" data-es="€1.68M" data-en="€1.68M">€1.68M</div>
+                    <div class="impact-stat-label" data-ca="estalvis anuals esperats" data-es="ahorros anuales esperados" data-en="expected annual savings">estalvis anuals esperats</div>
                 </div>
-                <p>Procesos más eficientes conducen a menor desperdicio de materia prima y reducción del impacto ambiental global.</p>
+                <div class="impact-stat">
+                    <div class="impact-stat-value" data-ca="14 mesos" data-es="14 meses" data-en="14 months">14 mesos</div>
+                    <div class="impact-stat-label" data-ca="temps de recuperació" data-es="tiempo de recuperación" data-en="payback period">temps de recuperació</div>
+                </div>
+                <p data-ca="L'inversió inicial es recuperarà ràpidament gràcies a la reducció de costos operatius." data-es="La inversión inicial se recuperará rápidamente gracias a la reducción de costos operativos." data-en="The initial investment will be recovered quickly through operational cost reduction.">L'inversió inicial es recuperarà ràpidament gràcies a la reducció de costos operatius.</p>
             </div>
         </div>
     </section>
 
     <!-- SECCIÓN: CRONOGRAMA -->
     <section id="cronograma">
-        <h2>Cronograma de Implementación</h2>
-        <p>Fases de desarrollo y entregables clave</p>
+        <h2 data-ca="Cronograma d'Implementació" data-es="Cronograma de Implementación" data-en="Implementation Timeline">Cronograma d'Implementació</h2>
+        <p data-ca="Fases de desplegament durant 18 mesos" data-es="Fases de despliegue durante 18 meses" data-en="Deployment phases over 18 months">Fases de desplegament durant 18 mesos</p>
 
         <div class="timeline">
             <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 1: Análisis y Planificación</h3>
-                    <p><strong>Mes 1-2</strong><br>Evaluación de infraestructura actual, identificación de necesidades, desarrollo de roadmap detallado y selección de proveedores tecnológicos.</p>
+                    <h3 data-ca="Mes 1-2: Avaluació i Planificació" data-es="Mes 1-2: Evaluación y Planificación" data-en="Month 1-2: Assessment & Planning">Mes 1-2: Avaluació i Planificació</h3>
+                    <p data-ca="Anàlisi completa de processos actuals. Identificació de punts crítics. Desenvolupament del pla detallat. Assignació de recursos." data-es="Análisis completo de procesos actuales. Identificación de puntos críticos. Desarrollo del plan detallado. Asignación de recursos." data-en="Complete analysis of current processes. Identification of critical points. Detailed plan development. Resource allocation.">Anàlisi completa de processos actuals. Identificació de punts crítics. Desenvolupament del pla detallat. Assignació de recursos.</p>
                 </div>
             </div>
 
             <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 2: Diseño de Solución</h3>
-                    <p><strong>Mes 2-3</strong><br>Arquitectura del sistema, especificaciones técnicas, diseño de procesos y plan de integración de sistemas existentes.</p>
+                    <h3 data-ca="Mes 3-6: Adquisició i Configuració" data-es="Mes 3-6: Adquisición y Configuración" data-en="Month 3-6: Procurement & Setup">Mes 3-6: Adquisició i Configuració</h3>
+                    <p data-ca="Compra de hardware i software. Instal·lació de sensors IoT. Configuració inicial del cloud. Preparació de la infraestructura." data-es="Compra de hardware y software. Instalación de sensores IoT. Configuración inicial de la nube. Preparación de la infraestructura." data-en="Hardware and software purchase. IoT sensor installation. Initial cloud configuration. Infrastructure preparation.">Compra de hardware i software. Instal·lació de sensors IoT. Configuració inicial del cloud. Preparació de la infraestructura.</p>
                 </div>
             </div>
 
             <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 3: Preparación Organizacional</h3>
-                    <p><strong>Mes 3-4</strong><br>Formación del equipo, preparación de infraestructura, establecimiento de políticas de cambio y comunicación con stakeholders.</p>
+                    <h3 data-ca="Mes 7-10: Formació i Pilot" data-es="Mes 7-10: Capacitación y Piloto" data-en="Month 7-10: Training & Pilot">Mes 7-10: Formació i Pilot</h3>
+                    <p data-ca="Formació completa del personal. Implementació pilot en una línia de producció. Testing i validació. Ajustos basats en resultats." data-es="Capacitación completa del personal. Implementación piloto en una línea de producción. Pruebas y validación. Ajustes basados en resultados." data-en="Complete staff training. Pilot implementation in one production line. Testing and validation. Adjustments based on results.">Formació completa del personal. Implementació pilot en una línia de producció. Testing i validació. Ajustos basats en resultats.</p>
                 </div>
             </div>
 
             <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 4: Implementación Core</h3>
-                    <p><strong>Mes 4-7</strong><br>Despliegue de infraestructura cloud, instalación de sistemas principales, integración de datos y primeras automatizaciones.</p>
+                    <h3 data-ca="Mes 11-15: Desplegament Complet" data-es="Mes 11-15: Despliegue Completo" data-en="Month 11-15: Full Deployment">Mes 11-15: Desplegament Complet</h3>
+                    <p data-ca="Implementació en totes les línies de producció. Integració de sistemes. Monitoratge continu. Optimització de rendiment." data-es="Implementación en todas las líneas de producción. Integración de sistemas. Monitoreo continuo. Optimización del rendimiento." data-en="Implementation across all production lines. System integration. Continuous monitoring. Performance optimization.">Implementació en totes les línies de producció. Integració de sistemes. Monitoratge continu. Optimització de rendiment.</p>
                 </div>
             </div>
 
             <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3>Fase 5: Integración Avanzada</h3>
-                    <p><strong>Mes 7-9</strong><br>Implementación de IoT, AI/ML, análisis de datos en tiempo real y optimización de procesos operacionales.</p>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <h3>Fase 6: Testing y Validación</h3>
-                    <p><strong>Mes 9-10</strong><br>Pruebas exhaustivas, validación de resultados, ajustes finales y preparación para producción.</p>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <h3>Fase 7: Despliegue Productivo</h3>
-                    <p><strong>Mes 10-11</strong><br>Migración de sistemas en vivo, capacitación final del personal y soporte inicial post-lanzamiento.</p>
-                </div>
-            </div>
-
-            <div class="timeline-item">
-                <div class="timeline-dot"></div>
-                <div class="timeline-content">
-                    <h3>Fase 8: Optimización Continua</h3>
-                    <p><strong>Mes 11-12+</strong><br>Monitoreo de rendimiento, optimizaciones iterativas, formación continua y expansión de nuevas funcionalidades.</p>
+                    <h3 data-ca="Mes 16-18: Optimització i Manteniment" data-es="Mes 16-18: Optimización y Mantenimiento" data-en="Month 16-18: Optimization & Maintenance">Mes 16-18: Optimització i Manteniment</h3>
+                    <p data-ca="Fine-tuning de sistemes. Formació avançada. Establiment de protocols de manteniment. Documentació final. Suport continu." data-es="Ajuste fino de sistemas. Capacitación avanzada. Establecimiento de protocolos de mantenimiento. Documentación final. Soporte continuo." data-en="Fine-tuning of systems. Advanced training. Maintenance protocol establishment. Final documentation. Ongoing support.">Fine-tuning de sistemes. Formació avançada. Establiment de protocols de manteniment. Documentació final. Suport continu.</p>
                 </div>
             </div>
         </div>
@@ -1331,98 +1301,176 @@
     <!-- FOOTER -->
     <footer>
         <div class="footer-content">
-            <div class="footer-logo">Tèxtils Montblanc</div>
-            <p>Pla de Transformació Digital 4.0</p>
-            <div class="footer-date">Documento: Junio 2024 | Versión 1.0</div>
-            <div class="footer-disclaimer">Este documento representa un plan estratégico de transformación digital. Todos los números y proyecciones están basados en análisis preliminares y están sujetos a cambios según evaluaciones detalladas posteriores.</div>
+            <div class="footer-logo" data-ca="Pla de Transformació Digital 4.0" data-es="Plan de Transformación Digital 4.0" data-en="Digital Transformation Plan 4.0">Pla de Transformació Digital 4.0</div>
+            <div class="footer-date" data-ca="Juny 2025 – Tèxtils Montblanc" data-es="Junio 2025 – Tèxtils Montblanc" data-en="June 2025 – Tèxtils Montblanc">Juny 2025 – Tèxtils Montblanc</div>
+            <div class="footer-disclaimer" data-ca="Document confidencial. Només per a ús intern. Tots els drets reservats © 2025" data-es="Documento confidencial. Solo para uso interno. Todos los derechos reservados © 2025" data-en="Confidential document. Internal use only. All rights reserved © 2025">Document confidencial. Només per a ús intern. Tots els drets reservats © 2025</div>
         </div>
     </footer>
 
-    <!-- COOKIE BANNER -->
-    <div class="cookie-banner" id="cookieBanner">
-        <h4>Política de Cookies</h4>
-        <p>Este sitio utiliza cookies para mejorar la experiencia del usuario y analizar el tráfico.</p>
-        <div class="cookie-buttons">
-            <button class="cookie-btn cookie-btn-accept" onclick="acceptCookies()">Aceptar</button>
-            <button class="cookie-btn cookie-btn-reject" onclick="rejectCookies()">Rechazar</button>
-        </div>
-    </div>
-
     <script>
-        // Animated background network
-        function createDots() {
-            const dotsContainer = document.querySelector('.neon-dots');
-            const dots = [];
-            
-            for (let i = 0; i < 50; i++) {
-                const dot = document.createElement('div');
-                dot.className = 'dot';
-                dot.style.left = Math.random() * 100 + '%';
-                dot.style.top = Math.random() * 100 + '%';
-                dot.style.animationDelay = Math.random() * 5 + 's';
-                dotsContainer.appendChild(dot);
+        // Language system
+        const translations = {
+            ca: {},
+            es: {},
+            en: {}
+        };
+
+        // Initialize language system
+        function initLanguageSystem() {
+            // Get all elements with data attributes
+            document.querySelectorAll('[data-ca]').forEach(element => {
+                const ca = element.getAttribute('data-ca');
+                const es = element.getAttribute('data-es');
+                const en = element.getAttribute('data-en');
                 
-                dots.push({
-                    x: parseFloat(dot.style.left),
-                    y: parseFloat(dot.style.top),
-                    element: dot
-                });
+                if (ca) translations.ca[ca] = ca;
+                if (es) translations.es[es] = es;
+                if (en) translations.en[en] = en;
+            });
+
+            // Load saved language or default to Catalan
+            const savedLanguage = localStorage.getItem('selectedLanguage') || 'ca';
+            setLanguage(savedLanguage);
+        }
+
+        function setLanguage(lang) {
+            // Validate language
+            if (!['ca', 'es', 'en'].includes(lang)) {
+                lang = 'ca';
             }
 
-            // Create subtle connecting lines
-            for (let i = 0; i < 15; i++) {
-                const dot1 = dots[Math.floor(Math.random() * dots.length)];
-                const dot2 = dots[Math.floor(Math.random() * dots.length)];
-                
-                if (dot1 !== dot2) {
-                    const connection = document.createElement('div');
-                    connection.className = 'dot-connection';
-                    dotsContainer.appendChild(connection);
+            // Update active button
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[onclick="setLanguage('${lang}')"]`).classList.add('active');
+
+            // Update page language attribute
+            document.documentElement.lang = lang;
+
+            // Update all translatable content
+            document.querySelectorAll('[data-ca]').forEach(element => {
+                const text = element.getAttribute(`data-${lang}`);
+                if (text) {
+                    if (element.textContent && !element.querySelector('*')) {
+                        element.textContent = text;
+                    } else {
+                        // For elements with children, update only the direct text
+                        const textNodes = Array.from(element.childNodes).filter(
+                            node => node.nodeType === Node.TEXT_NODE
+                        );
+                        if (textNodes.length > 0) {
+                            textNodes[0].textContent = text;
+                        } else {
+                            element.textContent = text;
+                        }
+                    }
+                }
+            });
+
+            // Update page title
+            const titleElement = document.querySelector('title');
+            const titleText = {
+                ca: 'Pla de Transformació Digital 4.0 – Tèxtils Montblanc',
+                es: 'Plan de Transformación Digital 4.0 – Tèxtils Montblanc',
+                en: 'Digital Transformation Plan 4.0 – Tèxtils Montblanc'
+            };
+            if (titleElement) {
+                titleElement.textContent = titleText[lang];
+            }
+
+            // Save preference
+            localStorage.setItem('selectedLanguage', lang);
+        }
+
+        // Network background generation
+        function generateNetworkBackground() {
+            const container = document.getElementById('networkDots');
+            if (!container) return;
+
+            container.innerHTML = '';
+            
+            // Generate random dots
+            const dotCount = Math.floor(window.innerWidth / 50);
+            const dots = [];
+
+            for (let i = 0; i < dotCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                const x = Math.random() * 100;
+                const y = Math.random() * 100;
+                dot.style.left = x + '%';
+                dot.style.top = y + '%';
+                container.appendChild(dot);
+                dots.push({ x, y, element: dot });
+            }
+
+            // Create connections between nearby dots
+            for (let i = 0; i < dots.length; i++) {
+                for (let j = i + 1; j < dots.length; j++) {
+                    const dx = dots[i].x - dots[j].x;
+                    const dy = dots[i].y - dots[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 20) {
+                        const connection = document.createElement('div');
+                        connection.className = 'dot-connection';
+                        
+                        const angle = Math.atan2(dy, dx);
+                        const connectionX = (dots[i].x + dots[j].x) / 2;
+                        const connectionY = (dots[i].y + dots[j].y) / 2;
+                        
+                        connection.style.left = connectionX + '%';
+                        connection.style.top = connectionY + '%';
+                        connection.style.width = distance + '%';
+                        connection.style.transform = `rotate(${angle}rad)`;
+                        connection.style.transformOrigin = 'left center';
+                        
+                        container.appendChild(connection);
+                    }
                 }
             }
         }
 
-        createDots();
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initLanguageSystem();
+            generateNetworkBackground();
+            
+            // Regenerate network on resize
+            window.addEventListener('resize', generateNetworkBackground);
+        });
 
-        // Cookie Banner
-        function acceptCookies() {
-            document.getElementById('cookieBanner').classList.add('hidden');
-            localStorage.setItem('cookies-accepted', 'true');
-        }
+        // Card flip functionality
+        document.querySelectorAll('.card-flip').forEach(card => {
+            card.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+        });
 
-        function rejectCookies() {
-            document.getElementById('cookieBanner').classList.add('hidden');
-            localStorage.setItem('cookies-accepted', 'false');
-        }
-
-        if (localStorage.getItem('cookies-accepted')) {
-            document.getElementById('cookieBanner').classList.add('hidden');
-        }
-
-        // Language Selector
-        function selectLanguage(lang) {
-            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            localStorage.setItem('selected-language', lang);
-        }
-
-        // Smooth scroll for navigation
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+        // Smooth scroll behavior for navigation
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', function(e) {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
                 }
             });
         });
 
-        // Initialize language
-        const savedLang = localStorage.getItem('selected-language') || 'ca';
-        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            if (btn.textContent === savedLang.toUpperCase()) {
-                btn.classList.add('active');
+        // Cookie banner functionality
+        window.addEventListener('load', function() {
+            const cookieBanner = document.querySelector('.cookie-banner');
+            if (cookieBanner) {
+                setTimeout(() => {
+                    if (!localStorage.getItem('cookiesAccepted')) {
+                        cookieBanner.style.display = 'block';
+                    } else {
+                        cookieBanner.style.display = 'none';
+                    }
+                }, 2000);
             }
         });
     </script>
