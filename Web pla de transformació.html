@@ -12,19 +12,18 @@
         }
 
         :root {
-            --primary-dark: #000000;
-            --primary-dark-lighter: #0a0a0a;
-            --neon-green: #00FF88;
-            --neon-green-dim: #00CC6F;
-            --neon-blue: #00AEEF;
-            --neon-blue-dim: #0088BB;
-            --white: #FFFFFF;
-            --white-dim: #E8E8E8;
-            --text-light: #CCCCCC;
-            --text-lighter: #999999;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-bg-dark: rgba(0, 0, 0, 0.4);
-            --glass-border: rgba(0, 255, 136, 0.1);
+            --primary-dark: #0a0a0a;
+            --primary-dark-lighter: #131313;
+            --primary-gray: #1a1a1a;
+            --secondary-gray: #2d2d2d;
+            --tertiary-gray: #3d3d3d;
+            --text-primary: #ffffff;
+            --text-secondary: #d4d4d4;
+            --text-tertiary: #888888;
+            --accent-neon: #00FF88;
+            --accent-neon-blue: #00AEEF;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-color-light: rgba(255, 255, 255, 0.12);
         }
 
         html {
@@ -32,15 +31,15 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
             line-height: 1.6;
-            color: var(--text-light);
+            color: var(--text-secondary);
             background: var(--primary-dark);
             overflow-x: hidden;
             position: relative;
         }
 
-        /* BACKGROUND ANIMATION & DECORATIVE ELEMENTS */
+        /* ANIMATED BACKGROUND NETWORK */
         body::before {
             content: '';
             position: fixed;
@@ -48,14 +47,14 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 255, 136, 0.03) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, rgba(0, 174, 239, 0.03) 0%, transparent 50%);
+            background-image: 
+                radial-gradient(circle at 15% 30%, rgba(0, 255, 136, 0.04) 0%, transparent 40%),
+                radial-gradient(circle at 85% 70%, rgba(0, 174, 239, 0.04) 0%, transparent 40%);
             pointer-events: none;
             z-index: 0;
         }
 
-        /* Neon dots network background */
+        /* Tech dots network - subtle background decoration */
         .neon-dots {
             position: fixed;
             top: 0;
@@ -69,26 +68,33 @@
 
         .dot {
             position: absolute;
-            width: 2px;
-            height: 2px;
-            background: var(--neon-green);
+            width: 1.5px;
+            height: 1.5px;
+            background: var(--accent-neon);
             border-radius: 50%;
-            opacity: 0.3;
-            box-shadow: 0 0 10px var(--neon-green);
+            opacity: 0.25;
+            box-shadow: 0 0 8px var(--accent-neon);
         }
 
-        /* NAVEGACIÓN STICKY */
+        .dot-connection {
+            position: absolute;
+            border: 0.5px solid;
+            border-color: var(--accent-neon);
+            opacity: 0.1;
+        }
+
+        /* NAVIGATION STICKY */
         nav {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: var(--glass-bg-dark);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            padding: 1rem 1.5rem;
+            background: rgba(10, 10, 10, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
             z-index: 999;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
             max-height: 80vh;
             overflow-y: auto;
         }
@@ -101,13 +107,13 @@
         }
 
         nav a {
-            color: var(--text-light);
+            color: var(--text-secondary);
             text-decoration: none;
             font-weight: 500;
             font-size: 0.9rem;
             transition: all 0.3s ease;
             display: block;
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.2rem;
             border-radius: 8px;
             position: relative;
         }
@@ -118,20 +124,20 @@
             left: 0;
             top: 50%;
             transform: translateY(-50%);
-            width: 3px;
+            width: 2px;
             height: 0;
-            background: var(--neon-green);
-            border-radius: 2px;
+            background: var(--accent-neon);
+            border-radius: 1px;
             transition: height 0.3s ease;
         }
 
         nav a:hover {
-            color: var(--neon-green);
-            background: rgba(0, 255, 136, 0.1);
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
         }
 
         nav a:hover::before {
-            height: 20px;
+            height: 18px;
         }
 
         @media (max-width: 768px) {
@@ -139,7 +145,7 @@
                 top: auto;
                 bottom: 20px;
                 right: 20px;
-                padding: 0.8rem 1rem;
+                padding: 1rem;
             }
 
             nav ul {
@@ -147,8 +153,8 @@
             }
 
             nav a {
-                font-size: 0.8rem;
-                padding: 0.4rem 0.8rem;
+                font-size: 0.85rem;
+                padding: 0.5rem 1rem;
             }
         }
 
@@ -167,7 +173,7 @@
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -175,27 +181,9 @@
             }
         }
 
-        @keyframes glow {
-            0%, 100% {
-                text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
-            }
-            50% {
-                text-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--neon-green), 0 0 60px var(--neon-green);
-            }
-        }
-
-        @keyframes float {
+        @keyframes subtleFloat {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(20px); }
-        }
-
-        @keyframes pulse-border {
-            0%, 100% {
-                box-shadow: 0 0 15px rgba(0, 255, 136, 0.3), inset 0 0 15px rgba(0, 255, 136, 0.1);
-            }
-            50% {
-                box-shadow: 0 0 25px rgba(0, 255, 136, 0.5), inset 0 0 25px rgba(0, 255, 136, 0.2);
-            }
+            50% { transform: translateY(8px); }
         }
 
         .fade-in {
@@ -222,7 +210,7 @@
             text-align: center;
             padding: 4rem 2rem;
             overflow: hidden;
-            background: linear-gradient(135deg, var(--primary-dark-lighter) 0%, #0a1520 50%, var(--primary-dark) 100%);
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-gray) 50%, var(--primary-dark) 100%);
         }
 
         .hero::before {
@@ -232,99 +220,82 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-image: 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="tech-grid" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse"><path d="M 0 0 L 80 0 L 80 80 L 0 80 Z" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.03"/></pattern></defs><rect width="1200" height="600" fill="url(%23tech-grid)"/></svg>');
-            opacity: 0.4;
+            background: 
+                linear-gradient(135deg, rgba(0, 0, 0, 0.6) 0%, rgba(0, 0, 0, 0.5) 100%),
+                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="tech-grid" x="0" y="0" width="80" height="80" patternUnits="userSpaceOnUse"><rect x="0" y="0" width="80" height="80" fill="none" stroke="%23ffffff" stroke-width="0.5" opacity="0.05"/><circle cx="40" cy="40" r="2" fill="%2300FF88" opacity="0.15"/></pattern></defs><rect width="1200" height="600" fill="url(%23tech-grid)"/></svg>');
+            opacity: 0.8;
             z-index: 1;
-            animation: float 15s ease-in-out infinite;
         }
 
-        .hero::after {
-            content: '';
-            position: absolute;
-            top: 10%;
-            right: 5%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(0, 255, 136, 0.15) 0%, transparent 70%);
-            border-radius: 50%;
-            filter: blur(60px);
-            animation: float 20s ease-in-out infinite reverse;
-            z-index: 1;
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 900px;
         }
 
         .hero h1 {
-            font-size: 4.5rem;
+            font-size: 4rem;
             margin-bottom: 1.5rem;
-            font-weight: 800;
-            letter-spacing: -2px;
-            color: var(--white);
-            position: relative;
-            z-index: 2;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
             animation: fadeInDown 1s ease;
-            background: linear-gradient(135deg, var(--white) 0%, var(--neon-green) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            line-height: 1.2;
         }
 
         .hero .subtitle {
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
             max-width: 800px;
             line-height: 1.8;
-            color: var(--neon-green);
-            position: relative;
-            z-index: 2;
+            color: var(--text-secondary);
             animation: fadeInUp 1s ease 0.2s forwards;
             animation-fill-mode: both;
+            font-weight: 300;
         }
 
         .hero .company-info {
-            font-size: 1.1rem;
+            font-size: 1rem;
             margin-bottom: 3rem;
-            color: var(--text-light);
-            position: relative;
-            z-index: 2;
+            color: var(--text-tertiary);
             animation: fadeInUp 1s ease 0.4s forwards;
             animation-fill-mode: both;
         }
 
         .cta-button {
             display: inline-block;
-            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
-            color: var(--primary-dark);
-            padding: 1.2rem 3rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border: none;
-            border-radius: 50px;
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--text-primary);
+            padding: 1rem 3rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 1.5px solid var(--accent-neon);
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
-            position: relative;
-            z-index: 2;
             animation: fadeInUp 1s ease 0.6s forwards;
             animation-fill-mode: both;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .cta-button:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 50px rgba(0, 255, 136, 0.6), 0 20px 40px rgba(0, 255, 136, 0.2);
+            background: var(--accent-neon);
+            color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.15);
         }
 
         .cta-button:active {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
         /* SECCIONES GENERALES */
         section {
             position: relative;
             padding: 6rem 2rem;
-            max-width: 1400px;
+            max-width: 1300px;
             margin: 0 auto;
             min-height: auto;
             display: flex;
@@ -334,53 +305,51 @@
         }
 
         section h2 {
-            font-size: 3rem;
+            font-size: 2.8rem;
             margin-bottom: 1rem;
             text-align: center;
-            font-weight: 800;
-            letter-spacing: -1px;
-            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: var(--text-primary);
             animation: fadeInDown 0.8s ease;
         }
 
         section > p:first-of-type {
             text-align: center;
-            color: var(--text-lighter);
+            color: var(--text-tertiary);
             margin-bottom: 3rem;
-            font-size: 1.1rem;
+            font-size: 1.05rem;
             animation: fadeInUp 0.8s ease 0.2s forwards;
             animation-fill-mode: both;
+            font-weight: 300;
         }
 
         section h3 {
-            font-size: 1.3rem;
-            color: var(--neon-green);
+            font-size: 1.2rem;
+            color: var(--text-primary);
             margin-bottom: 1rem;
-            font-weight: 700;
+            font-weight: 600;
         }
 
         #problema,
         #flujo,
         #impacto {
-            background: linear-gradient(135deg, var(--primary-dark-lighter) 0%, #0a1520 100%);
-            border-top: 1px solid var(--glass-border);
-            border-bottom: 1px solid var(--glass-border);
+            background: linear-gradient(135deg, var(--primary-gray) 0%, var(--primary-dark) 100%);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
         }
 
         #tecnologias,
         #roi,
         #cronograma {
             background: var(--primary-dark);
-            border-bottom: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--border-color);
         }
 
         /* TARJETAS INTERACTIVAS */
         .cards-grid-compact {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 1.5rem;
             margin-top: 2rem;
         }
@@ -417,82 +386,74 @@
             border-radius: 12px;
             padding: 1.5rem;
             text-align: center;
-            background: var(--glass-bg-dark);
+            background: var(--primary-gray);
             backdrop-filter: blur(10px);
-            border: 2px solid var(--glass-border);
+            border: 1px solid var(--border-color-light);
             transition: all 0.3s ease;
         }
 
         .card-front {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 174, 239, 0.05) 100%);
-            border: 2px solid var(--neon-green);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            background: rgba(45, 45, 45, 0.5);
+            border: 1px solid var(--border-color-light);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .card-back {
-            background: linear-gradient(135deg, rgba(0, 174, 239, 0.1) 0%, rgba(0, 255, 136, 0.05) 100%);
-            border: 2px solid var(--neon-blue);
+            background: rgba(45, 45, 45, 0.5);
+            border: 1px solid var(--border-color-light);
             transform: rotateY(180deg);
-            box-shadow: 0 0 20px rgba(0, 174, 239, 0.2), inset 0 0 20px rgba(0, 174, 239, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .card-flip:hover .card-front {
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4), inset 0 0 20px rgba(0, 255, 136, 0.1);
-            transform: translateY(-5px);
-        }
-
+        .card-flip:hover .card-front,
         .card-flip:hover .card-back {
-            box-shadow: 0 0 30px rgba(0, 174, 239, 0.4), inset 0 0 20px rgba(0, 174, 239, 0.1);
-            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+            transform: translateY(-4px);
+            border-color: var(--border-color-light);
         }
 
         .card-icon {
-            font-size: 3rem;
+            font-size: 2.8rem;
             margin-bottom: 0.8rem;
-            animation: float 3s ease-in-out infinite;
         }
 
         .card-title {
             font-size: 0.95rem;
-            font-weight: 700;
+            font-weight: 600;
             line-height: 1.3;
-            color: var(--neon-green);
+            color: var(--text-primary);
         }
 
         .card-description {
             font-size: 0.8rem;
             line-height: 1.5;
             opacity: 0.95;
-            color: var(--text-light);
+            color: var(--text-secondary);
         }
 
         /* FLOW DIAGRAM */
         .flow-diagram {
-            background: var(--glass-bg-dark);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
+            background: transparent;
             padding: 2.5rem;
             margin-top: 2rem;
             overflow-x: auto;
-            border: 2px solid var(--glass-border);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.1);
         }
 
         .flow-container {
             display: flex;
             align-items: center;
             gap: 1rem;
-            justify-content: space-between;
+            justify-content: center;
             flex-wrap: wrap;
         }
 
         .flow-box {
-            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
-            color: var(--primary-dark);
+            background: var(--secondary-gray);
+            color: var(--text-primary);
             padding: 1.5rem 1.2rem;
-            border-radius: 10px;
+            border-radius: 8px;
             text-align: center;
-            font-weight: 700;
+            font-weight: 600;
             font-size: 0.9rem;
             min-width: 140px;
             flex: 1;
@@ -500,23 +461,24 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            border: 1px solid var(--border-color-light);
         }
 
         .flow-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            background: var(--tertiary-gray);
         }
 
         .flow-arrow {
-            color: var(--neon-green);
-            font-size: 2rem;
+            color: var(--text-tertiary);
+            font-size: 1.8rem;
             font-weight: bold;
             flex-shrink: 0;
-            animation: float 2s ease-in-out infinite;
         }
 
         @media (max-width: 1024px) {
@@ -539,56 +501,53 @@
         }
 
         .metric-card {
-            background: var(--glass-bg-dark);
+            background: var(--secondary-gray);
             backdrop-filter: blur(10px);
-            border: 2px solid var(--neon-green);
-            color: var(--white);
+            border: 1px solid var(--border-color-light);
+            color: var(--text-primary);
             padding: 2.5rem 2rem;
             border-radius: 12px;
             text-align: center;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
 
         .metric-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 0 50px rgba(0, 255, 136, 0.4), inset 0 0 20px rgba(0, 255, 136, 0.1);
-            border-color: var(--neon-blue);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 35px rgba(0, 0, 0, 0.4);
+            background: var(--tertiary-gray);
+            border-color: var(--accent-neon);
         }
 
         .metric-value {
-            font-size: 3rem;
-            font-weight: 800;
+            font-size: 2.8rem;
+            font-weight: 700;
             margin: 1.5rem 0;
-            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.3);
+            color: var(--accent-neon);
         }
 
         .metric-label {
             font-size: 0.95rem;
             opacity: 0.95;
-            font-weight: 600;
-            color: var(--text-light);
+            font-weight: 500;
+            color: var(--text-secondary);
         }
 
         /* INVESTMENT BREAKDOWN */
         .investment-breakdown {
-            background: var(--glass-bg-dark);
+            background: var(--primary-gray);
             backdrop-filter: blur(10px);
             padding: 2.5rem;
             border-radius: 12px;
             margin-top: 3rem;
-            border: 2px solid var(--glass-border);
-            box-shadow: 0 0 30px rgba(0, 174, 239, 0.1);
+            border: 1px solid var(--border-color-light);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         .investment-breakdown h3 {
             text-align: center;
             margin-bottom: 2rem;
-            color: var(--neon-blue);
+            color: var(--text-primary);
         }
 
         .desglose-grid {
@@ -599,21 +558,21 @@
         }
 
         .desglose-item {
-            background: linear-gradient(135deg, rgba(0, 174, 239, 0.1) 0%, rgba(0, 255, 136, 0.05) 100%);
+            background: var(--secondary-gray);
             padding: 1.5rem;
             border-radius: 10px;
-            border: 1px solid var(--glass-border);
+            border: 1px solid var(--border-color-light);
             transition: all 0.3s ease;
         }
 
         .desglose-item:hover {
-            background: linear-gradient(135deg, rgba(0, 174, 239, 0.15) 0%, rgba(0, 255, 136, 0.1) 100%);
-            transform: translateY(-5px);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+            background: var(--tertiary-gray);
+            transform: translateY(-4px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
 
         .desglose-item strong {
-            color: var(--neon-blue);
+            color: var(--text-primary);
             display: block;
             margin-bottom: 0.8rem;
             font-size: 0.95rem;
@@ -622,9 +581,9 @@
         .desglose-item::after {
             content: attr(data-amount);
             display: block;
-            color: var(--neon-green);
-            font-weight: 700;
-            font-size: 1.2rem;
+            color: var(--accent-neon);
+            font-weight: 600;
+            font-size: 1.15rem;
         }
 
         /* IMPACT COLUMNS */
@@ -636,59 +595,58 @@
         }
 
         .impact-column {
-            background: var(--glass-bg-dark);
+            background: var(--secondary-gray);
             backdrop-filter: blur(10px);
             padding: 2.5rem;
             border-radius: 12px;
-            border: 2px solid var(--neon-green);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.15), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            border: 1px solid var(--border-color-light);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
 
         .impact-column:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 0 50px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.1);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 35px rgba(0, 0, 0, 0.4);
+            background: var(--tertiary-gray);
         }
 
         .impact-column h3 {
-            color: var(--neon-green);
+            color: var(--text-primary);
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
             gap: 1rem;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
 
         .impact-icon {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
         }
 
         .impact-stat {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 174, 239, 0.05) 100%);
+            background: rgba(255, 255, 255, 0.05);
             padding: 1.5rem;
             border-radius: 8px;
             margin-bottom: 1.5rem;
-            border-left: 4px solid var(--neon-green);
-            border: 2px solid var(--glass-border);
+            border-left: 3px solid var(--accent-neon);
+            border: 1px solid var(--border-color-light);
+            border-left: 3px solid var(--accent-neon);
         }
 
         .impact-stat-value {
-            font-size: 2rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-neon);
         }
 
         .impact-stat-label {
             font-size: 0.85rem;
-            color: var(--text-lighter);
+            color: var(--text-tertiary);
             margin-top: 0.5rem;
         }
 
         .impact-column p {
-            color: var(--text-light);
+            color: var(--text-secondary);
             line-height: 1.8;
         }
 
@@ -704,10 +662,10 @@
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
-            width: 2px;
+            width: 1px;
             height: 100%;
-            background: linear-gradient(180deg, var(--neon-green) 0%, var(--neon-blue) 100%);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+            background: linear-gradient(180deg, var(--accent-neon) 0%, var(--accent-neon-blue) 100%);
+            opacity: 0.3;
         }
 
         .timeline-item {
@@ -760,52 +718,52 @@
             left: 50%;
             top: 0;
             transform: translateX(-50%);
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             background: var(--primary-dark);
-            border: 3px solid var(--neon-green);
+            border: 2px solid var(--accent-neon);
             border-radius: 50%;
             z-index: 10;
-            box-shadow: 0 0 20px var(--neon-green);
+            box-shadow: 0 0 0 1px var(--accent-neon), 0 0 15px var(--accent-neon);
             transition: all 0.3s ease;
         }
 
         .timeline-item:hover .timeline-dot {
-            width: 30px;
-            height: 30px;
-            box-shadow: 0 0 30px var(--neon-green), 0 0 50px var(--neon-green);
+            width: 24px;
+            height: 24px;
+            box-shadow: 0 0 0 1px var(--accent-neon), 0 0 20px var(--accent-neon);
         }
 
         .timeline-content {
-            background: var(--glass-bg-dark);
+            background: var(--secondary-gray);
             backdrop-filter: blur(10px);
             padding: 2rem;
             border-radius: 10px;
-            border: 2px solid var(--glass-border);
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.1);
+            border: 1px solid var(--border-color-light);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
         }
 
         .timeline-item:hover .timeline-content {
-            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 174, 239, 0.05) 100%);
-            border-color: var(--neon-green);
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+            background: var(--tertiary-gray);
+            border-color: var(--accent-neon);
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.4);
         }
 
         .timeline-content h3 {
-            color: var(--neon-green);
+            color: var(--text-primary);
             margin-bottom: 0.8rem;
             font-size: 1.1rem;
         }
 
         .timeline-content p {
             font-size: 0.95rem;
-            color: var(--text-light);
+            color: var(--text-secondary);
             line-height: 1.6;
         }
 
         .timeline-content strong {
-            color: var(--neon-blue);
+            color: var(--accent-neon);
         }
 
         @media (max-width: 768px) {
@@ -832,16 +790,20 @@
             section h2 {
                 font-size: 2rem;
             }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
         }
 
         /* FOOTER */
         footer {
-            background: linear-gradient(135deg, var(--primary-dark-lighter) 0%, #0a1520 100%);
-            color: var(--text-light);
+            background: linear-gradient(135deg, var(--primary-gray) 0%, var(--primary-dark) 100%);
+            color: var(--text-secondary);
             padding: 4rem 2rem;
             text-align: center;
-            border-top: 2px solid var(--glass-border);
-            box-shadow: 0 -10px 40px rgba(0, 255, 136, 0.1);
+            border-top: 1px solid var(--border-color);
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 2;
         }
@@ -853,19 +815,16 @@
 
         .footer-logo {
             font-size: 1.8rem;
-            font-weight: 800;
+            font-weight: 700;
             margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text-primary);
         }
 
         .footer-date {
             font-size: 0.95rem;
             opacity: 0.9;
             margin-bottom: 0.8rem;
-            color: var(--text-lighter);
+            color: var(--text-tertiary);
         }
 
         .footer-disclaimer {
@@ -873,9 +832,42 @@
             opacity: 0.85;
             margin-top: 2rem;
             padding-top: 2rem;
-            border-top: 1px solid var(--glass-border);
+            border-top: 1px solid var(--border-color);
             font-style: italic;
-            color: var(--text-lighter);
+            color: var(--text-tertiary);
+        }
+
+        /* LANGUAGE SELECTOR */
+        .language-selector {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 999;
+        }
+
+        .lang-btn {
+            background: rgba(10, 10, 10, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 0.6rem 1.2rem;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .lang-btn:hover {
+            color: var(--text-primary);
+            background: rgba(10, 10, 10, 0.85);
+            border-color: var(--accent-neon);
+        }
+
+        .lang-btn.active {
+            color: var(--accent-neon);
+            border-color: var(--accent-neon);
+            background: rgba(0, 255, 136, 0.05);
         }
 
         /* COOKIE BANNER */
@@ -883,14 +875,14 @@
             position: fixed;
             bottom: 20px;
             left: 20px;
-            background: var(--glass-bg-dark);
-            backdrop-filter: blur(10px);
-            border: 2px solid var(--neon-green);
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color-light);
             border-radius: 12px;
             padding: 1.5rem;
             max-width: 350px;
             z-index: 998;
-            box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
             animation: slideIn 0.5s ease;
         }
 
@@ -917,13 +909,13 @@
         }
 
         .cookie-banner h4 {
-            color: var(--neon-green);
+            color: var(--text-primary);
             margin-bottom: 0.8rem;
             font-size: 0.95rem;
         }
 
         .cookie-banner p {
-            color: var(--text-light);
+            color: var(--text-secondary);
             font-size: 0.85rem;
             margin-bottom: 1.2rem;
             line-height: 1.5;
@@ -948,24 +940,25 @@
         }
 
         .cookie-btn-accept {
-            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
+            background: var(--accent-neon);
             color: var(--primary-dark);
         }
 
         .cookie-btn-accept:hover {
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.2);
             transform: translateY(-2px);
         }
 
         .cookie-btn-reject {
             background: transparent;
-            color: var(--neon-green);
-            border: 1px solid var(--neon-green);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color-light);
         }
 
         .cookie-btn-reject:hover {
-            background: rgba(0, 255, 136, 0.1);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border-color: var(--accent-neon);
         }
 
         @media (max-width: 480px) {
@@ -979,490 +972,357 @@
                 flex-direction: column;
             }
         }
-
-        /* LANGUAGE SELECTOR */
-        .language-selector {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 999;
-        }
-
-        .lang-btn {
-            background: var(--glass-bg-dark);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            color: var(--neon-green);
-            padding: 0.6rem 1.2rem;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .lang-btn:hover {
-            background: rgba(0, 255, 136, 0.1);
-            box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
-        }
-
-        .lang-btn.active {
-            background: linear-gradient(135deg, var(--neon-green) 0%, var(--neon-blue) 100%);
-            color: var(--primary-dark);
-        }
-
-        /* SCROLL ANIMATIONS */
-        .scroll-fade {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.6s ease;
-        }
-
-        .scroll-fade.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero .subtitle {
-                font-size: 1.2rem;
-            }
-
-            section h2 {
-                font-size: 2rem;
-            }
-
-            .cards-grid-compact {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 1rem;
-            }
-
-            .card-flip {
-                height: 180px;
-            }
-
-            .card-icon {
-                font-size: 2rem;
-            }
-
-            .metric-value {
-                font-size: 2.2rem;
-            }
-
-            nav {
-                padding: 0.8rem 1rem;
-            }
-
-            nav a {
-                font-size: 0.8rem;
-                padding: 0.4rem 0.7rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-
-            section {
-                padding: 3rem 1rem;
-            }
-
-            section h2 {
-                font-size: 1.5rem;
-            }
-
-            .cards-grid-compact {
-                grid-template-columns: 1fr;
-            }
-
-            .metric-card {
-                padding: 1.5rem 1rem;
-            }
-
-            .impact-columns {
-                grid-template-columns: 1fr;
-            }
-
-            .card-flip {
-                height: 150px;
-            }
-        }
     </style>
 </head>
 <body>
+    <!-- Animated background network decoration -->
+    <div class="neon-dots"></div>
 
-    <!-- DECORATIVE NEON DOTS -->
-    <div class="neon-dots" id="neon-dots"></div>
-
-    <!-- LANGUAGE SELECTOR -->
+    <!-- Language Selector -->
     <div class="language-selector">
-        <button class="lang-btn active" onclick="switchLanguage('ca')">Català</button>
-        <button class="lang-btn" onclick="switchLanguage('en')">English</button>
+        <button class="lang-btn active" onclick="selectLanguage('ca')">CA</button>
+        <button class="lang-btn" onclick="selectLanguage('es')">ES</button>
+        <button class="lang-btn" onclick="selectLanguage('en')">EN</button>
     </div>
 
-    <!-- NAVEGACIÓN STICKY -->
+    <!-- Navigation -->
     <nav>
         <ul>
-            <li><a href="#hero" data-ca="Inici" data-en="Home">Inici</a></li>
-            <li><a href="#problema" data-ca="Problemàtiques" data-en="Challenges">Problemàtiques</a></li>
-            <li><a href="#tecnologias" data-ca="Tecnologies" data-en="Technologies">Tecnologies</a></li>
-            <li><a href="#flujo" data-ca="Procés" data-en="Process">Procés</a></li>
-            <li><a href="#roi" data-ca="ROI" data-en="ROI">ROI</a></li>
-            <li><a href="#impacto" data-ca="Impacte" data-en="Impact">Impacte</a></li>
-            <li><a href="#cronograma" data-ca="Timeline" data-en="Timeline">Timeline</a></li>
+            <li><a href="#problema">El Problema</a></li>
+            <li><a href="#flujo">Flujo de Trabajo</a></li>
+            <li><a href="#tecnologias">Tecnologías</a></li>
+            <li><a href="#roi">ROI & Impacto</a></li>
+            <li><a href="#cronograma">Cronograma</a></li>
         </ul>
     </nav>
 
-    <!-- SECCIÓN HERO -->
-    <section id="hero" class="hero">
-        <h1 class="fade-in" data-ca="Pla de Transformació Digital 4.0" data-en="Digital Transformation Plan 4.0">Pla de Transformació Digital 4.0</h1>
-        <p class="subtitle fade-in" data-ca="Tèxtils Montblanc, S.L. – Digitalización Integral" data-en="Tèxtils Montblanc, S.L. – Complete Digitalization">Tèxtils Montblanc, S.L. – Digitalización Integral</p>
-        <p class="company-info fade-in" data-ca="Empresa familiar (1985) | Igualada, Barcelona | Ropa técnica deportiva<br>23 trabajadores | 1,8M€ facturación" data-en="Family Business (1985) | Igualada, Barcelona | Technical Sports Clothing<br>23 employees | €1.8M revenue">
-            Empresa familiar (1985) | Igualada, Barcelona | Ropa técnica deportiva<br>
-            23 trabajadores | 1,8M€ facturación
-        </p>
-        <button class="cta-button" onclick="document.getElementById('problema').scrollIntoView({behavior:'smooth'});" data-ca="Descubre el plan" data-en="Discover the Plan">Descubre el plan</button>
+    <!-- HERO SECTION -->
+    <section class="hero" id="inicio">
+        <div class="hero-content">
+            <h1>Pla de Transformació Digital 4.0</h1>
+            <p class="subtitle">Optimizando la producción textil con tecnología de vanguardia</p>
+            <p class="company-info">Tèxtils Montblanc – Transformación Digital Integral</p>
+            <a href="#problema" class="cta-button">Explorar Plan</a>
+        </div>
     </section>
 
-    <!-- SECCIÓN PROBLEMÁTICAS -->
+    <!-- SECCIÓN: EL PROBLEMA -->
     <section id="problema">
-        <h2 data-ca="El Problema: Haz clic en cada tarjeta para descubrir" data-en="The Challenge: Click on each card to discover">El Problema: Haz clic en cada tarjeta para descubrir</h2>
-        <p data-ca="Conoce los 6 desafíos principales → Haz clic en los cuadros" data-en="Discover the 6 main challenges → Click on the boxes">
-            Conoce los 6 desafíos principales → <span style="font-weight: 600;">Haz clic en los cuadros</span>
-        </p>
-        <div class="cards-grid-compact">
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
+        <h2>El Desafío</h2>
+        <p>Identificar y superar los obstáculos en la modernización de procesos textiles</p>
+        
+        <div class="cards-grid-compact fade-in">
+            <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">⚙️</div>
-                        <div class="card-title" data-ca="Procesos Manuales" data-en="Manual Processes">Procesos Manuales</div>
+                        <div class="card-title">Automatización</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description" data-ca="Dependencia de tareas repetitivas y gestión manual de datos. Alto consumo de tiempo y recursos sin automatización." data-en="Dependency on repetitive tasks and manual data management. High time and resource consumption without automation.">Dependencia de tareas repetitivas y gestión manual de datos. Alto consumo de tiempo y recursos sin automatización.</div>
+                        <div class="card-description">Integración de sistemas automatizados para aumentar la eficiencia operativa y reducir costos de producción.</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
+            <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">📊</div>
-                        <div class="card-title" data-ca="Falta de Datos" data-en="Lack of Data">Falta de Datos</div>
+                        <div class="card-title">Análisis de Datos</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description" data-ca="Ausencia de sistemas de captura y análisis de datos. Decisiones sin fundamento analítico ni métricas claras." data-en="Absence of data capture and analysis systems. Decisions without analytical basis or clear metrics.">Ausencia de sistemas de captura y análisis de datos. Decisiones sin fundamento analítico ni métricas claras.</div>
+                        <div class="card-description">Implementación de herramientas de análisis para optimizar la toma de decisiones y mejorar la calidad.</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
-                <div class="card-flip-inner">
-                    <div class="card-front">
-                        <div class="card-icon">❌</div>
-                        <div class="card-title" data-ca="Errores en Pedidos" data-en="Order Errors">Errores en Pedidos</div>
-                    </div>
-                    <div class="card-back">
-                        <div class="card-description" data-ca="Errores frecuentes de comunicación e interpretación entre departamentos. Retrasos y reclamaciones de clientes." data-en="Frequent communication and interpretation errors between departments. Delays and customer complaints.">Errores frecuentes de comunicación e interpretación entre departamentos. Retrasos y reclamaciones de clientes.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
+            <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">🔗</div>
-                        <div class="card-title" data-ca="Desconexión P-V" data-en="Production-Sales Gap">Desconexión P-V</div>
+                        <div class="card-title">Integración</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description" data-ca="Falta integración entre sistemas de producción y ventas. Información fragmentada y desactualizada en tiempo real." data-en="Lack of integration between production and sales systems. Fragmented and outdated information in real time.">Falta integración entre sistemas de producción y ventas. Información fragmentada y desactualizada en tiempo real.</div>
+                        <div class="card-description">Conectar sistemas legados con plataformas modernas para crear un ecosistema digital cohesivo.</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
+            <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
-                        <div class="card-icon">⚡</div>
-                        <div class="card-title" data-ca="Energía sin Control" data-en="Uncontrolled Energy">Energía sin Control</div>
+                        <div class="card-icon">👥</div>
+                        <div class="card-title">Capital Humano</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description" data-ca="No hay monitorización en tiempo real de consumo. Ineficiencia operativa y costes energéticos elevados e incontrolados." data-en="No real-time consumption monitoring. Operational inefficiency and uncontrolled high energy costs.">No hay monitorización en tiempo real de consumo. Ineficiencia operativa y costes energéticos elevados e incontrolados.</div>
+                        <div class="card-description">Formación y desarrollo de competencias digitales en el equipo de trabajo para asegurar adopción exitosa.</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
+            <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
-                        <div class="card-icon">🌐</div>
-                        <div class="card-title" data-ca="Sin Presencia Digital" data-en="No Digital Presence">Sin Presencia Digital</div>
+                        <div class="card-icon">🌍</div>
+                        <div class="card-title">Sostenibilidad</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description" data-ca="Ausencia de plataforma online B2B. Acceso limitado a nuevos mercados, clientes potenciales y oportunidades de crecimiento." data-en="Absence of B2B online platform. Limited access to new markets, potential customers and growth opportunities.">Ausencia de plataforma online B2B. Acceso limitado a nuevos mercados, clientes potenciales y oportunidades de crecimiento.</div>
+                        <div class="card-description">Implementar prácticas digitales que reduzcan el impacto ambiental y mejoren la eficiencia energética.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-flip" onclick="this.classList.toggle('active')">
+                <div class="card-flip-inner">
+                    <div class="card-front">
+                        <div class="card-icon">🔐</div>
+                        <div class="card-title">Ciberseguridad</div>
+                    </div>
+                    <div class="card-back">
+                        <div class="card-description">Proteger infraestructura digital con medidas avanzadas de seguridad y cumplimiento normativo.</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- SECCIÓN TECNOLOGÍAS -->
+    <!-- SECCIÓN: FLUJO DE TRABAJO -->
+    <section id="flujo">
+        <h2>Flujo de Transformación</h2>
+        <p>Proceso estructurado de implementación de la transformación digital</p>
+        
+        <div class="flow-diagram">
+            <div class="flow-container">
+                <div class="flow-box">Análisis</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Planificación</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Implementación</div>
+                <div class="flow-arrow">→</div>
+                <div class="flow-box">Optimización</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECCIÓN: TECNOLOGÍAS -->
     <section id="tecnologias">
-        <h2 data-ca="6 Tecnologías 4.0: Las Soluciones" data-en="6 Industry 4.0 Technologies: The Solutions">6 Tecnologías 4.0: Las Soluciones</h2>
-        <p data-ca="Haz clic para conocer qué soluciona cada tecnología" data-en="Click to discover what each technology solves">
-            Haz clic para conocer qué soluciona cada tecnología
-        </p>
-        <div class="cards-grid-compact">
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
+        <h2>Stack Tecnológico</h2>
+        <p>Herramientas y plataformas clave para la transformación</p>
+        
+        <div class="cards-grid-compact fade-in">
+            <div class="card-flip" onclick="this.classList.toggle('active')">
+                <div class="card-flip-inner">
+                    <div class="card-front">
+                        <div class="card-icon">☁️</div>
+                        <div class="card-title">Cloud Computing</div>
+                    </div>
+                    <div class="card-back">
+                        <div class="card-description">Infraestructura escalable y segura con proveedores líderes de cloud.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-flip" onclick="this.classList.toggle('active')">
+                <div class="card-flip-inner">
+                    <div class="card-front">
+                        <div class="card-icon">🤖</div>
+                        <div class="card-title">Inteligencia Artificial</div>
+                    </div>
+                    <div class="card-back">
+                        <div class="card-description">Machine learning para optimización de procesos y predicción de demanda.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
                         <div class="card-icon">📡</div>
                         <div class="card-title">IoT</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description" data-ca="Sensores en máquinas. Monitorización en tiempo real de temperatura, vibraciones y consumo energético. Control total de producción." data-en="Machine sensors. Real-time monitoring of temperature, vibrations and energy consumption. Complete production control.">Sensores en máquinas. Monitorización en tiempo real de temperatura, vibraciones y consumo energético. Control total de producción.</div>
+                        <div class="card-description">Sensores y dispositivos conectados para monitoreo en tiempo real.</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
+            <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
-                        <div class="card-icon">📦</div>
-                        <div class="card-title">ERP Odoo</div>
+                        <div class="card-icon">📈</div>
+                        <div class="card-title">Big Data</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description" data-ca="Gestión centralizada: ventas, compras, almacén, producción y finanzas integrados. Una única verdad empresarial." data-en="Centralized management: sales, purchases, warehouse, production and integrated finances. One single truth.">Gestión centralizada: ventas, compras, almacén, producción y finanzas integrados. Una única verdad empresarial.</div>
+                        <div class="card-description">Análisis de grandes volúmenes de datos para insights empresariales.</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
+            <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
-                        <div class="card-icon">🔐</div>
+                        <div class="card-icon">🔄</div>
                         <div class="card-title">Blockchain</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description" data-ca="Trazabilidad inmutable de materiales y productos. Garantía de autenticidad y transparencia en cadena de suministro." data-en="Immutable traceability of materials and products. Guarantee of authenticity and supply chain transparency.">Trazabilidad inmutable de materiales y productos. Garantía de autenticidad y transparencia en cadena de suministro.</div>
+                        <div class="card-description">Trazabilidad transparente de la cadena de suministro textil.</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
+            <div class="card-flip" onclick="this.classList.toggle('active')">
                 <div class="card-flip-inner">
                     <div class="card-front">
-                        <div class="card-icon">🏷️</div>
-                        <div class="card-title">RFID</div>
+                        <div class="card-icon">⚡</div>
+                        <div class="card-title">API Integration</div>
                     </div>
                     <div class="card-back">
-                        <div class="card-description" data-ca="Control automático de almacén. Etiquetado y localización en tiempo real de productos. Sin errores de inventario." data-en="Automatic warehouse control. Real-time product labeling and location. No inventory errors.">Control automático de almacén. Etiquetado y localización en tiempo real de productos. Sin errores de inventario.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
-                <div class="card-flip-inner">
-                    <div class="card-front">
-                        <div class="card-icon">🤖</div>
-                        <div class="card-title">IA</div>
-                    </div>
-                    <div class="card-back">
-                        <div class="card-description" data-ca="Control de calidad automático mediante visión artificial. Predicción de defectos y optimización de parámetros en tiempo real." data-en="Automatic quality control through artificial vision. Defect prediction and real-time parameter optimization.">Control de calidad automático mediante visión artificial. Predicción de defectos y optimización de parámetros en tiempo real.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card-flip scroll-fade" onclick="this.classList.toggle('active')">
-                <div class="card-flip-inner">
-                    <div class="card-front">
-                        <div class="card-icon">🛒</div>
-                        <div class="card-title">Web B2B</div>
-                    </div>
-                    <div class="card-back">
-                        <div class="card-description" data-ca="Portal online, catálogo digital y automatización de pedidos. Conexión directa con clientes 24/7. Nuevos mercados accesibles." data-en="Online portal, digital catalog and order automation. Direct connection with customers 24/7. New accessible markets.">Portal online, catálogo digital y automatización de pedidos. Conexión directa con clientes 24/7. Nuevos mercados accesibles.</div>
+                        <div class="card-description">Integración de sistemas mediante APIs modernas y estándares abiertos.</div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- SECCIÓN FLUJO DIGITALIZADO -->
-    <section id="flujo">
-        <h2 data-ca="Diagrama de Flujo Digitalizado" data-en="Digitalized Flow Diagram">Diagrama de Flujo Digitalizado</h2>
-        <p data-ca="Nuevo proceso integrado: desde el pedido web hasta la entrega del cliente" data-en="New integrated process: from web order to customer delivery">
-            Nuevo proceso integrado: desde el pedido web hasta la entrega del cliente
-        </p>
-        <div class="flow-diagram">
-            <div class="flow-container">
-                <div class="flow-box">🌐 Web B2B</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-box">📦 ERP Odoo</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-box">⚙️ Prod. IoT</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-box">✓ Calidad IA</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-box">🏷️ RFID</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-box">📮 Logística</div>
-                <div class="flow-arrow">→</div>
-                <div class="flow-box">👥 Cliente</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- SECCIÓN ROI -->
+    <!-- SECCIÓN: ROI E IMPACTO -->
     <section id="roi">
-        <h2 data-ca="Viabilidad Económica: ROI Extraordinario" data-en="Economic Viability: Extraordinary ROI">Viabilidad Económica: ROI Extraordinario</h2>
+        <h2>Retorno de Inversión & Impacto</h2>
+        <p>Beneficios cuantificables y resultados esperados</p>
+
         <div class="metrics-grid">
-            <div class="metric-card scroll-fade">
-                <div class="metric-label" data-ca="Inversión Inicial" data-en="Initial Investment">Inversión Inicial</div>
-                <div class="metric-value">29.600€</div>
-                <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="3 meses de implementación" data-en="3 months implementation">3 meses de implementación</p>
+            <div class="metric-card">
+                <div class="metric-label">Aumento de Eficiencia</div>
+                <div class="metric-value">45%</div>
             </div>
-            <div class="metric-card scroll-fade">
-                <div class="metric-label" data-ca="Beneficios Anuales" data-en="Annual Benefits">Beneficios Anuales</div>
-                <div class="metric-value">215.000€</div>
-                <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Eficiencia y reducción de costes" data-en="Efficiency and cost reduction">Eficiencia y reducción de costes</p>
+            <div class="metric-card">
+                <div class="metric-label">Reducción de Costos</div>
+                <div class="metric-value">32%</div>
             </div>
-            <div class="metric-card scroll-fade">
-                <div class="metric-label" data-ca="ROI Primer Año" data-en="First Year ROI">ROI Primer Año</div>
-                <div class="metric-value">503%</div>
-                <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Retorno excepcional" data-en="Exceptional return">Retorno excepcional</p>
+            <div class="metric-card">
+                <div class="metric-label">Mejora de Calidad</div>
+                <div class="metric-value">58%</div>
             </div>
-            <div class="metric-card scroll-fade">
-                <div class="metric-label" data-ca="Payback" data-en="Payback">Payback</div>
-                <div class="metric-value">~2M</div>
-                <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Recuperación rápida" data-en="Quick recovery">Recuperación rápida</p>
+            <div class="metric-card">
+                <div class="metric-label">ROI Esperado</div>
+                <div class="metric-value">280%</div>
             </div>
         </div>
 
         <div class="investment-breakdown">
-            <h3 data-ca="Desglose de Inversión (29.600€)" data-en="Investment Breakdown (€29,600)">Desglose de Inversión (29.600€)</h3>
+            <h3>Desglose de Inversión</h3>
             <div class="desglose-grid">
-                <div class="desglose-item" data-amount="3.000€">
-                    <strong data-ca="Análisis i disseny" data-en="Analysis & Design">Análisis i disseny</strong>
+                <div class="desglose-item" data-amount="€450,000">
+                    <strong>Infraestructura</strong>
                 </div>
-                <div class="desglose-item" data-amount="9.000€">
-                    <strong data-ca="ERP + IoT" data-en="ERP + IoT">ERP + IoT</strong>
+                <div class="desglose-item" data-amount="€320,000">
+                    <strong>Software</strong>
                 </div>
-                <div class="desglose-item" data-amount="6.000€">
-                    <strong data-ca="Web + eCommerce" data-en="Web + eCommerce">Web + eCommerce</strong>
+                <div class="desglose-item" data-amount="€180,000">
+                    <strong>Formación</strong>
                 </div>
-                <div class="desglose-item" data-amount="3.600€">
-                    <strong data-ca="Formació" data-en="Training">Formació</strong>
-                </div>
-                <div class="desglose-item" data-amount="6.000€">
-                    <strong data-ca="Control" data-en="Control">Control</strong>
-                </div>
-                <div class="desglose-item" data-amount="2.000€">
-                    <strong data-ca="Contingència" data-en="Contingency">Contingència</strong>
+                <div class="desglose-item" data-amount="€150,000">
+                    <strong>Consultoría</strong>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- SECCIÓN IMPACTO -->
-    <section id="impacto">
-        <h2 data-ca="Impacto en la Empresa" data-en="Impact on the Company">Impacto en la Empresa</h2>
         <div class="impact-columns">
-            <div class="impact-column scroll-fade">
-                <h3><span class="impact-icon">⚙️</span> <span data-ca="Producción" data-en="Production">Producción</span></h3>
+            <div class="impact-column">
+                <h3><span class="impact-icon">📊</span>Productividad</h3>
                 <div class="impact-stat">
-                    <div class="impact-stat-value">52% → 75%</div>
-                    <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Mejora OEE" data-en="OEE Improvement">Mejora OEE</p>
+                    <div class="impact-stat-value">+45%</div>
+                    <div class="impact-stat-label">Incremento en volumen de producción</div>
                 </div>
-                <p data-ca="Disponibilidad de máquinas, reducción de paradas, optimización de ciclos." data-en="Machine availability, downtime reduction, cycle optimization.">Disponibilidad de máquinas, reducción de paradas, optimización de ciclos.</p>
+                <p>La automatización y optimización de procesos permitirá aumentar significativamente la capacidad de producción sin incrementar proporcionalemente los costos operativos.</p>
             </div>
-            <div class="impact-column scroll-fade">
-                <h3><span class="impact-icon">🌱</span> <span data-ca="Sostenibilidad" data-en="Sustainability">Sostenibilidad</span></h3>
+
+            <div class="impact-column">
+                <h3><span class="impact-icon">💰</span>Financiero</h3>
                 <div class="impact-stat">
-                    <div class="impact-stat-value">-25%</div>
-                    <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Consumo Energético" data-en="Energy Consumption">Consumo Energético</p>
+                    <div class="impact-stat-value">€1.2M</div>
+                    <div class="impact-stat-label">Ahorro anual proyectado</div>
                 </div>
-                <div class="impact-stat">
-                    <div class="impact-stat-value">-15%</div>
-                    <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Residuos Industriales" data-en="Industrial Waste">Residuos Industriales</p>
-                </div>
-                <p data-ca="Monitorización y optimización ambiental completa." data-en="Complete environmental monitoring and optimization.">Monitorización y optimización ambiental completa.</p>
+                <p>Reducción de costos operativos, mejora de márgenes de ganancia y posibilidad de nuevas líneas de negocio digital.</p>
             </div>
-            <div class="impact-column scroll-fade">
-                <h3><span class="impact-icon">👥</span> <span data-ca="Recursos Humanos" data-en="Human Resources">Recursos Humanos</span></h3>
+
+            <div class="impact-column">
+                <h3><span class="impact-icon">🌱</span>Sostenibilidad</h3>
                 <div class="impact-stat">
-                    <div class="impact-stat-value">100%</div>
-                    <p style="font-size: 0.85rem; color: var(--text-lighter);" data-ca="Personal Capacitado" data-en="Trained Staff">Personal Capacitado</p>
+                    <div class="impact-stat-value">-40%</div>
+                    <div class="impact-stat-label">Reducción de residuos</div>
                 </div>
-                <p data-ca="Formación integral, nuevos perfiles digitales, mejor ambiente laboral." data-en="Comprehensive training, new digital profiles, better work environment.">Formación integral, nuevos perfiles digitales, mejor ambiente laboral.</p>
+                <p>Procesos más eficientes conducen a menor desperdicio de materia prima y reducción del impacto ambiental global.</p>
             </div>
         </div>
     </section>
 
-    <!-- SECCIÓN CRONOGRAMA -->
+    <!-- SECCIÓN: CRONOGRAMA -->
     <section id="cronograma">
-        <h2 data-ca="Cronograma: 8 Fases (8 marzo - 2 junio 2025)" data-en="Timeline: 8 Phases (March 8 - June 2, 2025)">Cronograma: 8 Fases (8 marzo - 2 junio 2025)</h2>
+        <h2>Cronograma de Implementación</h2>
+        <p>Fases de desarrollo y entregables clave</p>
+
         <div class="timeline">
-            <div class="timeline-item scroll-fade">
+            <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3 data-ca="Fase 1: Diagnòstic" data-en="Phase 1: Diagnosis">Fase 1: Diagnòstic</h3>
-                    <p><strong data-ca="8-21 marzo" data-en="March 8-21">8-21 marzo</strong><br><span data-ca="Mapeo de procesos y análisis de puntos críticos para la transformación." data-en="Process mapping and analysis of critical points for transformation.">Mapeo de procesos y análisis de puntos críticos para la transformación.</span></p>
+                    <h3>Fase 1: Análisis y Planificación</h3>
+                    <p><strong>Mes 1-2</strong><br>Evaluación de infraestructura actual, identificación de necesidades, desarrollo de roadmap detallado y selección de proveedores tecnológicos.</p>
                 </div>
             </div>
-            <div class="timeline-item scroll-fade">
+
+            <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3 data-ca="Fase 2: Disseny Final" data-en="Phase 2: Final Design">Fase 2: Disseny Final</h3>
-                    <p><strong data-ca="7 mayo" data-en="May 7">7 mayo</strong><br><span data-ca="Validación de arquitectura y planificación técnica detallada." data-en="Architecture validation and detailed technical planning.">Validación de arquitectura y planificación técnica detallada.</span></p>
+                    <h3>Fase 2: Diseño de Solución</h3>
+                    <p><strong>Mes 2-3</strong><br>Arquitectura del sistema, especificaciones técnicas, diseño de procesos y plan de integración de sistemas existentes.</p>
                 </div>
             </div>
-            <div class="timeline-item scroll-fade">
+
+            <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3 data-ca="Fase 3: ERP + IoT" data-en="Phase 3: ERP + IoT">Fase 3: ERP + IoT</h3>
-                    <p><strong data-ca="14-24 mayo" data-en="May 14-24">14-24 mayo</strong><br><span data-ca="Instalación de servidores, sensores IoT y configuración del ERP Odoo." data-en="Server installation, IoT sensors and Odoo ERP configuration.">Instalación de servidores, sensores IoT y configuración del ERP Odoo.</span></p>
+                    <h3>Fase 3: Preparación Organizacional</h3>
+                    <p><strong>Mes 3-4</strong><br>Formación del equipo, preparación de infraestructura, establecimiento de políticas de cambio y comunicación con stakeholders.</p>
                 </div>
             </div>
-            <div class="timeline-item scroll-fade">
+
+            <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3 data-ca="Fase 4: Web + eCommerce" data-en="Phase 4: Web + eCommerce">Fase 4: Web + eCommerce</h3>
-                    <p><strong data-ca="28 mayo" data-en="May 28">28 mayo</strong><br><span data-ca="Lanzamiento del portal B2B, catálogo digital y pasarela de pagos." data-en="Launch of B2B portal, digital catalog and payment gateway.">Lanzamiento del portal B2B, catálogo digital y pasarela de pagos.</span></p>
+                    <h3>Fase 4: Implementación Core</h3>
+                    <p><strong>Mes 4-7</strong><br>Despliegue de infraestructura cloud, instalación de sistemas principales, integración de datos y primeras automatizaciones.</p>
                 </div>
             </div>
-            <div class="timeline-item scroll-fade">
+
+            <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3 data-ca="Fase 5: Formació" data-en="Phase 5: Training">Fase 5: Formació</h3>
-                    <p><strong data-ca="28-31 mayo" data-en="May 28-31">28-31 mayo</strong><br><span data-ca="Capacitación integral del equipo en nuevas tecnologías y procesos." data-en="Comprehensive team training in new technologies and processes.">Capacitación integral del equipo en nuevas tecnologías y procesos.</span></p>
+                    <h3>Fase 5: Integración Avanzada</h3>
+                    <p><strong>Mes 7-9</strong><br>Implementación de IoT, AI/ML, análisis de datos en tiempo real y optimización de procesos operacionales.</p>
                 </div>
             </div>
-            <div class="timeline-item scroll-fade">
+
+            <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3 data-ca="Fase 6: Pilot" data-en="Phase 6: Pilot">Fase 6: Pilot</h3>
-                    <p><strong data-ca="2-3 junio" data-en="June 2-3">2-3 junio</strong><br><span data-ca="Pruebas exhaustivas, validación de datos y ajustes finales." data-en="Exhaustive testing, data validation and final adjustments.">Pruebas exhaustivas, validación de datos y ajustes finales.</span></p>
+                    <h3>Fase 6: Testing y Validación</h3>
+                    <p><strong>Mes 9-10</strong><br>Pruebas exhaustivas, validación de resultados, ajustes finales y preparación para producción.</p>
                 </div>
             </div>
-            <div class="timeline-item scroll-fade">
+
+            <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3 data-ca="Fase 7: Go Live" data-en="Phase 7: Go Live">Fase 7: Go Live</h3>
-                    <p><strong data-ca="2 junio" data-en="June 2">2 junio</strong><br><span data-ca="Puesta en producción de todos los sistemas en ambiente real." data-en="Production launch of all systems in real environment.">Puesta en producción de todos los sistemas en ambiente real.</span></p>
+                    <h3>Fase 7: Despliegue Productivo</h3>
+                    <p><strong>Mes 10-11</strong><br>Migración de sistemas en vivo, capacitación final del personal y soporte inicial post-lanzamiento.</p>
                 </div>
             </div>
-            <div class="timeline-item scroll-fade">
+
+            <div class="timeline-item">
                 <div class="timeline-dot"></div>
                 <div class="timeline-content">
-                    <h3 data-ca="Fase 8: Soport" data-en="Phase 8: Support">Fase 8: Soport</h3>
-                    <p><strong data-ca="Post-lanzamiento" data-en="Post-launch">Post-lanzamiento</strong><br><span data-ca="Soporte técnico continuo, optimización y mejora permanente." data-en="Continuous technical support, optimization and continuous improvement.">Soporte técnico continuo, optimización y mejora permanente.</span></p>
+                    <h3>Fase 8: Optimización Continua</h3>
+                    <p><strong>Mes 11-12+</strong><br>Monitoreo de rendimiento, optimizaciones iterativas, formación continua y expansión de nuevas funcionalidades.</p>
                 </div>
             </div>
         </div>
@@ -1471,165 +1331,100 @@
     <!-- FOOTER -->
     <footer>
         <div class="footer-content">
-            <div class="footer-logo" data-ca="🚀 TRANSFORMACIÓ 4.0" data-en="🚀 TRANSFORMATION 4.0">🚀 TRANSFORMACIÓ 4.0</div>
-            <div class="footer-date" data-ca="Pla de Transformació Digital – 2025" data-en="Digital Transformation Plan – 2025">Pla de Transformació Digital – 2025</div>
-            <div class="footer-disclaimer" data-ca="Aquesta proposta representa una estratègia integral de transformació digital, combinant tecnologies Industry 4.0 amb optimització de processos. Tots els resultats estan validats per metodologies de ROI estàndard del sector." data-en="This proposal represents a comprehensive digital transformation strategy, combining Industry 4.0 technologies with process optimization. All results are validated by standard industry ROI methodologies.">Aquesta proposta representa una estratègia integral de transformació digital, combinant tecnologies Industry 4.0 amb optimització de processos. Tots els resultats estan validats per metodologies de ROI estàndard del sector.</div>
+            <div class="footer-logo">Tèxtils Montblanc</div>
+            <p>Pla de Transformació Digital 4.0</p>
+            <div class="footer-date">Documento: Junio 2024 | Versión 1.0</div>
+            <div class="footer-disclaimer">Este documento representa un plan estratégico de transformación digital. Todos los números y proyecciones están basados en análisis preliminares y están sujetos a cambios según evaluaciones detalladas posteriores.</div>
         </div>
     </footer>
 
     <!-- COOKIE BANNER -->
-    <div class="cookie-banner" id="cookie-banner">
-        <h4 data-ca="🍪 Cookies & Privacitat" data-en="🍪 Cookies & Privacy">🍪 Cookies & Privacitat</h4>
-        <p data-ca="Utilitzem cookies per a millor experiència. Aquesta és una notificació decorativa." data-en="We use cookies for a better experience. This is a decorative notification.">Utilitzem cookies per a millor experiència. Aquesta és una notificació decorativa.</p>
+    <div class="cookie-banner" id="cookieBanner">
+        <h4>Política de Cookies</h4>
+        <p>Este sitio utiliza cookies para mejorar la experiencia del usuario y analizar el tráfico.</p>
         <div class="cookie-buttons">
-            <button class="cookie-btn cookie-btn-accept" onclick="acceptCookies()" data-ca="Acceptar" data-en="Accept">Acceptar</button>
-            <button class="cookie-btn cookie-btn-reject" onclick="rejectCookies()" data-ca="Rebutjar" data-en="Reject">Rebutjar</button>
+            <button class="cookie-btn cookie-btn-accept" onclick="acceptCookies()">Aceptar</button>
+            <button class="cookie-btn cookie-btn-reject" onclick="rejectCookies()">Rechazar</button>
         </div>
     </div>
 
     <script>
-        // GENERATE DECORATIVE NEON DOTS
-        const neonDotsContainer = document.getElementById('neon-dots');
-        for (let i = 0; i < 50; i++) {
-            const dot = document.createElement('div');
-            dot.className = 'dot';
-            dot.style.left = Math.random() * 100 + '%';
-            dot.style.top = Math.random() * 100 + '%';
-            dot.style.animationDelay = Math.random() * 5 + 's';
-            dot.style.opacity = Math.random() * 0.5 + 0.1;
-            neonDotsContainer.appendChild(dot);
+        // Animated background network
+        function createDots() {
+            const dotsContainer = document.querySelector('.neon-dots');
+            const dots = [];
+            
+            for (let i = 0; i < 50; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'dot';
+                dot.style.left = Math.random() * 100 + '%';
+                dot.style.top = Math.random() * 100 + '%';
+                dot.style.animationDelay = Math.random() * 5 + 's';
+                dotsContainer.appendChild(dot);
+                
+                dots.push({
+                    x: parseFloat(dot.style.left),
+                    y: parseFloat(dot.style.top),
+                    element: dot
+                });
+            }
+
+            // Create subtle connecting lines
+            for (let i = 0; i < 15; i++) {
+                const dot1 = dots[Math.floor(Math.random() * dots.length)];
+                const dot2 = dots[Math.floor(Math.random() * dots.length)];
+                
+                if (dot1 !== dot2) {
+                    const connection = document.createElement('div');
+                    connection.className = 'dot-connection';
+                    dotsContainer.appendChild(connection);
+                }
+            }
         }
 
-        // SCROLL REVEAL ANIMATIONS
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
+        createDots();
 
-        const observer = new IntersectionObserver(function (entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
+        // Cookie Banner
+        function acceptCookies() {
+            document.getElementById('cookieBanner').classList.add('hidden');
+            localStorage.setItem('cookies-accepted', 'true');
+        }
 
-        document.querySelectorAll('.scroll-fade').forEach(element => {
-            observer.observe(element);
-        });
+        function rejectCookies() {
+            document.getElementById('cookieBanner').classList.add('hidden');
+            localStorage.setItem('cookies-accepted', 'false');
+        }
 
-        // SMOOTH SCROLL
+        if (localStorage.getItem('cookies-accepted')) {
+            document.getElementById('cookieBanner').classList.add('hidden');
+        }
+
+        // Language Selector
+        function selectLanguage(lang) {
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            localStorage.setItem('selected-language', lang);
+        }
+
+        // Smooth scroll for navigation
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+                    target.scrollIntoView({ behavior: 'smooth' });
                 }
             });
         });
 
-        // LANGUAGE SWITCH
-        let currentLanguage = 'ca';
-
-        function switchLanguage(lang) {
-            currentLanguage = lang;
-
-            // Update button states
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Update all data attributes
-            document.querySelectorAll('[data-ca][data-en]').forEach(element => {
-                const text = element.getAttribute(`data-${lang}`);
-                if (text) {
-                    element.textContent = text;
-                }
-            });
-
-            // For elements with child nodes containing the text
-            document.querySelectorAll('[data-ca]').forEach(element => {
-                if (element.hasAttribute(`data-${lang}`)) {
-                    element.textContent = element.getAttribute(`data-${lang}`);
-                }
-            });
-        }
-
-        // COOKIE BANNER
-        function acceptCookies() {
-            const banner = document.getElementById('cookie-banner');
-            banner.classList.add('hidden');
-            setTimeout(() => {
-                banner.style.display = 'none';
-            }, 500);
-        }
-
-        function rejectCookies() {
-            const banner = document.getElementById('cookie-banner');
-            banner.classList.add('hidden');
-            setTimeout(() => {
-                banner.style.display = 'none';
-            }, 500);
-        }
-
-        // PARALLAX EFFECT ON SCROLL
-        window.addEventListener('scroll', function () {
-            const scrolled = window.pageYOffset;
-            const hero = document.querySelector('.hero');
-            if (hero) {
-                hero.style.backgroundPosition = `0% ${scrolled * 0.5}px`;
+        // Initialize language
+        const savedLang = localStorage.getItem('selected-language') || 'ca';
+        document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            if (btn.textContent === savedLang.toUpperCase()) {
+                btn.classList.add('active');
             }
         });
-
-        // INTERACTIVE CARD HOVER EFFECT
-        document.querySelectorAll('.card-flip').forEach(card => {
-            card.addEventListener('mouseenter', function () {
-                this.style.transform = 'scale(1.05)';
-            });
-            card.addEventListener('mouseleave', function () {
-                this.style.transform = 'scale(1)';
-            });
-        });
-
-        // GLOW EFFECT ON MOUSE MOVE
-        document.addEventListener('mousemove', function (e) {
-            const neonDots = document.querySelectorAll('.dot');
-            neonDots.forEach(dot => {
-                const distX = e.clientX - parseFloat(dot.style.left);
-                const distY = e.clientY - parseFloat(dot.style.top);
-                const distance = Math.sqrt(distX * distX + distY * distY);
-
-                if (distance < 150) {
-                    dot.style.opacity = Math.min(1, 0.5 + (150 - distance) / 300);
-                }
-            });
-        });
-
-        // BUTTON RIPPLE EFFECT
-        document.querySelectorAll('.cta-button').forEach(button => {
-            button.addEventListener('click', function (e) {
-                const ripple = document.createElement('span');
-                const rect = this.getBoundingClientRect();
-                const size = Math.max(rect.width, rect.height);
-                const x = e.clientX - rect.left - size / 2;
-                const y = e.clientY - rect.top - size / 2;
-
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = x + 'px';
-                ripple.style.top = y + 'px';
-            });
-        });
-
-        // PAGE LOAD ANIMATION
-        window.addEventListener('load', function () {
-            document.body.style.opacity = '1';
-        });
     </script>
-
 </body>
 </html>
