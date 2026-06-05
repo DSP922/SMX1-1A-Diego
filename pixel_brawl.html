@@ -176,6 +176,8 @@
             selectedStage: 0,
             selectedCharP1: 0,
             selectedCharP2: 0,
+            p1Confirmed: false,
+            p2Confirmed: false,
             currentRound: 1,
             frameCount: 0,
             hitstopFrames: 0,
@@ -200,6 +202,8 @@
             if (key === 'enter' && gameState.screen === 'title') {
                 gameState.screen = 'characterSelect';
                 gameState.frameCount = 0;
+                gameState.p1Confirmed = false;
+                gameState.p2Confirmed = false;
             }
         });
 
@@ -368,11 +372,16 @@
             drawText('CHARACTER SELECT', GAME_WIDTH / 2, 40, '#FFD700', 32);
 
             // LEFT SIDE - PLAYER 1
-            drawPixelatedBox(40, 80, 220, 320, '#1a1a1a', '#FF0000', 3);
+            const p1BorderColor = gameState.p1Confirmed ? '#00FF00' : '#FF0000';
+            drawPixelatedBox(40, 80, 220, 320, '#1a1a1a', p1BorderColor, 3);
             drawText('PLAYER 1', 150, 100, '#FF0000', 16);
             const p1Char = CHARACTERS[CHARACTER_KEYS[gameState.selectedCharP1]];
             drawText(p1Char.name, 150, 200, '#FFD700', 16);
             drawCharacter({ character: CHARACTER_KEYS[gameState.selectedCharP1], action: 'idle', actionFrame: gameState.frameCount, facing: 1 }, 150, 250, 1.5);
+            
+            if (gameState.p1Confirmed) {
+                drawText('READY!', 150, 300, '#00FF00', 12);
+            }
 
             // CENTER - CHARACTER GRID
             const charPerRow = 5;
@@ -395,15 +404,20 @@
             }
 
             // RIGHT SIDE - PLAYER 2
-            drawPixelatedBox(1020, 80, 220, 320, '#1a1a1a', '#0000FF', 3);
+            const p2BorderColor = gameState.p2Confirmed ? '#00FF00' : '#0000FF';
+            drawPixelatedBox(1020, 80, 220, 320, '#1a1a1a', p2BorderColor, 3);
             drawText('PLAYER 2', 1130, 100, '#0000FF', 16);
             const p2Char = CHARACTERS[CHARACTER_KEYS[gameState.selectedCharP2]];
             drawText(p2Char.name, 1130, 200, '#FFD700', 16);
             drawCharacter({ character: CHARACTER_KEYS[gameState.selectedCharP2], action: 'idle', actionFrame: gameState.frameCount, facing: -1 }, 1130, 250, 1.5);
+            
+            if (gameState.p2Confirmed) {
+                drawText('READY!', 1130, 300, '#00FF00', 12);
+            }
 
             // Instructions
-            drawText('P1: ARROW KEYS | P2: WASD | ENTER: CONFIRM', GAME_WIDTH / 2, GAME_HEIGHT - 80, '#00FF00', 12);
-            drawText('WASD / ARROWS: SELECT | ENTER: START', GAME_WIDTH / 2, GAME_HEIGHT - 40, '#00FF00', 12);
+            drawText('P1: ARROW KEYS + ENTER to confirm', GAME_WIDTH / 2, GAME_HEIGHT - 80, '#00FF00', 12);
+            drawText('P2: WASD + SPACE to confirm', GAME_WIDTH / 2, GAME_HEIGHT - 40, '#00FF00', 12);
         }
 
         function drawStageSelectScreen() {
@@ -512,48 +526,64 @@
         // ============================================================================
 
         function updateCharacterSelectScreen() {
-            // P1 selection (arrow keys)
-            if (keys['arrowleft']) {
-                gameState.selectedCharP1 = Math.max(0, gameState.selectedCharP1 - 1);
-                keys['arrowleft'] = false;
-            }
-            if (keys['arrowright']) {
-                gameState.selectedCharP1 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP1 + 1);
-                keys['arrowright'] = false;
-            }
-            if (keys['arrowup']) {
-                gameState.selectedCharP1 = Math.max(0, gameState.selectedCharP1 - 5);
-                keys['arrowup'] = false;
-            }
-            if (keys['arrowdown']) {
-                gameState.selectedCharP1 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP1 + 5);
-                keys['arrowdown'] = false;
+            // P1 selection (arrow keys) - only if not confirmed
+            if (!gameState.p1Confirmed) {
+                if (keys['arrowleft']) {
+                    gameState.selectedCharP1 = Math.max(0, gameState.selectedCharP1 - 1);
+                    keys['arrowleft'] = false;
+                }
+                if (keys['arrowright']) {
+                    gameState.selectedCharP1 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP1 + 1);
+                    keys['arrowright'] = false;
+                }
+                if (keys['arrowup']) {
+                    gameState.selectedCharP1 = Math.max(0, gameState.selectedCharP1 - 5);
+                    keys['arrowup'] = false;
+                }
+                if (keys['arrowdown']) {
+                    gameState.selectedCharP1 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP1 + 5);
+                    keys['arrowdown'] = false;
+                }
+
+                if (keys['enter']) {
+                    gameState.p1Confirmed = true;
+                    keys['enter'] = false;
+                }
             }
 
-            // P2 selection (WASD)
-            if (keys['a']) {
-                gameState.selectedCharP2 = Math.max(0, gameState.selectedCharP2 - 1);
-                keys['a'] = false;
-            }
-            if (keys['d']) {
-                gameState.selectedCharP2 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP2 + 1);
-                keys['d'] = false;
-            }
-            if (keys['w']) {
-                gameState.selectedCharP2 = Math.max(0, gameState.selectedCharP2 - 5);
-                keys['w'] = false;
-            }
-            if (keys['s']) {
-                gameState.selectedCharP2 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP2 + 5);
-                keys['s'] = false;
+            // P2 selection (WASD) - only if not confirmed
+            if (!gameState.p2Confirmed) {
+                if (keys['a']) {
+                    gameState.selectedCharP2 = Math.max(0, gameState.selectedCharP2 - 1);
+                    keys['a'] = false;
+                }
+                if (keys['d']) {
+                    gameState.selectedCharP2 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP2 + 1);
+                    keys['d'] = false;
+                }
+                if (keys['w']) {
+                    gameState.selectedCharP2 = Math.max(0, gameState.selectedCharP2 - 5);
+                    keys['w'] = false;
+                }
+                if (keys['s']) {
+                    gameState.selectedCharP2 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP2 + 5);
+                    keys['s'] = false;
+                }
+
+                if (keys[' ']) {
+                    gameState.p2Confirmed = true;
+                    keys[' '] = false;
+                }
             }
 
-            if (keys['enter']) {
+            // Both players confirmed - proceed to stage select
+            if (gameState.p1Confirmed && gameState.p2Confirmed) {
                 gameState.player1.character = CHARACTER_KEYS[gameState.selectedCharP1];
                 gameState.player2.character = CHARACTER_KEYS[gameState.selectedCharP2];
                 gameState.screen = 'stageSelect';
                 gameState.frameCount = 0;
-                keys['enter'] = false;
+                gameState.p1Confirmed = false;
+                gameState.p2Confirmed = false;
             }
         }
 
@@ -591,6 +621,10 @@
                 gameState.player2.facing = -1;
                 gameState.player1.isGrounded = true;
                 gameState.player2.isGrounded = true;
+                gameState.player1.action = 'idle';
+                gameState.player2.action = 'idle';
+                gameState.player1.actionFrame = 0;
+                gameState.player2.actionFrame = 0;
                 keys['enter'] = false;
             }
         }
