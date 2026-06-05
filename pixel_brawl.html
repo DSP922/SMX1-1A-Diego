@@ -65,7 +65,7 @@
         ctx.msImageSmoothingEnabled = false;
 
         // ============================================================================
-        // CHARACTER DEFINITIONS
+        // CHARACTER DEFINITIONS WITH SPECIAL ABILITIES
         // ============================================================================
 
         const CHARACTERS = {
@@ -73,55 +73,64 @@
                 name: 'RAGO',
                 color: '#FF3300',
                 style: 'Fire Fighter',
-                special: 'Fireball'
+                special: 'Fireball',
+                cooldown: 12
             },
             frost: {
                 name: 'FROST',
                 color: '#3399FF',
                 style: 'Ice Martial Artist',
-                special: 'Frost Nova'
+                special: 'Ice Wall',
+                cooldown: 18
             },
             venom: {
                 name: 'VENOM',
                 color: '#33CC33',
                 style: 'Poison Brawler',
-                special: 'Toxic Cloud'
+                special: 'Poison Strike',
+                cooldown: 14
             },
             volt: {
                 name: 'VOLT',
                 color: '#FFFF00',
                 style: 'Electric Speedster',
-                special: 'Thunder Dash'
+                special: 'Thunder Dash',
+                cooldown: 13
             },
             specter: {
                 name: 'SPECTER',
                 color: '#9933FF',
                 style: 'Shadow Ninja',
-                special: 'Shadow Teleport'
+                special: 'Shadow Blink',
+                cooldown: 20
             },
             stone: {
                 name: 'STONE',
                 color: '#CCCCCC',
                 style: 'Heavy Grappler',
-                special: 'Earth Crush'
+                special: 'Earthquake',
+                cooldown: 16
             },
             blaze: {
                 name: 'BLAZE',
                 color: '#FF6600',
                 style: 'Kickboxer',
-                special: 'Inferno Kick'
+                special: 'Inferno Kick',
+                cooldown: 11
             },
             sakura: {
                 name: 'SAKURA',
                 color: '#FF69B4',
                 style: 'Acrobatic Fighter',
-                special: 'Sky Dance'
+                special: 'Petal Storm',
+                cooldown: 17
             },
             void: {
                 name: 'VOID',
                 color: '#1A1A1A',
                 style: 'Dark Energy Mage',
-                special: 'Void Blast'
+                special: 'Dark Orb',
+                cooldown: 15
             }
         };
 
@@ -135,6 +144,138 @@
             { name: 'Ancient Ruins', bg: 'ruins' },
             { name: 'Sky Colosseum', bg: 'sky' }
         ];
+
+        // ============================================================================
+        // PROJECTILE AND EFFECT SYSTEM
+        // ============================================================================
+
+        let projectiles = [];
+        let effects = [];
+        let iceWalls = [];
+
+        class Projectile {
+            constructor(x, y, vx, vy, damage, type, owner) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.damage = damage;
+                this.type = type; // 'fireball', 'darkOrb', 'petalStorm'
+                this.owner = owner; // 'p1' or 'p2'
+                this.active = true;
+                this.size = 4;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Gravity for some projectiles
+                if (this.type === 'petalStorm') {
+                    this.vy += 0.3;
+                }
+
+                // Out of bounds
+                if (this.x < 0 || this.x > GAME_WIDTH || this.y > GAME_HEIGHT) {
+                    this.active = false;
+                }
+            }
+
+            draw() {
+                if (this.type === 'fireball') {
+                    drawFilledCircle(this.x, this.y, this.size, '#FF6600', '#000000', 1);
+                } else if (this.type === 'darkOrb') {
+                    drawFilledCircle(this.x, this.y, this.size + 1, '#1a1a1a', '#9933FF', 2);
+                } else if (this.type === 'petalStorm') {
+                    drawFilledRect(this.x - 2, this.y - 2, 4, 4, '#FF69B4', '#000000', 1);
+                }
+            }
+        }
+
+        class IceWall {
+            constructor(x, y, duration) {
+                this.x = x;
+                this.y = y;
+                this.width = 20;
+                this.height = 100;
+                this.duration = duration;
+                this.maxDuration = duration;
+                this.active = true;
+            }
+
+            update() {
+                this.duration--;
+                if (this.duration <= 0) {
+                    this.active = false;
+                }
+            }
+
+            draw() {
+                const opacity = this.duration / this.maxDuration;
+                ctx.fillStyle = `rgba(51, 153, 255, ${opacity * 0.6})`;
+                ctx.fillRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+                ctx.strokeStyle = '#3399FF';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x - this.width / 2, this.y - this.height / 2, this.width, this.height);
+            }
+
+            getBounds() {
+                return {
+                    x: this.x - this.width / 2,
+                    y: this.y - this.height / 2,
+                    w: this.width,
+                    h: this.height
+                };
+            }
+        }
+
+        class Effect {
+            constructor(x, y, type, duration) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'teleport', 'dash', 'shockwave', poison
+                this.duration = duration;
+                this.maxDuration = duration;
+                this.active = true;
+            }
+
+            update() {
+                this.duration--;
+                if (this.duration <= 0) {
+                    this.active = false;
+                }
+            }
+
+            draw() {
+                if (this.type === 'teleport-start') {
+                    const opacity = this.duration / this.maxDuration;
+                    ctx.fillStyle = `rgba(0, 0, 0, ${opacity * 0.8})`;
+                    ctx.fillRect(this.x - 20, this.y - 50, 40, 80);
+                } else if (this.type === 'teleport-end') {
+                    const opacity = this.duration / this.maxDuration;
+                    ctx.fillStyle = `rgba(153, 51, 255, ${opacity * 0.6})`;
+                    ctx.fillRect(this.x - 20, this.y - 50, 40, 80);
+                } else if (this.type === 'dashtrail') {
+                    const opacity = this.duration / this.maxDuration;
+                    ctx.fillStyle = `rgba(255, 255, 0, ${opacity * 0.4})`;
+                    ctx.fillRect(this.x - 10, this.y - 25, 20, 50);
+                } else if (this.type === 'poison') {
+                    ctx.fillStyle = '#33CC33';
+                    ctx.globalAlpha = 0.5;
+                    ctx.fillRect(this.x - 20, this.y - 50, 40, 80);
+                    ctx.globalAlpha = 1.0;
+                } else if (this.type === 'shockwave') {
+                    const opacity = this.duration / this.maxDuration;
+                    const expandSize = (1 - opacity) * 200;
+                    ctx.strokeStyle = `rgba(200, 200, 200, ${opacity * 0.8})`;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(this.x + expandSize, this.y);
+                    ctx.stroke();
+                }
+            }
+        }
 
         // ============================================================================
         // GAME STATE
@@ -156,7 +297,13 @@
                 isGrounded: true,
                 hurtbox: { x: 0, y: 0, w: 40, h: 80 },
                 hitbox: null,
-                keys: { left: false, right: false, up: false, punch: false, kick: false, special: false }
+                keys: { left: false, right: false, up: false, punch: false, kick: false, special: false },
+                specialCooldown: 0,
+                specialMaxCooldown: 0,
+                poisoned: false,
+                poisonDuration: 0,
+                poisonDPS: 0,
+                poisonTick: 0
             },
             player2: {
                 character: 'void',
@@ -171,7 +318,13 @@
                 isGrounded: true,
                 hurtbox: { x: 0, y: 0, w: 40, h: 80 },
                 hitbox: null,
-                keys: { left: false, right: false, up: false, punch: false, kick: false, special: false }
+                keys: { left: false, right: false, up: false, punch: false, kick: false, special: false },
+                specialCooldown: 0,
+                specialMaxCooldown: 0,
+                poisoned: false,
+                poisonDuration: 0,
+                poisonDPS: 0,
+                poisonTick: 0
             },
             selectedStage: 0,
             selectedCharP1: 0,
@@ -199,6 +352,11 @@
             const key = e.key.toLowerCase();
             keys[key] = true;
             
+            // Handle Ñ key for Player 2 kick
+            if (e.key === 'ñ') {
+                keys['ñ'] = true;
+            }
+            
             if (key === 'enter' && gameState.screen === 'title') {
                 gameState.screen = 'characterSelect';
                 gameState.frameCount = 0;
@@ -208,7 +366,11 @@
         });
 
         window.addEventListener('keyup', (e) => {
-            keys[e.key.toLowerCase()] = false;
+            const key = e.key.toLowerCase();
+            keys[key] = false;
+            if (e.key === 'ñ') {
+                keys['ñ'] = false;
+            }
         });
 
         // ============================================================================
@@ -263,7 +425,15 @@
             const facing = player.facing;
             const action = player.action;
             const frame = player.actionFrame;
-            const color = char.color;
+            let color = char.color;
+
+            // Poison effect visual
+            if (player.poisoned) {
+                ctx.globalAlpha = 0.6;
+                ctx.fillStyle = '#33CC33';
+                ctx.fillRect(x - 20 * size, y - 50 * size, 40 * size, 80 * size);
+                ctx.globalAlpha = 1.0;
+            }
 
             const headR = 8 * size;
             const torsoH = 20 * size;
@@ -377,7 +547,7 @@
             drawText('PLAYER 1', 150, 100, '#FF0000', 16);
             const p1Char = CHARACTERS[CHARACTER_KEYS[gameState.selectedCharP1]];
             drawText(p1Char.name, 150, 200, '#FFD700', 16);
-            drawCharacter({ character: CHARACTER_KEYS[gameState.selectedCharP1], action: 'idle', actionFrame: gameState.frameCount, facing: 1 }, 150, 250, 1.5);
+            drawCharacter({ character: CHARACTER_KEYS[gameState.selectedCharP1], action: 'idle', actionFrame: gameState.frameCount, facing: 1, poisoned: false }, 150, 250, 1.5);
             
             if (gameState.p1Confirmed) {
                 drawText('READY!', 150, 300, '#00FF00', 12);
@@ -400,7 +570,7 @@
                 const borderWidth = isSelectedP1 ? 3 : 2;
 
                 drawPixelatedBox(cx, cy, charSize, charSize, '#0a0a0a', borderColor, borderWidth);
-                drawCharacter({ character: charKey, action: 'idle', actionFrame: gameState.frameCount, facing: 1 }, cx + charSize / 2, cy + charSize - 10, 0.8);
+                drawCharacter({ character: charKey, action: 'idle', actionFrame: gameState.frameCount, facing: 1, poisoned: false }, cx + charSize / 2, cy + charSize - 10, 0.8);
             }
 
             // RIGHT SIDE - PLAYER 2
@@ -409,15 +579,15 @@
             drawText('PLAYER 2', 1130, 100, '#0000FF', 16);
             const p2Char = CHARACTERS[CHARACTER_KEYS[gameState.selectedCharP2]];
             drawText(p2Char.name, 1130, 200, '#FFD700', 16);
-            drawCharacter({ character: CHARACTER_KEYS[gameState.selectedCharP2], action: 'idle', actionFrame: gameState.frameCount, facing: -1 }, 1130, 250, 1.5);
+            drawCharacter({ character: CHARACTER_KEYS[gameState.selectedCharP2], action: 'idle', actionFrame: gameState.frameCount, facing: -1, poisoned: false }, 1130, 250, 1.5);
             
             if (gameState.p2Confirmed) {
                 drawText('READY!', 1130, 300, '#00FF00', 12);
             }
 
             // Instructions
-            drawText('P1: ARROW KEYS + ENTER to confirm', GAME_WIDTH / 2, GAME_HEIGHT - 80, '#00FF00', 12);
-            drawText('P2: WASD + SPACE to confirm', GAME_WIDTH / 2, GAME_HEIGHT - 40, '#00FF00', 12);
+            drawText('P1: ARROW KEYS + SPACE to confirm', GAME_WIDTH / 2, GAME_HEIGHT - 80, '#00FF00', 12);
+            drawText('P2: ARROW KEYS + ENTER to confirm', GAME_WIDTH / 2, GAME_HEIGHT - 40, '#00FF00', 12);
         }
 
         function drawStageSelectScreen() {
@@ -474,11 +644,31 @@
             drawLine(0, GROUND_Y + 40, GAME_WIDTH, GROUND_Y + 40, '#CCCCCC', 3);
         }
 
+        function drawCooldownBar(x, y, cooldown, maxCooldown, abilityName) {
+            const barWidth = 80;
+            const barHeight = 8;
+            const percent = Math.min(1, cooldown / maxCooldown);
+            
+            // Background
+            drawFilledRect(x, y, barWidth, barHeight, '#333', '#FFF', 1);
+            
+            // Fill
+            const fillColor = cooldown === 0 ? '#00FF00' : '#FFFF00';
+            drawFilledRect(x, y, barWidth * percent, barHeight, fillColor, 'none', 0);
+            
+            // Ability name (tiny text)
+            ctx.fillStyle = '#FFF';
+            ctx.font = '8px "Press Start 2P"';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText(abilityName, x, y + 12);
+        }
+
         function drawBattleScreen() {
             drawBattleBackground();
 
             // HUD background
-            drawFilledRect(0, 0, GAME_WIDTH, 70, 'rgba(0,0,0,0.8)', '#FFFF00', 2);
+            drawFilledRect(0, 0, GAME_WIDTH, 100, 'rgba(0,0,0,0.8)', '#FFFF00', 2);
 
             // P1 Health
             const p1HPPercent = Math.max(0, gameState.player1.hp / 100);
@@ -486,14 +676,37 @@
             drawPixelatedBox(20, 10, 200, 20, '#333', '#FFF', 1);
             drawFilledRect(20, 10, 200 * p1HPPercent, 20, p1HPColor);
 
+            // P1 Cooldown
+            const p1Char = CHARACTERS[gameState.player1.character];
+            drawCooldownBar(20, 35, gameState.player1.specialCooldown, gameState.player1.specialMaxCooldown, p1Char.special);
+
             // P2 Health
             const p2HPPercent = Math.max(0, gameState.player2.hp / 100);
             const p2HPColor = gameState.player2.hp > 50 ? '#00FF00' : gameState.player2.hp > 25 ? '#FFFF00' : '#FF0000';
             drawPixelatedBox(GAME_WIDTH - 220, 10, 200, 20, '#333', '#FFF', 1);
             drawFilledRect(GAME_WIDTH - 220, 10, 200 * p2HPPercent, 20, p2HPColor);
 
+            // P2 Cooldown
+            const p2Char = CHARACTERS[gameState.player2.character];
+            drawCooldownBar(GAME_WIDTH - 220, 35, gameState.player2.specialCooldown, gameState.player2.specialMaxCooldown, p2Char.special);
+
             // Round info
             drawText(`ROUND ${gameState.currentRound}`, GAME_WIDTH / 2, 25, '#FFD700', 16);
+
+            // Draw ice walls
+            for (let wall of iceWalls) {
+                wall.draw();
+            }
+
+            // Draw projectiles
+            for (let proj of projectiles) {
+                proj.draw();
+            }
+
+            // Draw effects
+            for (let effect of effects) {
+                effect.draw();
+            }
 
             // Characters
             drawCharacter(gameState.player1, gameState.player1.x, gameState.player1.y, 2);
@@ -522,6 +735,103 @@
         }
 
         // ============================================================================
+        // SPECIAL ABILITY EXECUTION
+        // ============================================================================
+
+        function triggerSpecialAbility(player, opponent) {
+            const char = player.character;
+            const charData = CHARACTERS[char];
+
+            if (char === 'rago') {
+                // Fireball
+                const proj = new Projectile(
+                    player.x + 30 * player.facing,
+                    player.y - 10,
+                    8 * player.facing,
+                    0,
+                    18,
+                    'fireball',
+                    player === gameState.player1 ? 'p1' : 'p2'
+                );
+                projectiles.push(proj);
+            } else if (char === 'frost') {
+                // Ice Wall
+                const wall = new IceWall(player.x + 40 * player.facing, player.y, 180); // 3 seconds * 60 fps
+                iceWalls.push(wall);
+            } else if (char === 'venom') {
+                // Poison Strike - buff next punch
+                player.poisoned = true;
+                effects.push(new Effect(player.x, player.y, 'poison', 120));
+            } else if (char === 'volt') {
+                // Thunder Dash
+                player.action = 'dash';
+                player.actionFrame = 0;
+            } else if (char === 'specter') {
+                // Shadow Blink
+                effects.push(new Effect(player.x, player.y, 'teleport-start', 10));
+                player.x = opponent.x - 60 * opponent.facing;
+                effects.push(new Effect(player.x, player.y, 'teleport-end', 10));
+                
+                // Check if close for auto-hit
+                const dist = Math.abs(player.x - opponent.x);
+                if (dist < 100) {
+                    opponent.hp = Math.max(0, opponent.hp - 15);
+                    opponent.action = 'hurt';
+                    opponent.actionFrame = 0;
+                    gameState.hitstopFrames = 5;
+                }
+            } else if (char === 'stone') {
+                // Earthquake - shockwave
+                effects.push(new Effect(player.x, GROUND_Y + 40, 'shockwave', 30));
+                
+                // Check if opponent is hit
+                const dist = Math.abs(player.x - opponent.x);
+                if (dist < 300) {
+                    opponent.hp = Math.max(0, opponent.hp - 22);
+                    opponent.action = 'hurt';
+                    opponent.actionFrame = 0;
+                    gameState.hitstopFrames = 10; // stun
+                }
+            } else if (char === 'blaze') {
+                // Inferno Kick
+                player.action = 'inferno-kick';
+                player.actionFrame = 0;
+            } else if (char === 'sakura') {
+                // Petal Storm - 3 projectiles
+                for (let i = -1; i <= 1; i++) {
+                    const angle = i * 0.3;
+                    const vx = 6 * player.facing;
+                    const vy = i * 2;
+                    const proj = new Projectile(
+                        player.x + 20 * player.facing,
+                        player.y - 10 + i * 10,
+                        vx,
+                        vy,
+                        8,
+                        'petalStorm',
+                        player === gameState.player1 ? 'p1' : 'p2'
+                    );
+                    projectiles.push(proj);
+                }
+            } else if (char === 'void') {
+                // Dark Orb
+                const proj = new Projectile(
+                    player.x + 30 * player.facing,
+                    player.y - 10,
+                    4 * player.facing,
+                    0,
+                    30,
+                    'darkOrb',
+                    player === gameState.player1 ? 'p1' : 'p2'
+                );
+                projectiles.push(proj);
+            }
+
+            player.specialCooldown = charData.cooldown * 60; // Convert seconds to frames
+            player.specialMaxCooldown = charData.cooldown * 60;
+        }
+
+        // ============================================================================
         // UPDATE LOGIC
         // ============================================================================
 
@@ -545,34 +855,34 @@
                     keys['arrowdown'] = false;
                 }
 
-                if (keys['enter']) {
+                if (keys[' ']) {
                     gameState.p1Confirmed = true;
-                    keys['enter'] = false;
+                    keys[' '] = false;
                 }
             }
 
-            // P2 selection (WASD) - only if not confirmed
+            // P2 selection (arrow keys) - only if not confirmed
             if (!gameState.p2Confirmed) {
-                if (keys['a']) {
+                if (keys['arrowleft']) {
                     gameState.selectedCharP2 = Math.max(0, gameState.selectedCharP2 - 1);
-                    keys['a'] = false;
+                    keys['arrowleft'] = false;
                 }
-                if (keys['d']) {
+                if (keys['arrowright']) {
                     gameState.selectedCharP2 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP2 + 1);
-                    keys['d'] = false;
+                    keys['arrowright'] = false;
                 }
-                if (keys['w']) {
+                if (keys['arrowup']) {
                     gameState.selectedCharP2 = Math.max(0, gameState.selectedCharP2 - 5);
-                    keys['w'] = false;
+                    keys['arrowup'] = false;
                 }
-                if (keys['s']) {
+                if (keys['arrowdown']) {
                     gameState.selectedCharP2 = Math.min(CHARACTER_KEYS.length - 1, gameState.selectedCharP2 + 5);
-                    keys['s'] = false;
+                    keys['arrowdown'] = false;
                 }
 
-                if (keys[' ']) {
+                if (keys['enter']) {
                     gameState.p2Confirmed = true;
-                    keys[' '] = false;
+                    keys['enter'] = false;
                 }
             }
 
@@ -580,6 +890,8 @@
             if (gameState.p1Confirmed && gameState.p2Confirmed) {
                 gameState.player1.character = CHARACTER_KEYS[gameState.selectedCharP1];
                 gameState.player2.character = CHARACTER_KEYS[gameState.selectedCharP2];
+                gameState.player1.specialMaxCooldown = CHARACTERS[gameState.player1.character].cooldown * 60;
+                gameState.player2.specialMaxCooldown = CHARACTERS[gameState.player2.character].cooldown * 60;
                 gameState.screen = 'stageSelect';
                 gameState.frameCount = 0;
                 gameState.p1Confirmed = false;
@@ -625,29 +937,52 @@
                 gameState.player2.action = 'idle';
                 gameState.player1.actionFrame = 0;
                 gameState.player2.actionFrame = 0;
+                gameState.player1.specialCooldown = 0;
+                gameState.player2.specialCooldown = 0;
+                projectiles = [];
+                effects = [];
+                iceWalls = [];
                 keys['enter'] = false;
             }
         }
 
         function updatePlayerInput() {
-            // Player 1: Arrow keys + FGHJ
-            gameState.player1.keys.left = keys['arrowleft'];
-            gameState.player1.keys.right = keys['arrowright'];
-            gameState.player1.keys.up = keys['arrowup'];
+            // Player 1: WASD + F/G/E
+            gameState.player1.keys.left = keys['a'];
+            gameState.player1.keys.right = keys['d'];
+            gameState.player1.keys.up = keys['w'];
             gameState.player1.keys.punch = keys['f'];
             gameState.player1.keys.kick = keys['g'];
-            gameState.player1.keys.special = keys['h'];
+            gameState.player1.keys.special = keys['e'];
 
-            // Player 2: WASD + UIOP
-            gameState.player2.keys.left = keys['a'];
-            gameState.player2.keys.right = keys['d'];
-            gameState.player2.keys.up = keys['w'];
-            gameState.player2.keys.punch = keys['u'];
-            gameState.player2.keys.kick = keys['i'];
-            gameState.player2.keys.special = keys['o'];
+            // Player 2: Arrow keys + L/Ñ/P
+            gameState.player2.keys.left = keys['arrowleft'];
+            gameState.player2.keys.right = keys['arrowright'];
+            gameState.player2.keys.up = keys['arrowup'];
+            gameState.player2.keys.punch = keys['l'];
+            gameState.player2.keys.kick = keys['ñ'];
+            gameState.player2.keys.special = keys['p'];
         }
 
         function updatePlayer(player, opponent) {
+            // Cooldown
+            if (player.specialCooldown > 0) {
+                player.specialCooldown--;
+            }
+
+            // Poison damage
+            if (player.poisoned) {
+                player.poisonTick++;
+                if (player.poisonTick >= 30) { // every 0.5 seconds at 60fps
+                    player.hp = Math.max(0, player.hp - player.poisonDPS);
+                    player.poisonTick = 0;
+                    player.poisonDuration--;
+                    if (player.poisonDuration <= 0) {
+                        player.poisoned = false;
+                    }
+                }
+            }
+
             // Gravity
             player.vy += GRAVITY;
             player.y += player.vy;
@@ -689,6 +1024,9 @@
             } else if (player.keys.kick && player.action === 'idle' && gameState.hitstopFrames === 0) {
                 player.action = 'kick';
                 player.actionFrame = 0;
+            } else if (player.keys.special && player.specialCooldown === 0 && gameState.hitstopFrames === 0) {
+                triggerSpecialAbility(player, opponent);
+                player.keys.special = false;
             }
 
             // Action animation loop
@@ -703,6 +1041,15 @@
                     const hbX = player.x + 25 * player.facing;
                     const hbY = player.y - 10;
                     player.hitbox = { x: hbX, y: hbY, w: 20, h: 20 };
+
+                    // Apply poison if active
+                    if (player.poisoned && player.actionFrame === 5) {
+                        opponent.poisoned = true;
+                        opponent.poisonDuration = 4; // 2 seconds at 30ticks
+                        opponent.poisonDPS = 3;
+                        opponent.poisonTick = 0;
+                        player.poisoned = false;
+                    }
                 } else {
                     player.hitbox = null;
                 }
@@ -731,6 +1078,36 @@
                     player.action = 'idle';
                     player.actionFrame = 0;
                 }
+            } else if (player.action === 'dash') {
+                // Volt Thunder Dash
+                player.x += 10 * player.facing;
+                effects.push(new Effect(player.x, player.y, 'dashtrail', 20));
+                player.actionFrame++;
+                if (player.actionFrame >= 15) {
+                    player.action = 'idle';
+                    player.actionFrame = 0;
+                }
+            } else if (player.action === 'inferno-kick') {
+                // Blaze Inferno Kick
+                if (player.actionFrame < 3) {
+                    player.vy = JUMP_POWER;
+                }
+                player.x += 6 * player.facing;
+                player.actionFrame++;
+                
+                // Hitbox
+                if (player.actionFrame >= 3 && player.actionFrame <= 12) {
+                    const hbX = player.x + 25 * player.facing;
+                    const hbY = player.y - 10;
+                    player.hitbox = { x: hbX, y: hbY, w: 25, h: 20 };
+                } else {
+                    player.hitbox = null;
+                }
+                
+                if (player.actionFrame >= 15) {
+                    player.action = 'idle';
+                    player.actionFrame = 0;
+                }
             } else {
                 player.actionFrame++;
                 if (player.actionFrame >= 30) player.actionFrame = 0;
@@ -755,6 +1132,19 @@
         function updateBattleScreen() {
             if (gameState.hitstopFrames > 0) {
                 gameState.hitstopFrames--;
+                // Still update effects and projectiles during hitstop
+                projectiles = projectiles.filter(p => {
+                    p.update();
+                    return p.active;
+                });
+                effects = effects.filter(e => {
+                    e.update();
+                    return e.active;
+                });
+                iceWalls = iceWalls.filter(w => {
+                    w.update();
+                    return w.active;
+                });
                 return;
             }
 
@@ -762,9 +1152,65 @@
             updatePlayer(gameState.player1, gameState.player2);
             updatePlayer(gameState.player2, gameState.player1);
 
-            // Collision detection
+            // Update projectiles
+            projectiles = projectiles.filter(p => {
+                p.update();
+                return p.active;
+            });
+
+            // Update effects
+            effects = effects.filter(e => {
+                e.update();
+                return e.active;
+            });
+
+            // Update ice walls
+            iceWalls = iceWalls.filter(w => {
+                w.update();
+                return w.active;
+            });
+
+            // Projectile collision detection
+            for (let proj of projectiles) {
+                if (proj.owner === 'p1' && checkAABBCollision(
+                    { x: proj.x - proj.size, y: proj.y - proj.size, w: proj.size * 2, h: proj.size * 2 },
+                    gameState.player2.hurtbox
+                )) {
+                    gameState.player2.hp = Math.max(0, gameState.player2.hp - proj.damage);
+                    gameState.player2.action = 'hurt';
+                    gameState.player2.actionFrame = 0;
+                    gameState.player2.x -= 15 * gameState.player2.facing;
+                    proj.active = false;
+                    gameState.hitstopFrames = 3;
+                } else if (proj.owner === 'p2' && checkAABBCollision(
+                    { x: proj.x - proj.size, y: proj.y - proj.size, w: proj.size * 2, h: proj.size * 2 },
+                    gameState.player1.hurtbox
+                )) {
+                    gameState.player1.hp = Math.max(0, gameState.player1.hp - proj.damage);
+                    gameState.player1.action = 'hurt';
+                    gameState.player1.actionFrame = 0;
+                    gameState.player1.x -= 15 * gameState.player1.facing;
+                    proj.active = false;
+                    gameState.hitstopFrames = 3;
+                }
+            }
+
+            // Ice wall collision detection
+            for (let wall of iceWalls) {
+                const wallBounds = wall.getBounds();
+                if (checkAABBCollision(wallBounds, gameState.player2.hurtbox)) {
+                    gameState.player2.hp = Math.max(0, gameState.player2.hp - 10);
+                    gameState.player2.x = wall.x + 40;
+                }
+                if (checkAABBCollision(wallBounds, gameState.player1.hurtbox)) {
+                    gameState.player1.hp = Math.max(0, gameState.player1.hp - 10);
+                    gameState.player1.x = wall.x - 40;
+                }
+            }
+
+            // Collision detection for melee attacks
             if (gameState.player1.hitbox && checkAABBCollision(gameState.player1.hitbox, gameState.player2.hurtbox)) {
-                const damage = gameState.player1.action === 'punch' ? 8 : 12;
+                const damage = gameState.player1.action === 'punch' ? 8 : gameState.player1.action === 'kick' ? 12 : 19;
                 gameState.player2.hp = Math.max(0, gameState.player2.hp - damage);
                 gameState.player2.action = 'hurt';
                 gameState.player2.actionFrame = 0;
@@ -772,7 +1218,7 @@
                 gameState.hitstopFrames = 5;
             }
             if (gameState.player2.hitbox && checkAABBCollision(gameState.player2.hitbox, gameState.player1.hurtbox)) {
-                const damage = gameState.player2.action === 'punch' ? 8 : 12;
+                const damage = gameState.player2.action === 'punch' ? 8 : gameState.player2.action === 'kick' ? 12 : 19;
                 gameState.player1.hp = Math.max(0, gameState.player1.hp - damage);
                 gameState.player1.action = 'hurt';
                 gameState.player1.actionFrame = 0;
@@ -789,7 +1235,12 @@
                     gameState.currentRound++;
                     gameState.player1.hp = 100;
                     gameState.player2.hp = 100;
+                    gameState.player1.poisoned = false;
+                    gameState.player2.poisoned = false;
                     gameState.frameCount = 0;
+                    projectiles = [];
+                    effects = [];
+                    iceWalls = [];
                 }
             } else if (gameState.player2.hp <= 0) {
                 gameState.player1.wins++;
@@ -799,7 +1250,12 @@
                     gameState.currentRound++;
                     gameState.player1.hp = 100;
                     gameState.player2.hp = 100;
+                    gameState.player1.poisoned = false;
+                    gameState.player2.poisoned = false;
                     gameState.frameCount = 0;
+                    projectiles = [];
+                    effects = [];
+                    iceWalls = [];
                 }
             }
         }
@@ -811,6 +1267,13 @@
                 gameState.player1.wins = 0;
                 gameState.player2.wins = 0;
                 gameState.currentRound = 1;
+                gameState.player1.specialCooldown = 0;
+                gameState.player2.specialCooldown = 0;
+                gameState.player1.poisoned = false;
+                gameState.player2.poisoned = false;
+                projectiles = [];
+                effects = [];
+                iceWalls = [];
                 keys['enter'] = false;
             }
         }
